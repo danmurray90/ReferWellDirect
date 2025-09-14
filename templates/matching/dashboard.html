@@ -3,145 +3,186 @@
 
 {% block title %}Matching Dashboard - ReferWell Direct{% endblock %}
 
+{% block page_header %}
+<div class="main-content__header">
+    <div class="container">
+        <h1 class="main-content__title">Matching Dashboard</h1>
+        <p class="main-content__subtitle">Monitor and manage the intelligent referral matching system</p>
+    </div>
+</div>
+{% endblock %}
+
 {% block extra_css %}
 <style>
-    .nhsuk-card--clickable {
-        cursor: pointer;
-        transition: box-shadow 0.2s ease-in-out;
-    }
-    .nhsuk-card--clickable:hover {
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-    .stat-card {
-        background: #f0f4f5;
-        border-left: 4px solid #005eb8;
-        padding: 1rem;
-        border-radius: 4px;
-    }
-    .stat-number {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #005eb8;
-        margin: 0;
-    }
-    .stat-label {
-        font-size: 0.875rem;
-        color: #425563;
-        margin: 0.25rem 0 0 0;
-    }
     .queue-item {
-        border: 1px solid #d8e2e3;
-        border-radius: 4px;
-        padding: 1rem;
-        margin-bottom: 1rem;
+        border: 1px solid var(--color-gray-200);
+        border-radius: var(--radius-lg);
+        padding: var(--space-6);
+        margin-bottom: var(--space-4);
         background: white;
+        transition: all var(--transition-normal);
+        position: relative;
+        overflow: hidden;
     }
-    .queue-item--high-touch {
-        border-left: 4px solid #d5281b;
+    
+    .queue-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--color-gray-300);
     }
-    .queue-item--auto {
-        border-left: 4px solid #00a499;
+    
+    .queue-item:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
     }
-    .queue-item--manual {
-        border-left: 4px solid #f9b000;
+    
+    .queue-item--high-touch::before {
+        background: var(--color-error-gradient);
     }
+    
+    .queue-item--auto::before {
+        background: var(--color-success-gradient);
+    }
+    
+    .queue-item--manual::before {
+        background: var(--color-warning-gradient);
+    }
+    
     .priority-badge {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        padding: var(--space-1) var(--space-3);
+        border-radius: var(--radius-full);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-semibold);
         text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
+    
     .priority-badge--urgent {
-        background-color: #d5281b;
+        background: var(--color-error);
         color: white;
     }
+    
     .priority-badge--high {
-        background-color: #f9b000;
-        color: #212b32;
+        background: var(--color-warning);
+        color: var(--color-gray-800);
     }
+    
     .priority-badge--medium {
-        background-color: #00a499;
+        background: var(--color-success);
         color: white;
     }
+    
     .priority-badge--low {
-        background-color: #425563;
+        background: var(--color-gray-500);
         color: white;
     }
+    
     .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        padding: var(--space-1) var(--space-3);
+        border-radius: var(--radius-full);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-semibold);
         text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
+    
     .status-badge--high-touch {
-        background-color: #d5281b;
+        background: var(--color-error);
         color: white;
     }
+    
     .status-badge--shortlisted {
-        background-color: #00a499;
+        background: var(--color-success);
         color: white;
     }
+    
     .status-badge--matching {
-        background-color: #f9b000;
-        color: #212b32;
+        background: var(--color-warning);
+        color: var(--color-gray-800);
     }
+    
     .status-badge--submitted {
-        background-color: #425563;
+        background: var(--color-gray-500);
         color: white;
     }
+    
     .action-buttons {
         display: flex;
-        gap: 0.5rem;
-        margin-top: 1rem;
+        gap: var(--space-3);
+        margin-top: var(--space-4);
+        flex-wrap: wrap;
     }
-    .nhsuk-button--small {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-    }
+    
     .empty-state {
         text-align: center;
-        padding: 3rem 1rem;
-        color: #425563;
+        padding: var(--space-16) var(--space-4);
+        color: var(--color-gray-500);
     }
+    
     .empty-state-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
+        font-size: 4rem;
+        margin-bottom: var(--space-6);
+        opacity: 0.6;
     }
+    
     .filter-controls {
-        background: #f0f4f5;
-        padding: 1rem;
-        border-radius: 4px;
-        margin-bottom: 2rem;
+        background: var(--color-gray-50);
+        padding: var(--space-6);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--space-8);
+        border: 1px solid var(--color-gray-200);
     }
+    
     .filter-row {
         display: flex;
-        gap: 1rem;
+        gap: var(--space-4);
         align-items: end;
         flex-wrap: wrap;
     }
+    
     .filter-group {
         flex: 1;
         min-width: 200px;
     }
+    
+    .filter-group label {
+        display: block;
+        font-weight: var(--font-weight-medium);
+        color: var(--color-gray-700);
+        margin-bottom: var(--space-2);
+        font-size: var(--font-size-sm);
+    }
+    
+    .filter-group select {
+        width: 100%;
+        padding: var(--space-3);
+        border: 1px solid var(--color-gray-300);
+        border-radius: var(--radius-md);
+        background: white;
+        font-size: var(--font-size-base);
+        transition: border-color var(--transition-fast);
+    }
+    
+    .filter-group select:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1);
+    }
+    
     @media (max-width: 768px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
         .filter-row {
             flex-direction: column;
             align-items: stretch;
         }
+        
         .filter-group {
             min-width: auto;
         }
@@ -150,165 +191,154 @@
 {% endblock %}
 
 {% block content %}
-<div class="nhsuk-grid-row">
-    <div class="nhsuk-grid-column-full">
-        <h1 class="nhsuk-heading-xl">Matching Dashboard</h1>
-        <p class="nhsuk-body-l">Monitor and manage referral matching across the system.</p>
-        
-        <!-- Screen reader announcement for dynamic content -->
-        <div class="nhsuk-u-visually-hidden" aria-live="polite" id="status-announcements"></div>
-    </div>
-</div>
+<div class="container">
+    <!-- Screen reader announcement for dynamic content -->
+    <div class="nhsuk-u-visually-hidden" aria-live="polite" id="status-announcements"></div>
 
-<!-- Statistics Overview -->
-<div class="nhsuk-grid-row">
-    <div class="nhsuk-grid-column-full">
-        <h2 class="nhsuk-heading-l">System Overview</h2>
-        <div class="stats-grid" role="region" aria-label="System statistics">
-            <div class="stat-card" role="group" aria-labelledby="total-referrals-label">
-                <p class="stat-number" id="total-referrals" aria-label="{{ total_referrals|default:0 }} total referrals">{{ total_referrals|default:0 }}</p>
-                <p class="stat-label" id="total-referrals-label">Total Referrals</p>
-            </div>
-            <div class="stat-card" role="group" aria-labelledby="auto-routed-label">
-                <p class="stat-number" id="auto-routed" aria-label="{{ auto_routed|default:0 }} auto-routed referrals">{{ auto_routed|default:0 }}</p>
-                <p class="stat-label" id="auto-routed-label">Auto-Routed</p>
-            </div>
-            <div class="stat-card" role="group" aria-labelledby="high-touch-queue-label">
-                <p class="stat-number" id="high-touch-queue" aria-label="{{ high_touch_queue|default:0 }} referrals in high-touch queue">{{ high_touch_queue|default:0 }}</p>
-                <p class="stat-label" id="high-touch-queue-label">High-Touch Queue</p>
-            </div>
-            <div class="stat-card" role="group" aria-labelledby="manual-review-label">
-                <p class="stat-number" id="manual-review" aria-label="{{ manual_review|default:0 }} referrals requiring manual review">{{ manual_review|default:0 }}</p>
-                <p class="stat-label" id="manual-review-label">Manual Review</p>
-            </div>
+    <!-- Statistics Overview -->
+    <div class="grid grid-cols-4 mb-8">
+        <div class="stat-card" role="group" aria-labelledby="total-referrals-label">
+            <p class="stat-card__value" id="total-referrals" aria-label="{{ total_referrals|default:0 }} total referrals">{{ total_referrals|default:0 }}</p>
+            <p class="stat-card__label" id="total-referrals-label">Total Referrals</p>
+            <p class="stat-card__description">All time referrals processed</p>
+        </div>
+        <div class="stat-card" role="group" aria-labelledby="auto-routed-label">
+            <p class="stat-card__value" id="auto-routed" aria-label="{{ auto_routed|default:0 }} auto-routed referrals">{{ auto_routed|default:0 }}</p>
+            <p class="stat-card__label" id="auto-routed-label">Auto-Routed</p>
+            <p class="stat-card__description">Automatically processed</p>
+        </div>
+        <div class="stat-card" role="group" aria-labelledby="high-touch-queue-label">
+            <p class="stat-card__value" id="high-touch-queue" aria-label="{{ high_touch_queue|default:0 }} referrals in high-touch queue">{{ high_touch_queue|default:0 }}</p>
+            <p class="stat-card__label" id="high-touch-queue-label">High-Touch Queue</p>
+            <p class="stat-card__description">Requiring manual review</p>
+        </div>
+        <div class="stat-card" role="group" aria-labelledby="manual-review-label">
+            <p class="stat-card__value" id="manual-review" aria-label="{{ manual_review|default:0 }} referrals requiring manual review">{{ manual_review|default:0 }}</p>
+            <p class="stat-card__label" id="manual-review-label">Manual Review</p>
+            <p class="stat-card__description">Awaiting specialist input</p>
         </div>
     </div>
-</div>
 
-<!-- Filter Controls -->
-<div class="nhsuk-grid-row">
-    <div class="nhsuk-grid-column-full">
-        <div class="filter-controls" role="region" aria-labelledby="filter-heading">
-            <h3 class="nhsuk-heading-m" id="filter-heading">Filter Referrals</h3>
-            <form method="get" class="filter-row" role="search" aria-label="Filter referrals">
-                <div class="filter-group">
-                    <label class="nhsuk-label" for="status-filter">Status</label>
-                    <select class="nhsuk-select" id="status-filter" name="status" aria-describedby="status-help">
-                        <option value="">All Statuses</option>
-                        <option value="submitted">Submitted</option>
-                        <option value="matching">Matching</option>
-                        <option value="high_touch_queue">High-Touch Queue</option>
-                        <option value="shortlisted">Shortlisted</option>
-                    </select>
-                    <div class="nhsuk-hint" id="status-help">Filter referrals by their current status</div>
-                </div>
-                <div class="filter-group">
-                    <label class="nhsuk-label" for="priority-filter">Priority</label>
-                    <select class="nhsuk-select" id="priority-filter" name="priority" aria-describedby="priority-help">
-                        <option value="">All Priorities</option>
-                        <option value="urgent">Urgent</option>
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
-                    </select>
-                    <div class="nhsuk-hint" id="priority-help">Filter referrals by priority level</div>
-                </div>
-                <div class="filter-group">
-                    <label class="nhsuk-label" for="service-type-filter">Service Type</label>
-                    <select class="nhsuk-select" id="service-type-filter" name="service_type" aria-describedby="service-type-help">
-                        <option value="">All Service Types</option>
-                        <option value="nhs">NHS</option>
-                        <option value="private">Private</option>
-                        <option value="mixed">Mixed</option>
-                    </select>
-                    <div class="nhsuk-hint" id="service-type-help">Filter referrals by service type</div>
-                </div>
-                <div class="filter-group">
-                    <button class="nhsuk-button" type="submit" aria-describedby="apply-help">Apply Filters</button>
-                    <a href="{% url 'matching:dashboard' %}" class="nhsuk-button nhsuk-button--secondary" aria-describedby="clear-help">Clear</a>
-                    <div class="nhsuk-hint" id="apply-help">Apply the selected filters to the referral list</div>
-                    <div class="nhsuk-hint" id="clear-help">Clear all filters and show all referrals</div>
-                </div>
-            </form>
-        </div>
+    <!-- Filter Controls -->
+    <div class="filter-controls" role="region" aria-labelledby="filter-heading">
+        <h3 class="card__title" id="filter-heading">Filter Referrals</h3>
+        <form method="get" class="filter-row" role="search" aria-label="Filter referrals">
+            <div class="filter-group">
+                <label for="status-filter">Status</label>
+                <select id="status-filter" name="status" aria-describedby="status-help">
+                    <option value="">All Statuses</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="matching">Matching</option>
+                    <option value="high_touch_queue">High-Touch Queue</option>
+                    <option value="shortlisted">Shortlisted</option>
+                </select>
+                <div class="nhsuk-hint" id="status-help">Filter referrals by their current status</div>
+            </div>
+            <div class="filter-group">
+                <label for="priority-filter">Priority</label>
+                <select id="priority-filter" name="priority" aria-describedby="priority-help">
+                    <option value="">All Priorities</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+                <div class="nhsuk-hint" id="priority-help">Filter referrals by priority level</div>
+            </div>
+            <div class="filter-group">
+                <label for="service-type-filter">Service Type</label>
+                <select id="service-type-filter" name="service_type" aria-describedby="service-type-help">
+                    <option value="">All Service Types</option>
+                    <option value="nhs">NHS</option>
+                    <option value="private">Private</option>
+                    <option value="mixed">Mixed</option>
+                </select>
+                <div class="nhsuk-hint" id="service-type-help">Filter referrals by service type</div>
+            </div>
+            <div class="filter-group">
+                <button class="btn btn--primary" type="submit" aria-describedby="apply-help">Apply Filters</button>
+                <a href="{% url 'matching:dashboard' %}" class="btn btn--secondary" aria-describedby="clear-help">Clear</a>
+                <div class="nhsuk-hint" id="apply-help">Apply the selected filters to the referral list</div>
+                <div class="nhsuk-hint" id="clear-help">Clear all filters and show all referrals</div>
+            </div>
+        </form>
     </div>
-</div>
 
-<!-- Referral Queues -->
-<div class="nhsuk-grid-row">
-    <div class="nhsuk-grid-column-full">
-        <h2 class="nhsuk-heading-l">Referral Queues</h2>
-        
-        <!-- High-Touch Queue -->
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h3 class="nhsuk-card__heading" id="high-touch-queue-heading">High-Touch Queue</h3>
-                <p class="nhsuk-card__description">Referrals requiring manual review and expert matching.</p>
+    <!-- Referral Queues -->
+    <h2 style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-gray-800); margin: var(--space-8) 0 var(--space-6) 0;">Referral Queues</h2>
+    
+    <!-- High-Touch Queue -->
+    <div class="card card--elevated mb-8">
+        <div class="card__header">
+            <h3 class="card__title" id="high-touch-queue-heading">High-Touch Queue</h3>
+            <p class="card__subtitle">Referrals requiring manual review and expert matching</p>
+        </div>
+        <div class="card__content">
                 
-                <div id="high-touch-queue-list" role="region" aria-labelledby="high-touch-queue-heading" aria-live="polite">
-                    {% if high_touch_referrals %}
-                        {% for referral in high_touch_referrals %}
-                        <div class="queue-item queue-item--high-touch" role="article" aria-labelledby="referral-{{ referral.id }}-title">
-                            <div class="nhsuk-grid-row">
-                                <div class="nhsuk-grid-column-two-thirds">
-                                    <h4 class="nhsuk-heading-s" id="referral-{{ referral.id }}-title">
-                                        <a href="{% url 'referrals:detail' referral.id %}" class="nhsuk-link" 
-                                           aria-describedby="referral-{{ referral.id }}-description">
-                                            {{ referral.referral_id }}
-                                        </a>
-                                    </h4>
-                                    <p class="nhsuk-body-s" id="referral-{{ referral.id }}-description">
-                                        {{ referral.presenting_problem|truncatechars:100 }}
-                                    </p>
-                                    <p class="nhsuk-body-xs" id="referral-{{ referral.id }}-details">
-                                        <strong>Patient:</strong> {{ referral.patient.get_full_name }} |
-                                        <strong>Referrer:</strong> {{ referral.referrer.get_full_name }} |
-                                        <strong>Created:</strong> {{ referral.created_at|date:"d M Y H:i" }}
-                                    </p>
+            <div id="high-touch-queue-list" role="region" aria-labelledby="high-touch-queue-heading" aria-live="polite">
+                {% if high_touch_referrals %}
+                    {% for referral in high_touch_referrals %}
+                    <div class="queue-item queue-item--high-touch" role="article" aria-labelledby="referral-{{ referral.id }}-title">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6); align-items: start;">
+                            <div>
+                                <h4 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-gray-800); margin: 0 0 var(--space-2) 0;" id="referral-{{ referral.id }}-title">
+                                    <a href="{% url 'referrals:detail' referral.id %}" style="color: var(--color-primary); text-decoration: none;" 
+                                       aria-describedby="referral-{{ referral.id }}-description">
+                                        {{ referral.referral_id }}
+                                    </a>
+                                </h4>
+                                <p style="color: var(--color-gray-600); margin: 0 0 var(--space-3) 0; line-height: var(--line-height-relaxed);" id="referral-{{ referral.id }}-description">
+                                    {{ referral.presenting_problem|truncatechars:100 }}
+                                </p>
+                                <p style="font-size: var(--font-size-sm); color: var(--color-gray-500); margin: 0;" id="referral-{{ referral.id }}-details">
+                                    <strong>Patient:</strong> {{ referral.patient.get_full_name }} |
+                                    <strong>Referrer:</strong> {{ referral.referrer.get_full_name }} |
+                                    <strong>Created:</strong> {{ referral.created_at|date:"d M Y H:i" }}
+                                </p>
+                            </div>
+                            <div>
+                                <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);" role="group" aria-label="Referral status indicators">
+                                    <span class="priority-badge priority-badge--{{ referral.priority }}" 
+                                          aria-label="Priority: {{ referral.get_priority_display }}">
+                                        {{ referral.get_priority_display }}
+                                    </span>
+                                    <span class="status-badge status-badge--high-touch" 
+                                          aria-label="Status: High-Touch queue">
+                                        High-Touch
+                                    </span>
                                 </div>
-                                <div class="nhsuk-grid-column-one-third">
-                                    <div class="action-buttons" role="group" aria-label="Referral status indicators">
-                                        <span class="priority-badge priority-badge--{{ referral.priority }}" 
-                                              aria-label="Priority: {{ referral.get_priority_display }}">
-                                            {{ referral.get_priority_display }}
-                                        </span>
-                                        <span class="status-badge status-badge--high-touch" 
-                                              aria-label="Status: High-Touch queue">
-                                            High-Touch
-                                        </span>
+                                <div class="action-buttons" role="group" aria-label="Referral actions">
+                                    <a href="{% url 'matching:find_matches' referral.id %}" 
+                                       class="btn btn--primary btn--sm"
+                                       aria-describedby="find-matches-help-{{ referral.id }}">
+                                        Find Matches
+                                    </a>
+                                    <a href="{% url 'referrals:detail' referral.id %}" 
+                                       class="btn btn--secondary btn--sm"
+                                       aria-describedby="view-details-help-{{ referral.id }}">
+                                        View Details
+                                    </a>
+                                    <div class="nhsuk-u-visually-hidden" id="find-matches-help-{{ referral.id }}">
+                                        Find matching psychologists for referral {{ referral.referral_id }}
                                     </div>
-                                    <div class="action-buttons" role="group" aria-label="Referral actions">
-                                        <a href="{% url 'matching:find_matches' referral.id %}" 
-                                           class="nhsuk-button nhsuk-button--small"
-                                           aria-describedby="find-matches-help-{{ referral.id }}">
-                                            Find Matches
-                                        </a>
-                                        <a href="{% url 'referrals:detail' referral.id %}" 
-                                           class="nhsuk-button nhsuk-button--secondary nhsuk-button--small"
-                                           aria-describedby="view-details-help-{{ referral.id }}">
-                                            View Details
-                                        </a>
-                                        <div class="nhsuk-u-visually-hidden" id="find-matches-help-{{ referral.id }}">
-                                            Find matching psychologists for referral {{ referral.referral_id }}
-                                        </div>
-                                        <div class="nhsuk-u-visually-hidden" id="view-details-help-{{ referral.id }}">
-                                            View full details for referral {{ referral.referral_id }}
-                                        </div>
+                                    <div class="nhsuk-u-visually-hidden" id="view-details-help-{{ referral.id }}">
+                                        View full details for referral {{ referral.referral_id }}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📋</div>
-                            <p class="nhsuk-body-l">No referrals in high-touch queue</p>
-                            <p class="nhsuk-body">Referrals requiring manual review will appear here.</p>
-                        </div>
-                    {% endif %}
-                </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p style="font-size: var(--font-size-lg); font-weight: var(--font-weight-medium); margin: 0 0 var(--space-2) 0;">No referrals in high-touch queue</p>
+                        <p style="margin: 0;">Referrals requiring manual review will appear here.</p>
+                    </div>
+                {% endif %}
             </div>
         </div>
+    </div>
 
         <!-- Auto-Routed Referrals -->
         <div class="nhsuk-card">

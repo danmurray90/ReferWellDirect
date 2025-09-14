@@ -5,139 +5,156 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ReferWell Direct{% endblock %}</title>
     
-    <!-- NHS.UK Design System CSS -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- NHS.UK Design System CSS (for accessibility compliance) -->
     <link rel="stylesheet" href="https://assets.nhs.uk/css/nhsuk.css" media="screen">
     
-    <!-- Custom CSS -->
-    <style>
-        .nhsuk-header__logo {
-            background-color: #005eb8;
-        }
-        .nhsuk-header__logo a {
-            color: white;
-            text-decoration: none;
-        }
-        .nhsuk-header__logo a:hover {
-            color: white;
-            text-decoration: underline;
-        }
-        .nhsuk-main-wrapper {
-            padding-top: 0;
-        }
-        .nhsuk-width-container {
-            max-width: 1200px;
-        }
-        .nhsuk-card {
-            margin-bottom: 2rem;
-        }
-        .nhsuk-button--primary {
-            background-color: #005eb8;
-            box-shadow: 0 4px 0 #003d82;
-        }
-        .nhsuk-button--primary:hover {
-            background-color: #004494;
-        }
-        .nhsuk-button--secondary {
-            background-color: #f0f4f5;
-            color: #005eb8;
-            box-shadow: 0 4px 0 #aeb7bd;
-        }
-        .nhsuk-button--secondary:hover {
-            background-color: #d8e2e3;
-        }
-    </style>
+    <!-- Premium Design System CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/premium-design-system.css' %}">
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- NHS.UK Header -->
-    <header class="nhsuk-header" role="banner">
-        <div class="nhsuk-width-container nhsuk-header__container">
-            <div class="nhsuk-header__logo">
-                <a class="nhsuk-header__link" href="{% url 'accounts:home' %}" aria-label="ReferWell Direct home">
-                    ReferWell Direct
+    <!-- Premium Navigation -->
+    <nav class="navbar" role="banner">
+        <div class="navbar__container">
+            <a href="{% url 'accounts:home' %}" class="navbar__brand">
+                <span style="background: var(--color-primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">ReferWell</span> Direct
+            </a>
+            
+            <div class="navbar__nav">
+                <a href="{% url 'accounts:home' %}" class="navbar__link {% if request.resolver_match.url_name == 'home' %}navbar__link--active{% endif %}">
+                    Home
                 </a>
-            </div>
-            <div class="nhsuk-header__content" id="content-header">
-                <div class="nhsuk-header__menu">
-                    <button class="nhsuk-header__menu-toggle" id="toggle-menu" aria-controls="header-navigation" aria-label="Open menu">Menu</button>
-                </div>
-            </div>
-        </div>
-        <nav class="nhsuk-header__navigation" id="header-navigation" role="navigation" aria-label="Primary navigation" aria-labelledby="toggle-menu">
-            <div class="nhsuk-width-container">
-                <ul class="nhsuk-header__navigation-list">
-                    <li class="nhsuk-header__navigation-item">
-                        <a class="nhsuk-header__navigation-link" href="{% url 'accounts:home' %}">
-                            Home
-                        </a>
-                    </li>
-                    {% if user.is_authenticated %}
-                    <li class="nhsuk-header__navigation-item">
-                        <a class="nhsuk-header__navigation-link" href="{% url 'accounts:dashboard' %}">
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="nhsuk-header__navigation-item">
-                        <a class="nhsuk-header__navigation-link" href="{% url 'admin:index' %}">
-                            Admin
-                        </a>
-                    </li>
-                    <li class="nhsuk-header__navigation-item">
-                        <a class="nhsuk-header__navigation-link" href="{% url 'admin:logout' %}">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:dashboard' %}" class="navbar__link {% if 'dashboard' in request.resolver_match.url_name %}navbar__link--active{% endif %}">
+                        Dashboard
+                    </a>
+                    <a href="{% url 'matching:dashboard' %}" class="navbar__link {% if 'matching' in request.resolver_match.url_name %}navbar__link--active{% endif %}">
+                        Matching
+                    </a>
+                    <a href="{% url 'admin:index' %}" class="navbar__link">
+                        Admin
+                    </a>
+                    <div class="navbar__user">
+                        <span class="text-gray-600">{{ user.get_full_name|default:user.username }}</span>
+                        <a href="{% url 'admin:logout' %}" class="btn btn--sm btn--secondary ml-2">
                             Sign out
                         </a>
-                    </li>
-                    {% else %}
-                    <li class="nhsuk-header__navigation-item">
-                        <a class="nhsuk-header__navigation-link" href="{% url 'admin:login' %}">
-                            Sign in
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'admin:login' %}" class="btn btn--primary">
+                        Sign in
+                    </a>
+                {% endif %}
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
-    <!-- Main content -->
-    <div class="nhsuk-width-container">
-        <main class="nhsuk-main-wrapper" id="maincontent" role="main">
-            {% if messages %}
-                <div class="nhsuk-alert nhsuk-alert--success" role="alert">
-                    {% for message in messages %}
-                        <p class="nhsuk-alert__message">{{ message }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-            
+    <!-- Main Layout -->
+    <div class="main-content">
+        <!-- Messages -->
+        {% if messages %}
+            <div class="main-content__header">
+                {% for message in messages %}
+                    <div class="card" style="border-left: 4px solid var(--color-success); background: var(--color-success); color: white; padding: var(--space-4); margin-bottom: var(--space-4);">
+                        <p class="mb-0">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <!-- Page Header -->
+        {% block page_header %}{% endblock %}
+        
+        <!-- Main Content -->
+        <main class="main-content__body" id="maincontent" role="main">
             {% block content %}{% endblock %}
         </main>
     </div>
 
-    <!-- NHS.UK Footer -->
-    <footer role="contentinfo">
-        <div class="nhsuk-footer" id="nhsuk-footer">
-            <div class="nhsuk-width-container">
-                <h2 class="nhsuk-u-visually-hidden">Support links</h2>
-                <ul class="nhsuk-footer__list">
-                    <li class="nhsuk-footer__list-item">
-                        <a class="nhsuk-footer__list-item-link" href="#">Privacy policy</a>
-                    </li>
-                    <li class="nhsuk-footer__list-item">
-                        <a class="nhsuk-footer__list-item-link" href="#">Terms and conditions</a>
-                    </li>
-                    <li class="nhsuk-footer__list-item">
-                        <a class="nhsuk-footer__list-item-link" href="#">Accessibility</a>
-                    </li>
-                </ul>
-                <p class="nhsuk-footer__copyright">&copy; Crown copyright</p>
+    <!-- Premium Footer -->
+    <footer role="contentinfo" style="background: var(--color-gray-800); color: white; padding: var(--space-12) 0 var(--space-8) 0; margin-top: var(--space-16);">
+        <div class="container">
+            <div class="grid grid-cols-4" style="gap: var(--space-8);">
+                <div>
+                    <h3 style="color: white; margin-bottom: var(--space-4);">ReferWell Direct</h3>
+                    <p style="color: var(--color-gray-400); font-size: var(--font-size-sm); line-height: var(--line-height-relaxed);">
+                        Intelligent referral matching for mental health professionals.
+                    </p>
+                </div>
+                <div>
+                    <h4 style="color: white; margin-bottom: var(--space-4);">Product</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--color-gray-400); text-decoration: none;">Features</a></li>
+                        <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--color-gray-400); text-decoration: none;">Pricing</a></li>
+                        <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--color-gray-400); text-decoration: none;">API</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: white; margin-bottom: var(--space-4);">Support</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--color-gray-400); text-decoration: none;">Documentation</a></li>
+                        <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--color-gray-400); text-decoration: none;">Help Center</a></li>
+                        <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--color-gray-400); text-decoration: none;">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: white; margin-bottom: var(--space-4);">Legal</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--color-gray-400); text-decoration: none;">Privacy Policy</a></li>
+                        <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--color-gray-400); text-decoration: none;">Terms of Service</a></li>
+                        <li style="margin-bottom: var(--space-2);"><a href="#" style="color: var(--color-gray-400); text-decoration: none;">Accessibility</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="border-top: 1px solid var(--color-gray-700); margin-top: var(--space-8); padding-top: var(--space-6); text-align: center;">
+                <p style="color: var(--color-gray-400); font-size: var(--font-size-sm); margin: 0;">
+                    &copy; 2024 ReferWell Direct. All rights reserved.
+                </p>
             </div>
         </div>
     </footer>
 
-    <!-- NHS.UK JavaScript -->
+    <!-- NHS.UK JavaScript (for accessibility features) -->
     <script src="https://assets.nhs.uk/js/nhsuk.js"></script>
+    
+    <!-- Premium JavaScript -->
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Add loading states to buttons
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    if (this.type === 'submit' || this.classList.contains('btn--primary')) {
+                        this.classList.add('loading');
+                        setTimeout(() => {
+                            this.classList.remove('loading');
+                        }, 2000);
+                    }
+                });
+            });
+        });
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>

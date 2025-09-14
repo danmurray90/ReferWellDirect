@@ -4,143 +4,314 @@
 
 {% block extra_css %}
 <style>
-.nhsuk-progress-bar {
-    background-color: #f0f4f5;
-    border-radius: 4px;
-    height: 8px;
-    margin-bottom: 2rem;
+.progress-bar {
+    background: var(--color-gray-200);
+    border-radius: var(--radius-full);
+    height: 12px;
+    margin-bottom: var(--space-8);
     overflow: hidden;
+    position: relative;
 }
 
-.nhsuk-progress-bar__value {
-    background-color: #005eb8;
+.progress-bar__value {
+    background: var(--color-primary-gradient);
     height: 100%;
-    transition: width 0.3s ease;
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+    position: relative;
+}
+
+.progress-bar__value::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 .onboarding-step {
-    background: #fff;
-    border: 1px solid #d8dde0;
-    border-radius: 8px;
-    padding: 2rem;
-    margin-bottom: 2rem;
+    background: white;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--space-8);
+    margin-bottom: var(--space-8);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+}
+
+.onboarding-step:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
 }
 
 .onboarding-navigation {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid #d8dde0;
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-gray-200);
+    background: var(--color-gray-50);
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
 }
 
 .step-indicator {
     display: flex;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-8);
+    justify-content: center;
+    padding: var(--space-4);
+    background: var(--color-gray-50);
+    border-radius: var(--radius-lg);
 }
 
 .step-indicator__item {
     display: flex;
     align-items: center;
-    margin-right: 1rem;
+    margin-right: var(--space-4);
+    position: relative;
 }
 
 .step-indicator__number {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background-color: #f0f4f5;
-    color: #425563;
+    background: var(--color-gray-200);
+    color: var(--color-gray-600);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    margin-right: 0.5rem;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
+    margin-right: var(--space-3);
+    transition: all var(--transition-normal);
+    position: relative;
+    z-index: 2;
 }
 
 .step-indicator__item--current .step-indicator__number {
-    background-color: #005eb8;
-    color: #fff;
+    background: var(--color-primary-gradient);
+    color: white;
+    box-shadow: var(--shadow-md);
+    transform: scale(1.1);
 }
 
 .step-indicator__item--completed .step-indicator__number {
-    background-color: #007f3b;
-    color: #fff;
+    background: var(--color-success-gradient);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.step-indicator__item--completed .step-indicator__number::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+}
+
+.step-indicator__label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-700);
+    font-size: var(--font-size-sm);
+    text-align: center;
+    min-width: 80px;
+}
+
+.step-indicator__item--current .step-indicator__label {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+.step-indicator__item--completed .step-indicator__label {
+    color: var(--color-success);
 }
 
 .step-indicator__connector {
-    width: 2rem;
-    height: 2px;
-    background-color: #d8dde0;
-    margin: 0 0.5rem;
+    width: 60px;
+    height: 3px;
+    background: var(--color-gray-300);
+    margin: 0 var(--space-2);
+    border-radius: var(--radius-full);
+    position: relative;
+    z-index: 1;
 }
 
 .step-indicator__item--completed + .step-indicator__item .step-indicator__connector {
-    background-color: #007f3b;
+    background: var(--color-success-gradient);
+}
+
+.step-indicator__item--current .step-indicator__connector {
+    background: var(--color-primary-gradient);
+}
+
+.onboarding-form {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-sm);
+}
+
+.form-group {
+    margin-bottom: var(--space-6);
+}
+
+.form-group label {
+    display: block;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-700);
+    margin-bottom: var(--space-2);
+    font-size: var(--font-size-base);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: var(--space-4);
+    border: 2px solid var(--color-gray-300);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    transition: all var(--transition-fast);
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1);
+}
+
+.form-group .help-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+    margin-top: var(--space-2);
+}
+
+.form-group .error-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-error);
+    margin-top: var(--space-2);
+}
+
+.btn-group {
+    display: flex;
+    gap: var(--space-4);
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-8);
+}
+
+.btn-group .btn {
+    min-width: 120px;
+}
+
+@media (max-width: 768px) {
+    .step-indicator {
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+    
+    .step-indicator__item {
+        margin-right: var(--space-2);
+    }
+    
+    .step-indicator__connector {
+        width: 30px;
+        margin: 0 var(--space-1);
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    
+    .btn-group .btn {
+        width: 100%;
+    }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="nhsuk-grid-row">
-    <div class="nhsuk-grid-column-full">
-        <!-- Progress Bar -->
-        <div class="nhsuk-progress-bar" role="progressbar" aria-valuenow="{{ progress_percentage|default:0 }}" aria-valuemin="0" aria-valuemax="100">
-            <div class="nhsuk-progress-bar__value" style="width: {{ progress_percentage|default:0 }}%"></div>
-        </div>
-        
-        <!-- Step Indicator -->
-        <div class="step-indicator" aria-label="Onboarding progress">
-            {% for step in all_steps %}
-                <div class="step-indicator__item {% if step.is_current %}step-indicator__item--current{% elif step.status == 'completed' %}step-indicator__item--completed{% endif %}">
-                    <span class="step-indicator__number" aria-label="Step {{ step.order }}: {{ step.name }}">
-                        {% if step.status == 'completed' %}✓{% else %}{{ step.order }}{% endif %}
-                    </span>
-                    <span class="nhsuk-u-visually-hidden">{{ step.name }}</span>
+<div class="container">
+    <!-- Progress Bar -->
+    <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress_percentage|default:0 }}" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar__value" style="width: {{ progress_percentage|default:0 }}%"></div>
+    </div>
+    
+    <!-- Step Indicator -->
+    <div class="step-indicator" aria-label="Onboarding progress">
+        {% for step in all_steps %}
+            <div class="step-indicator__item {% if step.is_current %}step-indicator__item--current{% elif step.status == 'completed' %}step-indicator__item--completed{% endif %}">
+                <div class="step-indicator__number" aria-label="Step {{ step.order }}: {{ step.name }}">
+                    {% if step.status == 'completed' %}✓{% else %}{{ step.order }}{% endif %}
                 </div>
+                <div class="step-indicator__label">{{ step.name }}</div>
                 {% if not forloop.last %}
                     <div class="step-indicator__connector" aria-hidden="true"></div>
                 {% endif %}
-            {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Current Step -->
+    <div class="onboarding-step">
+        <div style="text-align: center; margin-bottom: var(--space-8);">
+            <h1 style="font-size: var(--font-size-4xl); font-weight: var(--font-weight-bold); color: var(--color-gray-800); margin: 0 0 var(--space-4) 0;">{{ step.name }}</h1>
+            {% if step.description %}
+                <p style="font-size: var(--font-size-lg); color: var(--color-gray-600); margin: 0; line-height: var(--line-height-relaxed);">{{ step.description }}</p>
+            {% endif %}
         </div>
         
-        <!-- Current Step -->
-        <div class="onboarding-step">
-            <h1 class="nhsuk-heading-xl">{{ step.name }}</h1>
-            {% if step.description %}
-                <p class="nhsuk-body-l">{{ step.description }}</p>
-            {% endif %}
-            
+        <div class="onboarding-form">
             {% block step_content %}
             {% endblock %}
         </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div class="onboarding-navigation">
+        {% if step.order > 1 %}
+            <a href="{% url 'accounts:onboarding_step' step_id=previous_step.id %}" class="btn btn--secondary">
+                ← Previous
+            </a>
+        {% else %}
+            <div></div>
+        {% endif %}
         
-        <!-- Navigation -->
-        <div class="onboarding-navigation">
-            <div class="nhsuk-button-group">
-                {% if step.order > 1 %}
-                    <a href="{% url 'accounts:onboarding_step' step_id=previous_step.id %}" class="nhsuk-button nhsuk-button--secondary">
-                        Previous
-                    </a>
-                {% endif %}
-                
-                {% if not step.is_required %}
-                    <form method="post" action="{% url 'accounts:onboarding_skip_step' step_id=step.id %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="nhsuk-button nhsuk-button--secondary">
-                            Skip this step
-                        </button>
-                    </form>
-                {% endif %}
-            </div>
+        <div style="text-align: center;">
+            <div style="font-size: var(--font-size-sm); color: var(--color-gray-600); margin-bottom: var(--space-1);">Progress</div>
+            <div style="font-weight: var(--font-weight-semibold); color: var(--color-primary);">{{ progress_percentage|default:0 }}% Complete</div>
+            <div style="font-size: var(--font-size-xs); color: var(--color-gray-500);">Step {{ step.order }} of {{ total_steps|default:5 }}</div>
+        </div>
+        
+        <div class="btn-group">
+            {% if not step.is_required %}
+                <form method="post" action="{% url 'accounts:onboarding_skip_step' step_id=step.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn--secondary">
+                        Skip Step
+                    </button>
+                </form>
+            {% endif %}
             
-            <div class="nhsuk-button-group">
-                <button type="submit" form="onboarding-form" class="nhsuk-button nhsuk-button--primary">
-                    {% if next_step %}Continue{% else %}Complete{% endif %}
-                </button>
-            </div>
+            <button type="submit" form="onboarding-form" class="btn btn--primary">
+                {% if next_step %}Continue →{% else %}Complete Setup{% endif %}
+            </button>
         </div>
     </div>
 </div>

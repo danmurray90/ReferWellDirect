@@ -2,119 +2,180 @@
 
 {% block title %}{{ title }} - ReferWell Direct{% endblock %}
 
+{% block page_header %}
+<div class="main-content__header">
+    <div class="container">
+        <h1 class="main-content__title">{{ title }}</h1>
+        <p class="main-content__subtitle">Welcome back, {{ user.get_full_name }}. You are logged in as a {{ user_type }}.</p>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
-<div class="nhsuk-grid-row">
-    <div class="nhsuk-grid-column-full">
-        <h1 class="nhsuk-heading-xl">{{ title }}</h1>
-        <p class="nhsuk-body-l">Welcome back, {{ user.get_full_name }}. You are logged in as a {{ user_type }}.</p>
+<div class="container">
+    <!-- Statistics Overview -->
+    <div class="grid grid-cols-4 mb-8">
+        <div class="stat-card">
+            <p class="stat-card__value">0</p>
+            <p class="stat-card__label">Total Referrals</p>
+            <p class="stat-card__description">All time referrals</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-card__value">0</p>
+            <p class="stat-card__label">Successful Matches</p>
+            <p class="stat-card__description">Completed matches</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-card__value">0</p>
+            <p class="stat-card__label">Pending Reviews</p>
+            <p class="stat-card__description">Awaiting review</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-card__value">0</p>
+            <p class="stat-card__label">This Month</p>
+            <p class="stat-card__description">Current month activity</p>
+        </div>
     </div>
-</div>
 
-<div class="nhsuk-grid-row">
-    <div class="nhsuk-grid-column-one-half">
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h2 class="nhsuk-card__heading">Recent Activity</h2>
-                <p class="nhsuk-card__description">Your latest referrals and matches</p>
-                <div class="nhsuk-inset-text">
-                    <span class="nhsuk-u-visually-hidden">Information: </span>
-                    <p>No recent activity to display.</p>
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-3 mb-8">
+        <!-- Quick Actions -->
+        <div class="card card--elevated">
+            <div class="card__header">
+                <h2 class="card__title">Quick Actions</h2>
+                <p class="card__subtitle">Common tasks and shortcuts</p>
+            </div>
+            <div class="card__content">
+                {% if not user.onboarding_session.is_completed %}
+                    <a href="{% url 'accounts:onboarding_start' %}" class="btn btn--primary" style="width: 100%; margin-bottom: var(--space-3);">
+                        Complete Onboarding
+                    </a>
+                {% else %}
+                    <a href="#" class="btn btn--primary" style="width: 100%; margin-bottom: var(--space-3);">
+                        Create New Referral
+                    </a>
+                    <a href="{% url 'matching:dashboard' %}" class="btn btn--secondary" style="width: 100%; margin-bottom: var(--space-3);">
+                        View Matching Dashboard
+                    </a>
+                    <a href="#" class="btn btn--secondary" style="width: 100%;">
+                        Browse Catalogue
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card card--elevated">
+            <div class="card__header">
+                <h2 class="card__title">Recent Activity</h2>
+                <p class="card__subtitle">Your latest referrals and matches</p>
+            </div>
+            <div class="card__content">
+                <div style="text-align: center; padding: var(--space-8) 0; color: var(--color-gray-500);">
+                    <div style="font-size: 3rem; margin-bottom: var(--space-4);">📊</div>
+                    <p style="margin: 0;">No recent activity to display</p>
+                    <p style="font-size: var(--font-size-sm); margin: var(--space-2) 0 0 0;">Start by creating your first referral</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="card card--elevated">
+            <div class="card__header">
+                <h2 class="card__title">System Status</h2>
+                <p class="card__subtitle">Current system health</p>
+            </div>
+            <div class="card__content">
+                <div style="display: flex; align-items: center; margin-bottom: var(--space-4);">
+                    <div style="width: 8px; height: 8px; background: var(--color-success); border-radius: 50%; margin-right: var(--space-3);"></div>
+                    <span style="font-weight: var(--font-weight-medium);">All Systems Operational</span>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: var(--space-4);">
+                    <div style="width: 8px; height: 8px; background: var(--color-success); border-radius: 50%; margin-right: var(--space-3);"></div>
+                    <span style="font-weight: var(--font-weight-medium);">Matching Engine Active</span>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: var(--space-4);">
+                    <div style="width: 8px; height: 8px; background: var(--color-success); border-radius: 50%; margin-right: var(--space-3);"></div>
+                    <span style="font-weight: var(--font-weight-medium);">Database Connected</span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 8px; height: 8px; background: var(--color-success); border-radius: 50%; margin-right: var(--space-3);"></div>
+                    <span style="font-weight: var(--font-weight-medium);">Cache System Online</span>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="nhsuk-grid-column-one-half">
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h2 class="nhsuk-card__heading">Quick Actions</h2>
-                <div class="nhsuk-button-group">
-                    {% if not user.onboarding_session.is_completed %}
-                        <a href="{% url 'accounts:onboarding_start' %}" class="nhsuk-button nhsuk-button--primary">
-                            Complete Onboarding
-                        </a>
-                    {% else %}
-                        <a href="#" class="nhsuk-button nhsuk-button--primary">
-                            Create Referral
-                        </a>
-                        <a href="#" class="nhsuk-button nhsuk-button--secondary">
-                            View Matches
-                        </a>
-                    {% endif %}
+
+    <!-- Profile and Settings -->
+    <div class="grid grid-cols-2">
+        <!-- Profile Information -->
+        <div class="card">
+            <div class="card__header">
+                <h3 class="card__title">Profile Information</h3>
+                <p class="card__subtitle">Your account details and preferences</p>
+            </div>
+            <div class="card__content">
+                <div style="display: grid; gap: var(--space-4);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-gray-200);">
+                        <span style="font-weight: var(--font-weight-medium); color: var(--color-gray-600);">Name</span>
+                        <span>{{ user.get_full_name }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-gray-200);">
+                        <span style="font-weight: var(--font-weight-medium); color: var(--color-gray-600);">Email</span>
+                        <span>{{ user.email }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-gray-200);">
+                        <span style="font-weight: var(--font-weight-medium); color: var(--color-gray-600);">Role</span>
+                        <span class="badge badge--primary">{{ user_type }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-gray-200);">
+                        <span style="font-weight: var(--font-weight-medium); color: var(--color-gray-600);">Status</span>
+                        {% if user.is_active %}
+                            <span class="badge badge--success">Active</span>
+                        {% else %}
+                            <span class="badge badge--error">Inactive</span>
+                        {% endif %}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0;">
+                        <span style="font-weight: var(--font-weight-medium); color: var(--color-gray-600);">Onboarding</span>
+                        {% if user.onboarding_session.is_completed %}
+                            <span class="badge badge--success">Complete</span>
+                        {% else %}
+                            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                                <span class="badge badge--warning">In Progress</span>
+                                <a href="{% url 'accounts:onboarding_start' %}" class="btn btn--sm btn--secondary">Continue</a>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="nhsuk-grid-row">
-    <div class="nhsuk-grid-column-one-third">
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h3 class="nhsuk-card__heading">My Profile</h3>
-                <dl class="nhsuk-summary-list">
-                    <div class="nhsuk-summary-list__row">
-                        <dt class="nhsuk-summary-list__key">Name</dt>
-                        <dd class="nhsuk-summary-list__value">{{ user.get_full_name }}</dd>
-                    </div>
-                    <div class="nhsuk-summary-list__row">
-                        <dt class="nhsuk-summary-list__key">Email</dt>
-                        <dd class="nhsuk-summary-list__value">{{ user.email }}</dd>
-                    </div>
-                    <div class="nhsuk-summary-list__row">
-                        <dt class="nhsuk-summary-list__key">Role</dt>
-                        <dd class="nhsuk-summary-list__value">{{ user_type }}</dd>
-                    </div>
-                    <div class="nhsuk-summary-list__row">
-                        <dt class="nhsuk-summary-list__key">Status</dt>
-                        <dd class="nhsuk-summary-list__value">
-                            {% if user.is_active %}
-                                <span class="nhsuk-tag nhsuk-tag--green">Active</span>
-                            {% else %}
-                                <span class="nhsuk-tag nhsuk-tag--red">Inactive</span>
-                            {% endif %}
-                        </dd>
-                    </div>
-                    <div class="nhsuk-summary-list__row">
-                        <dt class="nhsuk-summary-list__key">Onboarding</dt>
-                        <dd class="nhsuk-summary-list__value">
-                            {% if user.onboarding_session.is_completed %}
-                                <span class="nhsuk-tag nhsuk-tag--green">Complete</span>
-                            {% else %}
-                                <span class="nhsuk-tag nhsuk-tag--yellow">In Progress</span>
-                                <a href="{% url 'accounts:onboarding_start' %}" class="nhsuk-link">Continue</a>
-                            {% endif %}
-                        </dd>
-                    </div>
-                </dl>
+        <!-- Account Details -->
+        <div class="card">
+            <div class="card__header">
+                <h3 class="card__title">Account Details</h3>
+                <p class="card__subtitle">System information and settings</p>
             </div>
-        </div>
-    </div>
-    
-    <div class="nhsuk-grid-column-one-third">
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h3 class="nhsuk-card__heading">Statistics</h3>
-                <ul class="nhsuk-list">
-                    <li><strong>Total Referrals:</strong> 0</li>
-                    <li><strong>Successful Matches:</strong> 0</li>
-                    <li><strong>Pending Reviews:</strong> 0</li>
-                    <li><strong>This Month:</strong> 0</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div class="nhsuk-grid-column-one-third">
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h3 class="nhsuk-card__heading">System Information</h3>
-                <ul class="nhsuk-list">
-                    <li><strong>Version:</strong> 1.0.0</li>
-                    <li><strong>Last Login:</strong> {{ user.last_login|date:"d M Y H:i"|default:"Never" }}</li>
-                    <li><strong>Account Created:</strong> {{ user.date_joined|date:"d M Y" }}</li>
-                    <li><strong>Timezone:</strong> {{ user.timezone }}</li>
-                </ul>
+            <div class="card__content">
+                <div style="display: grid; gap: var(--space-4);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-gray-200);">
+                        <span style="font-weight: var(--font-weight-medium); color: var(--color-gray-600);">Version</span>
+                        <span class="badge badge--secondary">1.0.0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-gray-200);">
+                        <span style="font-weight: var(--font-weight-medium); color: var(--color-gray-600);">Last Login</span>
+                        <span style="font-size: var(--font-size-sm);">{{ user.last_login|date:"d M Y H:i"|default:"Never" }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-gray-200);">
+                        <span style="font-weight: var(--font-weight-medium); color: var(--color-gray-600);">Account Created</span>
+                        <span style="font-size: var(--font-size-sm);">{{ user.date_joined|date:"d M Y" }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0;">
+                        <span style="font-weight: var(--font-weight-medium); color: var(--color-gray-600);">Timezone</span>
+                        <span style="font-size: var(--font-size-sm);">{{ user.timezone|default:"UTC" }}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
