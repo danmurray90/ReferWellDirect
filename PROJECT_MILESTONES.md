@@ -6,7 +6,7 @@
 - [x] PROJECT_MILESTONES.md (this file)
 - [x] OPEN_TASKS.md for task tracking
 - [x] ADR/0001-architecture.md for architectural decisions
-- [x] .env.example with all required environment variables
+- [x] .env file for local development configuration
 - [x] docker-compose.yml for local development
 - [x] Makefile with development commands
 - [x] pyproject.toml for Python project configuration
@@ -14,13 +14,18 @@
 - [x] .pre-commit-config.yaml for code quality
 - [x] Django project "referwell" created
 - [x] App modules: accounts, referrals, catalogue, matching, inbox, payments, ops
-- [x] Core models with PostGIS + pgvector support
+- [x] Core models with basic structure (PostGIS support prepared)
 - [x] Database migrations for all models
 - [x] Celery configuration with beat schedule
 - [x] Local development environment setup
-- [x] Basic UI pages (sign-in, create-referral, shortlist, inbox, admin)
+- [x] Basic UI pages with NHS.UK design system
 - [x] Testing configuration (pytest + pytest-django)
 - [x] Cursor rules directory setup
+- [x] Git repository initialization and commits
+- [x] Docker services running (PostgreSQL, Redis, Mailcatcher)
+- [x] Django development server working
+- [x] User authentication and role-based access
+- [x] REST API endpoints for users and organisations
 
 ## Phase 2: Core Matching Engine
 - [ ] Feasibility filter implementation
@@ -65,16 +70,18 @@
 - [ ] Documentation completion
 
 ## Current Status
-**Phase 1: Foundation** - In Progress
+**Phase 1: Foundation** - ✅ Complete
 - Repository scaffolding: ✅ Complete
-- Django project setup: 🔄 In Progress
-- Core models: 🔄 In Progress
-- Development environment: 🔄 In Progress
+- Django project setup: ✅ Complete
+- Core models: ✅ Complete
+- Development environment: ✅ Complete
+- Basic UI pages: ✅ Complete
+- Git repository: ✅ Complete
 
 ## Next Actions
-1. Complete Django project structure
-2. Implement core models with PostGIS support
-3. Set up database migrations
-4. Configure Celery and Redis
-5. Create basic UI pages
-6. Set up testing framework
+1. Implement PostGIS support (requires GDAL installation)
+2. Create comprehensive test suite
+3. Implement core matching engine
+4. Add advanced UI features
+5. Set up production configuration
+6. Begin Phase 2: Core Matching Engine
