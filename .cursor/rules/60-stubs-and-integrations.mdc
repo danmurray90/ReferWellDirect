@@ -1,0 +1,8 @@
+---
+description: Stub external integrations with feature flags; add final-stage notes.
+alwaysApply: true
+---
+
+- GOV.UK Notify client wrapper: build interface + fake backend for tests. (Docs linked for later enablement)
+- Payments: Stripe Connect flow as interface + fake collector; no network calls now. (Destination charges/app fee later)
+- Identity: OIDC adapters for NHS login/CIS2 as stubs. All OFF by default with settings flags and “Not enabled” banners in UI.

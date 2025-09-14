@@ -1,0 +1,55 @@
+# Code Quality Rules
+
+## Python Standards
+- Follow PEP 8 style guide
+- Use type hints where appropriate
+- Write clear, descriptive variable names
+- Keep functions and classes focused
+
+## Django Best Practices
+- Use Django's built-in features
+- Follow Django's naming conventions
+- Use appropriate Django patterns
+- Keep views thin and models fat
+
+## Code Organization
+- Group related functionality
+- Use appropriate abstractions
+- Avoid code duplication
+- Keep modules focused
+
+## Documentation
+- Write clear docstrings
+- Document complex logic
+- Use meaningful comments
+- Keep documentation up to date
+
+## Error Handling
+- Handle errors gracefully
+- Use appropriate exception types
+- Provide meaningful error messages
+- Log errors appropriately
+
+## Performance
+- Write efficient code
+- Use appropriate data structures
+- Avoid N+1 queries
+- Use caching where appropriate
+
+## Security
+- Validate all input
+- Use Django's security features
+- Protect against common vulnerabilities
+- Follow security best practices
+
+## Testing
+- Write comprehensive tests
+- Test edge cases
+- Use appropriate test data
+- Maintain test coverage
+
+## Code Review
+- Review all code changes
+- Check for security issues
+- Verify test coverage
+- Ensure code quality

@@ -1,0 +1,43 @@
+# Testing Rules
+
+## Test Structure
+- Write tests for all models, views, and services
+- Use pytest and pytest-django
+- Organize tests in test_*.py files
+- Use descriptive test names
+
+## Test Data
+- Use factory_boy for test data generation
+- Create fixtures for common test data
+- Use freezegun for time-based testing
+- Keep test data minimal and focused
+
+## Test Coverage
+- Aim for high test coverage on core domain logic
+- Test both success and error cases
+- Test edge cases and boundary conditions
+- Use coverage reporting tools
+
+## Test Categories
+- Unit tests for individual functions/classes
+- Integration tests for component interactions
+- API tests for REST endpoints
+- View tests for web pages
+
+## Test Performance
+- Keep tests fast and isolated
+- Use database transactions for test isolation
+- Mock external services
+- Use test-specific settings
+
+## Test Documentation
+- Write clear test docstrings
+- Use descriptive test method names
+- Document test setup and teardown
+- Explain complex test scenarios
+
+## Continuous Integration
+- Run tests on every commit
+- Use pre-commit hooks
+- Fail builds on test failures
+- Generate coverage reports

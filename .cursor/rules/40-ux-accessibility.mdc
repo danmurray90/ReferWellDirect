@@ -1,0 +1,9 @@
+---
+description: UX and accessibility rules for a calm, premium interface.
+alwaysApply: true
+globs: ["**/*.html","**/*.py"]
+---
+
+- Use NHS.UK design patterns; for MVP use semantic HTML, large tap targets, clear focus states, error summaries.
+- Keep forms short with plain English; progressive disclosure; mobile-first.
+- Add basic Pa11y/axe check scripts; server-rendered pages must be keyboard-navigable.

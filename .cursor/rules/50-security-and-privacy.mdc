@@ -1,0 +1,9 @@
+---
+description: Security, logging, privacy defaults.
+alwaysApply: true
+---
+
+- No PHI in emails/SMS. Notifications are in-app; emails become nudges at a later milestone.
+- Structured logging with redaction; never log tokens or free-text notes.
+- RBAC by role + organisation; immutable AuditEvent on every state change.
+- Records & retention hooks (jobs but no destructive deletes until final milestone; soft-delete flags OK).

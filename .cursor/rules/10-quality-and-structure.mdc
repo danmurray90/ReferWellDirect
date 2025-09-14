@@ -1,0 +1,19 @@
+---
+description: Code quality, layout, testing, and docs rules.
+alwaysApply: true
+globs: ["**/*.py","**/*.html","**/*.md"]
+---
+
+# Structure
+- Apps: accounts, catalogue, referrals, matching, inbox, payments (stubs), ops.
+- Keep services/functions pure where possible; DB writes at edges.
+- Add ADRs for significant decisions under /ADR.
+
+# Testing
+- pytest + pytest-django; factory_boy; freezegun.
+- Aim for tests on models, services (matching, feasibility filter, calibration).
+- Provide sample data fixtures for local dev.
+
+# Docs & tracking
+- Update README.md with run steps; keep “Known gaps” list.
+- Update PROJECT_MILESTONES.md checkboxes and OPEN_TASKS.md after changes.

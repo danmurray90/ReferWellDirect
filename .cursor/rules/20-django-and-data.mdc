@@ -1,0 +1,16 @@
+---
+description: Django & data platform rules (PostGIS + pgvector + Celery).
+alwaysApply: true
+---
+
+# Database
+- Use Postgres with extensions: postgis, vector (pgvector). Create migrations that enable them.
+- Geo queries must use ST_DWithin on geography for radius filters; add gis indexes. (Reference: PostGIS ST_DWithin)
+- Embeddings stored as vector columns (768 by default) with HNSW index once data grows.
+
+# Celery & Redis
+- Celery for background tasks (embedding refresh, calibration placeholder, invite timeouts).
+
+# Config
+- .env.example must include DB creds, DEBUG flag, FEATURE_* toggles, SECRET_KEY placeholder.
+- Do not write secrets to repo; use env vars only.

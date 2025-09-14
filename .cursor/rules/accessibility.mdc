@@ -1,0 +1,44 @@
+# Accessibility Rules
+
+## WCAG 2.2 AA Compliance
+- Ensure all content is perceivable, operable, understandable, and robust
+- Use semantic HTML elements
+- Provide alternative text for images
+- Ensure sufficient color contrast
+- Make content keyboard accessible
+
+## HTML Structure
+- Use proper heading hierarchy (h1, h2, h3, etc.)
+- Use semantic elements (nav, main, section, article, aside)
+- Include skip links for keyboard navigation
+- Use proper form labels and field associations
+
+## Forms
+- Associate labels with form controls
+- Provide clear error messages
+- Use fieldset and legend for grouped fields
+- Ensure form validation is accessible
+
+## Navigation
+- Provide clear navigation structure
+- Use consistent navigation patterns
+- Include breadcrumbs where appropriate
+- Ensure keyboard navigation works
+
+## Content
+- Write clear, concise content
+- Use plain language
+- Provide instructions and help text
+- Use consistent terminology
+
+## Testing
+- Test with keyboard navigation
+- Test with screen readers
+- Use automated accessibility testing tools
+- Test with different user agents
+
+## NHS.UK Design System
+- Follow NHS.UK design patterns
+- Use NHS.UK color palette
+- Implement NHS.UK typography
+- Follow NHS.UK spacing guidelines

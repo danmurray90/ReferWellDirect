@@ -1,0 +1,53 @@
+# Django Development Rules
+
+## Project Structure
+- Follow Django's app-based architecture
+- Keep business logic in service classes, not models
+- Use Django's built-in features (ORM, admin, auth, forms)
+- Maintain separation of concerns between apps
+
+## Models
+- Use UUID primary keys for all models
+- Add proper indexes for frequently queried fields
+- Use PostGIS for geographic data
+- Use pgvector for embeddings
+- Include audit fields (created_at, updated_at, created_by)
+- Use appropriate field types and validators
+
+## Views
+- Use class-based views for complex logic
+- Use function-based views for simple operations
+- Implement proper permission checks
+- Use Django's built-in pagination
+- Handle errors gracefully
+
+## Admin
+- Customize admin interfaces for better UX
+- Use list_display, list_filter, and search_fields
+- Group related fields in fieldsets
+- Add readonly_fields for audit fields
+- Use select_related for performance
+
+## Testing
+- Write tests for models, views, and services
+- Use factory_boy for test data generation
+- Test both success and error cases
+- Maintain good test coverage
+
+## Security
+- Use Django's built-in security features
+- Validate all user input
+- Use proper authentication and authorization
+- Protect against common vulnerabilities
+
+## Performance
+- Use select_related and prefetch_related
+- Add database indexes where needed
+- Use caching appropriately
+- Monitor query performance
+
+## Code Quality
+- Follow PEP 8 and Django coding standards
+- Use type hints where appropriate
+- Write clear docstrings
+- Keep functions and classes focused
