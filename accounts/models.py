@@ -229,3 +229,213 @@ class UserOrganisation(models.Model):
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.organisation.name} ({self.get_role_display()})"
+
+
+class OnboardingStep(models.Model):
+    """
+    Model to define onboarding steps for different user types.
+    """
+    class StepType(models.TextChoices):
+        PROFILE_SETUP = 'profile_setup', 'Profile Setup'
+        ORGANISATION_SETUP = 'organisation_setup', 'Organisation Setup'
+        PREFERENCES = 'preferences', 'Preferences'
+        VERIFICATION = 'verification', 'Verification'
+        COMPLETION = 'completion', 'Completion'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    step_type = models.CharField(max_length=30, choices=StepType.choices)
+    user_type = models.CharField(max_length=20, choices=User.UserType.choices)
+    order = models.PositiveIntegerField()
+    is_required = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
+    help_text = models.TextField(blank=True)
+    
+    # Status
+    is_active = models.BooleanField(default=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'accounts_onboarding_step'
+        verbose_name = 'Onboarding Step'
+        verbose_name_plural = 'Onboarding Steps'
+        unique_together = ['user_type', 'order']
+        ordering = ['user_type', 'order']
+
+    def __str__(self):
+        return f"{self.get_user_type_display()} - {self.name}"
+
+
+class UserOnboardingProgress(models.Model):
+    """
+    Model to track user progress through onboarding steps.
+    """
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        IN_PROGRESS = 'in_progress', 'In Progress'
+        COMPLETED = 'completed', 'Completed'
+        SKIPPED = 'skipped', 'Skipped'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='onboarding_progress')
+    step = models.ForeignKey(OnboardingStep, on_delete=models.CASCADE, related_name='user_progress')
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    
+    # Progress tracking
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    data = models.JSONField(default=dict, blank=True, help_text="Step-specific data")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'accounts_user_onboarding_progress'
+        verbose_name = 'User Onboarding Progress'
+        verbose_name_plural = 'User Onboarding Progress'
+        unique_together = ['user', 'step']
+        indexes = [
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['step', 'status']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.step.name} ({self.get_status_display()})"
+
+    @property
+    def is_completed(self):
+        return self.status == self.Status.COMPLETED
+
+    @property
+    def is_skipped(self):
+        return self.status == self.Status.SKIPPED
+
+    def mark_started(self):
+        """Mark step as started."""
+        if self.status == self.Status.PENDING:
+            self.status = self.Status.IN_PROGRESS
+            from django.utils import timezone
+            self.started_at = timezone.now()
+            self.save(update_fields=['status', 'started_at'])
+
+    def mark_completed(self, data=None):
+        """Mark step as completed with optional data."""
+        self.status = self.Status.COMPLETED
+        from django.utils import timezone
+        self.completed_at = timezone.now()
+        if data:
+            self.data = data
+        self.save(update_fields=['status', 'completed_at', 'data'])
+
+    def mark_skipped(self):
+        """Mark step as skipped."""
+        self.status = self.Status.SKIPPED
+        from django.utils import timezone
+        self.completed_at = timezone.now()
+        self.save(update_fields=['status', 'completed_at'])
+
+
+class OnboardingSession(models.Model):
+    """
+    Model to track overall onboarding session for a user.
+    """
+    class Status(models.TextChoices):
+        NOT_STARTED = 'not_started', 'Not Started'
+        IN_PROGRESS = 'in_progress', 'In Progress'
+        COMPLETED = 'completed', 'Completed'
+        ABANDONED = 'abandoned', 'Abandoned'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='onboarding_session')
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.NOT_STARTED)
+    current_step = models.ForeignKey(OnboardingStep, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # Progress tracking
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    last_activity = models.DateTimeField(auto_now=True)
+    
+    # Session data
+    session_data = models.JSONField(default=dict, blank=True, help_text="Session-wide data")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'accounts_onboarding_session'
+        verbose_name = 'Onboarding Session'
+        verbose_name_plural = 'Onboarding Sessions'
+        indexes = [
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.get_status_display()}"
+
+    @property
+    def is_completed(self):
+        return self.status == self.Status.COMPLETED
+
+    @property
+    def progress_percentage(self):
+        """Calculate completion percentage."""
+        total_steps = OnboardingStep.objects.filter(
+            user_type=self.user.user_type,
+            is_active=True
+        ).count()
+        
+        if total_steps == 0:
+            return 100
+        
+        completed_steps = self.user.onboarding_progress.filter(
+            status=UserOnboardingProgress.Status.COMPLETED
+        ).count()
+        
+        return int((completed_steps / total_steps) * 100)
+
+    def get_next_step(self):
+        """Get the next incomplete step."""
+        completed_step_ids = self.user.onboarding_progress.filter(
+            status__in=[
+                UserOnboardingProgress.Status.COMPLETED,
+                UserOnboardingProgress.Status.SKIPPED
+            ]
+        ).values_list('step_id', flat=True)
+        
+        next_step = OnboardingStep.objects.filter(
+            user_type=self.user.user_type,
+            is_active=True
+        ).exclude(
+            id__in=completed_step_ids
+        ).order_by('order').first()
+        
+        return next_step
+
+    def start(self):
+        """Start the onboarding session."""
+        self.status = self.Status.IN_PROGRESS
+        from django.utils import timezone
+        self.started_at = timezone.now()
+        self.current_step = self.get_next_step()
+        self.save(update_fields=['status', 'started_at', 'current_step'])
+
+    def complete(self):
+        """Complete the onboarding session."""
+        self.status = self.Status.COMPLETED
+        from django.utils import timezone
+        self.completed_at = timezone.now()
+        self.current_step = None
+        self.save(update_fields=['status', 'completed_at', 'current_step'])
+
+    def abandon(self):
+        """Abandon the onboarding session."""
+        self.status = self.Status.ABANDONED
+        from django.utils import timezone
+        self.completed_at = timezone.now()
+        self.save(update_fields=['status', 'completed_at'])

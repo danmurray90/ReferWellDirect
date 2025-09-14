@@ -29,12 +29,18 @@
             <div class="nhsuk-card__content">
                 <h2 class="nhsuk-card__heading">Quick Actions</h2>
                 <div class="nhsuk-button-group">
-                    <a href="#" class="nhsuk-button nhsuk-button--primary">
-                        Create Referral
-                    </a>
-                    <a href="#" class="nhsuk-button nhsuk-button--secondary">
-                        View Matches
-                    </a>
+                    {% if not user.onboarding_session.is_completed %}
+                        <a href="{% url 'accounts:onboarding_start' %}" class="nhsuk-button nhsuk-button--primary">
+                            Complete Onboarding
+                        </a>
+                    {% else %}
+                        <a href="#" class="nhsuk-button nhsuk-button--primary">
+                            Create Referral
+                        </a>
+                        <a href="#" class="nhsuk-button nhsuk-button--secondary">
+                            View Matches
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -66,6 +72,17 @@
                                 <span class="nhsuk-tag nhsuk-tag--green">Active</span>
                             {% else %}
                                 <span class="nhsuk-tag nhsuk-tag--red">Inactive</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="nhsuk-summary-list__row">
+                        <dt class="nhsuk-summary-list__key">Onboarding</dt>
+                        <dd class="nhsuk-summary-list__value">
+                            {% if user.onboarding_session.is_completed %}
+                                <span class="nhsuk-tag nhsuk-tag--green">Complete</span>
+                            {% else %}
+                                <span class="nhsuk-tag nhsuk-tag--yellow">In Progress</span>
+                                <a href="{% url 'accounts:onboarding_start' %}" class="nhsuk-link">Continue</a>
                             {% endif %}
                         </dd>
                     </div>

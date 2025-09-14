@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+.nhsuk-progress-bar {
+    background-color: #f0f4f5;
+    border-radius: 4px;
+    height: 8px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.nhsuk-progress-bar__value {
+    background-color: #005eb8;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.onboarding-step {
+    background: #fff;
+    border: 1px solid #d8dde0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.onboarding-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #d8dde0;
+}
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.step-indicator__item {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+}
+
+.step-indicator__number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #f0f4f5;
+    color: #425563;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.step-indicator__item--current .step-indicator__number {
+    background-color: #005eb8;
+    color: #fff;
+}
+
+.step-indicator__item--completed .step-indicator__number {
+    background-color: #007f3b;
+    color: #fff;
+}
+
+.step-indicator__connector {
+    width: 2rem;
+    height: 2px;
+    background-color: #d8dde0;
+    margin: 0 0.5rem;
+}
+
+.step-indicator__item--completed + .step-indicator__item .step-indicator__connector {
+    background-color: #007f3b;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <!-- Progress Bar -->
+        <div class="nhsuk-progress-bar" role="progressbar" aria-valuenow="{{ progress_percentage|default:0 }}" aria-valuemin="0" aria-valuemax="100">
+            <div class="nhsuk-progress-bar__value" style="width: {{ progress_percentage|default:0 }}%"></div>
+        </div>
+        
+        <!-- Step Indicator -->
+        <div class="step-indicator" aria-label="Onboarding progress">
+            {% for step in all_steps %}
+                <div class="step-indicator__item {% if step.is_current %}step-indicator__item--current{% elif step.status == 'completed' %}step-indicator__item--completed{% endif %}">
+                    <span class="step-indicator__number" aria-label="Step {{ step.order }}: {{ step.name }}">
+                        {% if step.status == 'completed' %}✓{% else %}{{ step.order }}{% endif %}
+                    </span>
+                    <span class="nhsuk-u-visually-hidden">{{ step.name }}</span>
+                </div>
+                {% if not forloop.last %}
+                    <div class="step-indicator__connector" aria-hidden="true"></div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <!-- Current Step -->
+        <div class="onboarding-step">
+            <h1 class="nhsuk-heading-xl">{{ step.name }}</h1>
+            {% if step.description %}
+                <p class="nhsuk-body-l">{{ step.description }}</p>
+            {% endif %}
+            
+            {% block step_content %}
+            {% endblock %}
+        </div>
+        
+        <!-- Navigation -->
+        <div class="onboarding-navigation">
+            <div class="nhsuk-button-group">
+                {% if step.order > 1 %}
+                    <a href="{% url 'accounts:onboarding_step' step_id=previous_step.id %}" class="nhsuk-button nhsuk-button--secondary">
+                        Previous
+                    </a>
+                {% endif %}
+                
+                {% if not step.is_required %}
+                    <form method="post" action="{% url 'accounts:onboarding_skip_step' step_id=step.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="nhsuk-button nhsuk-button--secondary">
+                            Skip this step
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+            
+            <div class="nhsuk-button-group">
+                <button type="submit" form="onboarding-form" class="nhsuk-button nhsuk-button--primary">
+                    {% if next_step %}Continue{% else %}Complete{% endif %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-save form data
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('onboarding-form');
+    if (form) {
+        // Save form data to localStorage
+        form.addEventListener('input', function() {
+            const formData = new FormData(form);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            localStorage.setItem('onboarding_data', JSON.stringify(data));
+        });
+        
+        // Restore form data from localStorage
+        const savedData = localStorage.getItem('onboarding_data');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            for (let [key, value] of Object.entries(data)) {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = value === 'on' || value === input.value;
+                    } else {
+                        input.value = value;
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

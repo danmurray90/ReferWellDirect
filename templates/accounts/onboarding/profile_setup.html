@@ -1,0 +1,120 @@
+{% extends 'accounts/onboarding/base.html' %}
+
+{% block step_content %}
+<form id="onboarding-form" method="post" action="{% url 'accounts:onboarding_complete_step' step_id=step.id %}" novalidate>
+    {% csrf_token %}
+    
+    <div class="nhsuk-form-group">
+        <fieldset class="nhsuk-fieldset" aria-describedby="profile-hint">
+            <legend class="nhsuk-fieldset__legend nhsuk-fieldset__legend--l">
+                <h2 class="nhsuk-fieldset__heading">Your Profile Information</h2>
+            </legend>
+            
+            <div class="nhsuk-hint" id="profile-hint">
+                Please provide your basic profile information. This helps us personalize your experience.
+            </div>
+            
+            <div class="nhsuk-grid-row">
+                <div class="nhsuk-grid-column-one-half">
+                    <div class="nhsuk-form-group">
+                        <label class="nhsuk-label" for="first_name">
+                            First name
+                        </label>
+                        <input class="nhsuk-input" id="first_name" name="first_name" type="text" 
+                               value="{{ form_data.first_name|default:'' }}" required
+                               aria-describedby="first_name-hint">
+                        <div class="nhsuk-hint" id="first_name-hint">
+                            Your given name
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nhsuk-grid-column-one-half">
+                    <div class="nhsuk-form-group">
+                        <label class="nhsuk-label" for="last_name">
+                            Last name
+                        </label>
+                        <input class="nhsuk-input" id="last_name" name="last_name" type="text" 
+                               value="{{ form_data.last_name|default:'' }}" required
+                               aria-describedby="last_name-hint">
+                        <div class="nhsuk-hint" id="last_name-hint">
+                            Your family name
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="phone">
+                    Phone number
+                </label>
+                <input class="nhsuk-input" id="phone" name="phone" type="tel" 
+                       value="{{ form_data.phone|default:'' }}" 
+                       pattern="^(\+44|0)[0-9]{10,11}$"
+                       aria-describedby="phone-hint">
+                <div class="nhsuk-hint" id="phone-hint">
+                    Include country code (e.g., +44 7700 900000)
+                </div>
+            </div>
+            
+            <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="date_of_birth">
+                    Date of birth
+                </label>
+                <div class="nhsuk-hint" id="date_of_birth-hint">
+                    For example, 15 03 1984
+                </div>
+                <div class="nhsuk-date-input" id="date_of_birth">
+                    <div class="nhsuk-date-input__item">
+                        <div class="nhsuk-form-group">
+                            <label class="nhsuk-label nhsuk-date-input__label" for="date_of_birth_day">
+                                Day
+                            </label>
+                            <input class="nhsuk-input nhsuk-date-input__input nhsuk-input--width-2" 
+                                   id="date_of_birth_day" name="date_of_birth_day" type="number" 
+                                   pattern="[0-9]*" inputmode="numeric" min="1" max="31">
+                        </div>
+                    </div>
+                    <div class="nhsuk-date-input__item">
+                        <div class="nhsuk-form-group">
+                            <label class="nhsuk-label nhsuk-date-input__label" for="date_of_birth_month">
+                                Month
+                            </label>
+                            <select class="nhsuk-select nhsuk-date-input__input" id="date_of_birth_month" name="date_of_birth_month">
+                                <option value="">Month</option>
+                                <option value="01">January</option>
+                                <option value="02">February</option>
+                                <option value="03">March</option>
+                                <option value="04">April</option>
+                                <option value="05">May</option>
+                                <option value="06">June</option>
+                                <option value="07">July</option>
+                                <option value="08">August</option>
+                                <option value="09">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="nhsuk-date-input__item">
+                        <div class="nhsuk-form-group">
+                            <label class="nhsuk-label nhsuk-date-input__label" for="date_of_birth_year">
+                                Year
+                            </label>
+                            <input class="nhsuk-input nhsuk-date-input__input nhsuk-input--width-4" 
+                                   id="date_of_birth_year" name="date_of_birth_year" type="number" 
+                                   pattern="[0-9]*" inputmode="numeric" min="1900" max="2024">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    
+    <div class="nhsuk-inset-text">
+        <span class="nhsuk-u-visually-hidden">Information: </span>
+        <p>This information will be used to personalize your experience and help match you with appropriate services.</p>
+    </div>
+</form>
+{% endblock %}

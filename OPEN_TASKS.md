@@ -58,21 +58,19 @@
 
 ## Medium Priority (Next Sprint)
 
-### Matching Engine Completion
-- [x] Implement feasibility filter
-- [x] Set up dual retrieval system (vector embeddings with Sentence-Transformers)
-- [x] Create reranking algorithm
-- [x] Implement probability calibration
-- [x] Add matching explanation generation
-- [x] Add threshold routing logic
-- [x] Add performance optimization and caching
+### Phase 4: Advanced Features
+- [ ] Real-time notifications system
+- [ ] Advanced search and filtering interface
+- [ ] Bulk operations for referrals and appointments
+- [ ] Reporting and analytics dashboard
+- [ ] API documentation with interactive docs
+- [ ] Data export capabilities
 
-### User Interface
-- [x] Implement NHS.UK design patterns
-- [x] Add accessibility features
-- [x] Create responsive layouts
-- [x] Add form validation
-- [x] Implement error handling
+### User Experience Enhancements
+- [ ] Enhanced dashboard with real-time updates
+- [ ] Advanced user preferences management
+- [ ] Improved mobile experience
+- [ ] Accessibility improvements and testing
 
 ### Testing
 - [x] Write model tests
@@ -80,6 +78,43 @@
 - [x] Write view tests
 - [x] Add integration tests
 - [x] Set up test data fixtures
+
+## Phase 4: Advanced Features (Current Sprint)
+
+### Real-time Notifications
+- [ ] WebSocket implementation for real-time updates
+- [ ] Server-Sent Events (SSE) for notifications
+- [ ] Notification preferences management
+- [ ] Push notification support
+- [ ] Email notification templates
+
+### Advanced Search & Filtering
+- [ ] Enhanced search interface for referrals
+- [ ] Advanced filtering options
+- [ ] Search result ranking and sorting
+- [ ] Saved search functionality
+- [ ] Search analytics and insights
+
+### Bulk Operations
+- [ ] Bulk referral creation and management
+- [ ] Batch appointment scheduling
+- [ ] Mass data import/export
+- [ ] Bulk status updates
+- [ ] Progress tracking for bulk operations
+
+### Reporting & Analytics
+- [ ] Performance metrics dashboard
+- [ ] Referral success rate analytics
+- [ ] User activity reports
+- [ ] System usage statistics
+- [ ] Custom report builder
+
+### API Documentation
+- [ ] Interactive API documentation (Swagger/OpenAPI)
+- [ ] API versioning strategy
+- [ ] Rate limiting and throttling
+- [ ] API authentication documentation
+- [ ] SDK generation
 
 ## Low Priority (Future Sprints)
 
@@ -89,13 +124,6 @@
 - [ ] NHS Login adapter
 - [ ] PDS/ODS adapter
 - [ ] e-RS adapter
-
-### Advanced Features
-- [ ] Real-time notifications
-- [ ] Advanced search
-- [ ] Bulk operations
-- [ ] Reporting and analytics
-- [ ] API documentation
 
 ### Production Readiness
 - [ ] Security hardening
@@ -136,6 +164,18 @@
 - [x] Updated requirements.txt with latest dependencies
 
 ## Recently Completed (Latest Sprint)
+
+### User Onboarding Flow
+- [x] **OnboardingStep Model**: Complete model for defining onboarding steps by user type
+- [x] **UserOnboardingProgress Model**: Track individual user progress through steps
+- [x] **OnboardingSession Model**: Manage overall onboarding sessions with progress tracking
+- [x] **Onboarding Serializers**: Comprehensive serializers for API endpoints
+- [x] **Onboarding Views**: Web and API views for step management and progress tracking
+- [x] **NHS.UK Templates**: Accessible, mobile-responsive templates for all step types
+- [x] **Management Command**: Automated setup of default onboarding steps
+- [x] **Dashboard Integration**: Seamless integration with user dashboard
+- [x] **Progress Tracking**: Real-time progress calculation and step status management
+- [x] **Step Validation**: Comprehensive validation for each onboarding step type
 
 ### Core Matching Engine
 - [x] **VectorEmbeddingService**: Complete implementation with Sentence-Transformers

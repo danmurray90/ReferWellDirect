@@ -1,0 +1,116 @@
+{% extends 'accounts/onboarding/base.html' %}
+
+{% block step_content %}
+<div class="nhsuk-form-group">
+    <fieldset class="nhsuk-fieldset" aria-describedby="verification-hint">
+        <legend class="nhsuk-fieldset__legend nhsuk-fieldset__legend--l">
+            <h2 class="nhsuk-fieldset__heading">Verify Your Identity</h2>
+        </legend>
+        
+        <div class="nhsuk-hint" id="verification-hint">
+            To ensure the security and integrity of our service, we need to verify your identity.
+        </div>
+        
+        <div class="nhsuk-grid-row">
+            <div class="nhsuk-grid-column-one-half">
+                <div class="nhsuk-card">
+                    <div class="nhsuk-card__content">
+                        <h3 class="nhsuk-card__heading">Email Verification</h3>
+                        <p class="nhsuk-card__description">
+                            We've sent a verification link to your email address. Please check your inbox and click the link to verify your email.
+                        </p>
+                        <div class="nhsuk-inset-text">
+                            <span class="nhsuk-u-visually-hidden">Information: </span>
+                            <p><strong>Email sent to:</strong> {{ user.email }}</p>
+                        </div>
+                        <a href="#" class="nhsuk-button nhsuk-button--secondary" onclick="resendVerificationEmail()">
+                            Resend verification email
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nhsuk-grid-column-one-half">
+                <div class="nhsuk-card">
+                    <div class="nhsuk-card__content">
+                        <h3 class="nhsuk-card__heading">Professional Verification</h3>
+                        <p class="nhsuk-card__description">
+                            {% if user.is_gp %}
+                                Verify your GP registration with the GMC.
+                            {% elif user.is_psychologist %}
+                                Verify your HCPC registration or BPS membership.
+                            {% else %}
+                                Verify your professional credentials.
+                            {% endif %}
+                        </p>
+                        <a href="#" class="nhsuk-button nhsuk-button--secondary" onclick="startProfessionalVerification()">
+                            Start verification
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nhsuk-warning-callout">
+            <h3 class="nhsuk-warning-callout__label">
+                <span role="text">
+                    <span class="nhsuk-u-visually-hidden">Important: </span>
+                    Verification required
+                </span>
+            </h3>
+            <p>You must complete verification to access all features of ReferWell Direct. This helps us maintain the highest standards of care and security.</p>
+        </div>
+        
+        <div class="nhsuk-form-group">
+            <div class="nhsuk-checkboxes">
+                <div class="nhsuk-checkboxes__item">
+                    <input class="nhsuk-checkboxes__input" id="terms_accepted" name="terms_accepted" type="checkbox" value="true" required>
+                    <label class="nhsuk-label nhsuk-checkboxes__label" for="terms_accepted">
+                        I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+                    </label>
+                </div>
+                
+                <div class="nhsuk-checkboxes__item">
+                    <input class="nhsuk-checkboxes__input" id="data_sharing" name="data_sharing" type="checkbox" value="true" required>
+                    <label class="nhsuk-label nhsuk-checkboxes__label" for="data_sharing">
+                        I consent to sharing my professional information for matching purposes
+                    </label>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</div>
+
+<form id="onboarding-form" method="post" action="{% url 'accounts:onboarding_complete_step' step_id=step.id %}" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="verification_status" value="pending">
+</form>
+
+<script>
+function resendVerificationEmail() {
+    // This would typically make an API call to resend the verification email
+    alert('Verification email resent! Please check your inbox.');
+}
+
+function startProfessionalVerification() {
+    // This would typically redirect to a professional verification service
+    alert('Professional verification process will be implemented in a future update.');
+}
+
+// Check verification status periodically
+function checkVerificationStatus() {
+    // This would typically make an API call to check verification status
+    // For now, we'll simulate a check
+    const emailVerified = document.getElementById('email_verified')?.checked || false;
+    const professionalVerified = document.getElementById('professional_verified')?.checked || false;
+    
+    if (emailVerified && professionalVerified) {
+        document.getElementById('onboarding-form').style.display = 'block';
+        document.querySelector('.onboarding-navigation .nhsuk-button--primary').style.display = 'block';
+    }
+}
+
+// Check every 30 seconds
+setInterval(checkVerificationStatus, 30000);
+</script>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends 'accounts/onboarding/base.html' %}
+
+{% block step_content %}
+<form id="onboarding-form" method="post" action="{% url 'accounts:onboarding_complete_step' step_id=step.id %}" novalidate>
+    {% csrf_token %}
+    
+    <div class="nhsuk-form-group">
+        <fieldset class="nhsuk-fieldset" aria-describedby="organisation-hint">
+            <legend class="nhsuk-fieldset__legend nhsuk-fieldset__legend--l">
+                <h2 class="nhsuk-fieldset__heading">Your Organisation</h2>
+            </legend>
+            
+            <div class="nhsuk-hint" id="organisation-hint">
+                Please provide information about your healthcare organisation or practice.
+            </div>
+            
+            <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="organisation_name">
+                    Organisation name
+                </label>
+                <input class="nhsuk-input" id="organisation_name" name="organisation_name" type="text" 
+                       required aria-describedby="organisation_name-hint">
+                <div class="nhsuk-hint" id="organisation_name-hint">
+                    The name of your practice, clinic, or healthcare organisation
+                </div>
+            </div>
+            
+            <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="organisation_type">
+                    Organisation type
+                </label>
+                <select class="nhsuk-select" id="organisation_type" name="organisation_type" required>
+                    <option value="">Select organisation type</option>
+                    <option value="gp_practice">GP Practice</option>
+                    <option value="clinic">Clinic</option>
+                    <option value="hospital">Hospital</option>
+                    <option value="mental_health_service">Mental Health Service</option>
+                    <option value="private_practice">Private Practice</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="address_line_1">
+                    Address line 1
+                </label>
+                <input class="nhsuk-input" id="address_line_1" name="address_line_1" type="text" 
+                       aria-describedby="address_line_1-hint">
+                <div class="nhsuk-hint" id="address_line_1-hint">
+                    Street address, building name, or PO box
+                </div>
+            </div>
+            
+            <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="address_line_2">
+                    Address line 2 (optional)
+                </label>
+                <input class="nhsuk-input" id="address_line_2" name="address_line_2" type="text" 
+                       aria-describedby="address_line_2-hint">
+                <div class="nhsuk-hint" id="address_line_2-hint">
+                    Apartment, suite, unit, building, floor, etc.
+                </div>
+            </div>
+            
+            <div class="nhsuk-grid-row">
+                <div class="nhsuk-grid-column-one-half">
+                    <div class="nhsuk-form-group">
+                        <label class="nhsuk-label" for="city">
+                            City
+                        </label>
+                        <input class="nhsuk-input" id="city" name="city" type="text" 
+                               aria-describedby="city-hint">
+                        <div class="nhsuk-hint" id="city-hint">
+                            City or town
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nhsuk-grid-column-one-half">
+                    <div class="nhsuk-form-group">
+                        <label class="nhsuk-label" for="postcode">
+                            Postcode
+                        </label>
+                        <input class="nhsuk-input" id="postcode" name="postcode" type="text" 
+                               pattern="[A-Za-z]{1,2}[0-9Rr][0-9A-Za-z]? [0-9][ABD-HJLNP-UW-Zabd-hjlnp-uw-z]{2}"
+                               aria-describedby="postcode-hint">
+                        <div class="nhsuk-hint" id="postcode-hint">
+                            UK postcode (e.g., SW1A 1AA)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="phone">
+                    Organisation phone number
+                </label>
+                <input class="nhsuk-input" id="phone" name="phone" type="tel" 
+                       pattern="^(\+44|0)[0-9]{10,11}$"
+                       aria-describedby="phone-hint">
+                <div class="nhsuk-hint" id="phone-hint">
+                    Main contact number for the organisation
+                </div>
+            </div>
+            
+            <div class="nhsuk-form-group">
+                <label class="nhsuk-label" for="email">
+                    Organisation email
+                </label>
+                <input class="nhsuk-input" id="email" name="email" type="email" 
+                       aria-describedby="email-hint">
+                <div class="nhsuk-hint" id="email-hint">
+                    Main contact email for the organisation
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    
+    {% if user_organisations %}
+        <div class="nhsuk-form-group">
+            <h3 class="nhsuk-heading-m">Your existing organisations</h3>
+            <div class="nhsuk-table-responsive">
+                <table class="nhsuk-table">
+                    <thead class="nhsuk-table__head">
+                        <tr class="nhsuk-table__row">
+                            <th class="nhsuk-table__header">Organisation</th>
+                            <th class="nhsuk-table__header">Type</th>
+                            <th class="nhsuk-table__header">Role</th>
+                        </tr>
+                    </thead>
+                    <tbody class="nhsuk-table__body">
+                        {% for user_org in user_organisations %}
+                            <tr class="nhsuk-table__row">
+                                <td class="nhsuk-table__cell">{{ user_org.organisation.name }}</td>
+                                <td class="nhsuk-table__cell">{{ user_org.organisation.get_organisation_type_display }}</td>
+                                <td class="nhsuk-table__cell">{{ user_org.get_role_display }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div class="nhsuk-inset-text">
+        <span class="nhsuk-u-visually-hidden">Information: </span>
+        <p>This information helps us understand your practice context and provide relevant services.</p>
+    </div>
+</form>
+{% endblock %}
