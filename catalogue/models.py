@@ -2,8 +2,8 @@
 Catalogue models for ReferWell Direct.
 """
 from django.db import models
-# from django.contrib.gis.db import models as gis_models
-# from django.contrib.gis.geos import Point
+from django.contrib.gis.db import models as gis_models
+from django.contrib.gis.geos import Point
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth import get_user_model
 import uuid
@@ -45,8 +45,8 @@ class Psychologist(models.Model):
     service_type = models.CharField(max_length=10, choices=ServiceType.choices, default=ServiceType.MIXED)
     modality = models.CharField(max_length=10, choices=Modality.choices, default=Modality.MIXED)
     
-    # Location and availability (temporarily disabled - requires PostGIS)
-    # location = gis_models.PointField(null=True, blank=True, srid=4326)
+    # Location and availability
+    location = gis_models.PointField(null=True, blank=True, srid=4326)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     address_line_1 = models.CharField(max_length=100, blank=True)
@@ -103,6 +103,12 @@ class Psychologist(models.Model):
             models.Index(fields=['registration_number']),
         ]
 
+    def save(self, *args, **kwargs):
+        """Override save to update location from lat/lon."""
+        super().save(*args, **kwargs)
+        if self.latitude and self.longitude and not self.location:
+            self.update_location()
+
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.get_service_type_display()}"
 
@@ -136,6 +142,20 @@ class Psychologist(models.Model):
         import json
         import numpy as np
         return np.array(json.loads(self.embedding))
+
+    def update_location(self):
+        """Update the PostGIS location field from latitude and longitude."""
+        if self.latitude and self.longitude:
+            self.location = Point(self.longitude, self.latitude, srid=4326)
+            self.save(update_fields=['location'])
+
+    def get_distance_to(self, lat, lon):
+        """Calculate distance to another point in meters."""
+        if not self.location:
+            return None
+        from django.contrib.gis.geos import Point
+        point = Point(lon, lat, srid=4326)
+        return self.location.distance(point) * 111000  # Convert to meters (approximate)
 
 
 class Availability(models.Model):

@@ -14,13 +14,14 @@
 - [x] .pre-commit-config.yaml for code quality
 - [x] Django project "referwell" created
 - [x] App modules: accounts, referrals, catalogue, matching, inbox, payments, ops
-- [x] Core models with basic structure (PostGIS support prepared)
+- [x] Core models with PostGIS support enabled
 - [x] Database migrations for all models
 - [x] Celery configuration with beat schedule
 - [x] Local development environment setup
 - [x] Basic UI pages with NHS.UK design system
 - [x] Testing configuration (pytest + pytest-django)
 - [x] Cursor rules directory setup
+- [x] Feasibility filter implementation
 - [x] Git repository initialization and commits
 - [x] Docker services running (PostgreSQL, Redis, Mailcatcher)
 - [x] Django development server working
@@ -28,7 +29,7 @@
 - [x] REST API endpoints for users and organisations
 
 ## Phase 2: Core Matching Engine
-- [ ] Feasibility filter implementation
+- [x] Feasibility filter implementation
 - [ ] Dual retrieval system (BM25 + vector)
 - [ ] Reranking algorithm with structured features
 - [ ] Probability calibration (isotonic/Platt)
@@ -77,11 +78,20 @@
 - Development environment: ✅ Complete
 - Basic UI pages: ✅ Complete
 - Git repository: ✅ Complete
+- PostGIS support: ✅ Complete
+- Cursor rules: ✅ Complete
+- Feasibility filter: ✅ Complete
+
+**Phase 2: Core Matching Engine** - 🚧 In Progress
+- Feasibility filter: ✅ Complete
+- Dual retrieval system: 🚧 In Progress
+- Reranking algorithm: ⏳ Pending
+- Probability calibration: ⏳ Pending
 
 ## Next Actions
-1. Implement PostGIS support (requires GDAL installation)
-2. Create comprehensive test suite
-3. Implement core matching engine
-4. Add advanced UI features
-5. Set up production configuration
-6. Begin Phase 2: Core Matching Engine
+1. Complete dual retrieval system with vector embeddings
+2. Implement reranking algorithm
+3. Add probability calibration
+4. Create comprehensive test suite
+5. Add advanced UI features
+6. Set up production configuration

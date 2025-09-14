@@ -64,7 +64,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'django.contrib.gis',  # PostGIS support - requires GDAL installation
+    'django.contrib.gis',  # PostGIS support
 ]
 
 THIRD_PARTY_APPS = [
@@ -122,7 +122,7 @@ ASGI_APPLICATION = 'referwell.asgi.application'
 # Database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': env('DB_NAME'),
         'USER': env('DB_USER'),
         'PASSWORD': env('DB_PASSWORD'),
@@ -266,6 +266,10 @@ CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE')
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.User'
+
+# GDAL Configuration
+GDAL_LIBRARY_PATH = '/opt/homebrew/Cellar/gdal/3.11.4/lib/libgdal.37.3.11.4.dylib'
+GEOS_LIBRARY_PATH = '/opt/homebrew/Cellar/geos/3.14.0/lib/libgeos_c.1.20.4.dylib'
 
 # Session Configuration
 SESSION_COOKIE_AGE = 86400  # 24 hours

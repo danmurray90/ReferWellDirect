@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: pgvector/pgvector:pg15
+    image: postgis/postgis:15-3.4
     environment:
       POSTGRES_DB: referwell
       POSTGRES_USER: referwell

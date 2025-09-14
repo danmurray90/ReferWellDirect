@@ -32,7 +32,7 @@
 - [x] Create Appointment model
 - [x] Create Message/Task model
 - [x] Create AuditEvent model
-- [ ] Add PostGIS and pgvector support (requires GDAL installation)
+- [x] Add PostGIS and pgvector support (requires GDAL installation)
 - [x] Create database migrations
 
 ### Development Environment
@@ -50,17 +50,17 @@
 - [x] Enable Django admin interface
 
 ### Cursor Rules
-- [ ] Create .cursor/rules/ directory
-- [ ] Add Django-specific rules
-- [ ] Add accessibility rules
-- [ ] Add testing rules
-- [ ] Add code quality rules
+- [x] Create .cursor/rules/ directory
+- [x] Add Django-specific rules
+- [x] Add accessibility rules
+- [x] Add testing rules
+- [x] Add code quality rules
 
 ## Medium Priority (Next Sprint)
 
 ### Matching Engine Foundation
-- [ ] Implement feasibility filter
-- [ ] Set up dual retrieval system
+- [x] Implement feasibility filter
+- [ ] Set up dual retrieval system (vector embeddings with Sentence-Transformers)
 - [ ] Create reranking algorithm
 - [ ] Implement probability calibration
 - [ ] Add threshold routing logic
@@ -119,6 +119,9 @@
 - [x] Environment configuration (.env file)
 - [x] Python dependencies installed
 - [x] Superuser created for admin access
+- [x] PostGIS and pgvector support enabled
+- [x] Cursor rules directory with comprehensive guidelines
+- [x] Feasibility filter implementation with PostGIS radius filtering
 
 ## Notes
 - All external integrations must be stubbed behind feature flags
