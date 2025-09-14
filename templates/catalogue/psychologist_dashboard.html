@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psychologist Dashboard - ReferWell Direct</title>
+</head>
+<body>
+    <h1>Psychologist Dashboard</h1>
+    <p>Welcome, {{ psychologist.title }} {{ psychologist.user.first_name }} {{ psychologist.user.last_name }}!</p>
+    
+    <h2>Upcoming Appointments</h2>
+    {% if upcoming_appointments %}
+        <ul>
+            {% for appointment in upcoming_appointments %}
+                <li>{{ appointment.scheduled_at }} - {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No upcoming appointments.</p>
+    {% endif %}
+    
+    <h2>Profile Information</h2>
+    <p>Service Type: {{ psychologist.get_service_type_display }}</p>
+    <p>Modality: {{ psychologist.get_modality_display }}</p>
+    <p>Specialisms: {{ psychologist.specialisms|join:", " }}</p>
+    <p>Current Patients: {{ psychologist.current_patients }}/{{ psychologist.max_patients }}</p>
+</body>
+</html>

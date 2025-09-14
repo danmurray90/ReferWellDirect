@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Referral{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="page-title">Create New Referral</h1>
+            <p class="page-description">Submit a new referral for mental health services.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Referral Details</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.patient.id_for_label }}" class="form-label">
+                                        Patient *
+                                    </label>
+                                    {{ form.patient }}
+                                    {% if form.patient.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.patient.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.priority.id_for_label }}" class="form-label">
+                                        Priority *
+                                    </label>
+                                    {{ form.priority }}
+                                    {% if form.priority.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.priority.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.service_type.id_for_label }}" class="form-label">
+                                        Service Type *
+                                    </label>
+                                    {{ form.service_type }}
+                                    {% if form.service_type.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.service_type.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.modality.id_for_label }}" class="form-label">
+                                        Modality *
+                                    </label>
+                                    {{ form.modality }}
+                                    {% if form.modality.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.modality.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.presenting_problem.id_for_label }}" class="form-label">
+                                Presenting Problem *
+                            </label>
+                            {{ form.presenting_problem }}
+                            {% if form.presenting_problem.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.presenting_problem.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.clinical_notes.id_for_label }}" class="form-label">
+                                Clinical Notes
+                            </label>
+                            {{ form.clinical_notes }}
+                            {% if form.clinical_notes.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.clinical_notes.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.urgency_notes.id_for_label }}" class="form-label">
+                                Urgency Notes
+                            </label>
+                            {{ form.urgency_notes }}
+                            {% if form.urgency_notes.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.urgency_notes.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.preferred_latitude.id_for_label }}" class="form-label">
+                                        Preferred Latitude
+                                    </label>
+                                    {{ form.preferred_latitude }}
+                                    {% if form.preferred_latitude.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.preferred_latitude.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.preferred_longitude.id_for_label }}" class="form-label">
+                                        Preferred Longitude
+                                    </label>
+                                    {{ form.preferred_longitude }}
+                                    {% if form.preferred_longitude.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.preferred_longitude.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.max_distance_km.id_for_label }}" class="form-label">
+                                Maximum Distance (km)
+                            </label>
+                            {{ form.max_distance_km }}
+                            {% if form.max_distance_km.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.max_distance_km.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.preferred_language.id_for_label }}" class="form-label">
+                                Preferred Language
+                            </label>
+                            {{ form.preferred_language }}
+                            {% if form.preferred_language.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.preferred_language.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                Create Referral
+                            </button>
+                            <a href="{% url 'referrals:dashboard' %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Help</h2>
+                </div>
+                <div class="card-body">
+                    <h3>Creating a Referral</h3>
+                    <p>When creating a referral, please provide:</p>
+                    <ul>
+                        <li>Clear description of the presenting problem</li>
+                        <li>Relevant clinical notes</li>
+                        <li>Patient preferences and requirements</li>
+                        <li>Geographic preferences if applicable</li>
+                    </ul>
+                    
+                    <h3>Priority Levels</h3>
+                    <ul>
+                        <li><strong>Low:</strong> Routine referral</li>
+                        <li><strong>Medium:</strong> Standard referral</li>
+                        <li><strong>High:</strong> Urgent referral</li>
+                        <li><strong>Urgent:</strong> Emergency referral</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

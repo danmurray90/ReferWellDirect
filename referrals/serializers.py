@@ -26,7 +26,7 @@ class ReferralSerializer(serializers.ModelSerializer):
             'status', 'status_display', 'priority', 'priority_display',
             'service_type', 'service_type_display', 'modality', 'modality_display',
             'presenting_problem', 'clinical_notes', 'urgency_notes',
-            'patient_preferences', 'preferred_location', 'max_distance_km',
+            'patient_preferences', 'preferred_latitude', 'preferred_longitude', 'max_distance_km',
             'preferred_language', 'required_specialisms',
             'created_at', 'updated_at', 'submitted_at', 'completed_at'
         ]
@@ -184,7 +184,7 @@ class ReferralCreateSerializer(serializers.ModelSerializer):
         fields = [
             'patient', 'presenting_problem', 'clinical_notes', 'urgency_notes',
             'service_type', 'modality', 'priority', 'patient_preferences',
-            'preferred_location', 'max_distance_km', 'preferred_language',
+            'preferred_latitude', 'preferred_longitude', 'max_distance_km', 'preferred_language',
             'required_specialisms'
         ]
     

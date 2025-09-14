@@ -46,7 +46,7 @@ class Referral(models.Model):
 
     # Basic fields
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    referral_id = models.CharField(max_length=20, unique=True, help_text="Human-readable referral ID")
+    referral_id = models.CharField(max_length=30, unique=True, help_text="Human-readable referral ID")
     
     # Relationships
     referrer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='referrals_made')
@@ -62,6 +62,7 @@ class Referral(models.Model):
     
     # Clinical information
     presenting_problem = models.TextField(help_text="Description of the patient's presenting problem")
+    condition_description = models.TextField(blank=True, help_text="Detailed description of the condition")
     clinical_notes = models.TextField(blank=True, help_text="Additional clinical notes")
     urgency_notes = models.TextField(blank=True, help_text="Notes about urgency if applicable")
     
@@ -113,8 +114,12 @@ class Referral(models.Model):
     def _generate_referral_id(self):
         """Generate a human-readable referral ID."""
         import datetime
+        import random
         now = datetime.datetime.now()
-        return f"REF{now.strftime('%Y%m%d')}{now.strftime('%H%M%S')}"
+        # Add microseconds and random component to ensure uniqueness
+        microsecond = now.microsecond
+        random_component = random.randint(10, 99)
+        return f"REF{now.strftime('%Y%m%d')}{now.strftime('%H%M%S')}{microsecond:06d}{random_component}"
 
     @property
     def is_draft(self):

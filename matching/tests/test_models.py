@@ -21,14 +21,13 @@ class TestMatchingAlgorithm(TestCase):
             name='Test Algorithm',
             version='1.0',
             algorithm_type='hybrid',
-            parameters={'vector_weight': 0.7, 'bm25_weight': 0.3},
-            description='Test algorithm for matching'
+            config={'vector_weight': 0.7, 'bm25_weight': 0.3}
         )
         
         self.assertEqual(algorithm.name, 'Test Algorithm')
         self.assertEqual(algorithm.version, '1.0')
         self.assertEqual(algorithm.algorithm_type, 'hybrid')
-        self.assertEqual(algorithm.parameters['vector_weight'], 0.7)
+        self.assertEqual(algorithm.config['vector_weight'], 0.7)
         self.assertTrue(algorithm.is_active)
         self.assertFalse(algorithm.is_default)
     
@@ -231,7 +230,40 @@ class TestMatchingRun(TestCase):
     
     def test_creation(self):
         """Test creating a matching run."""
+        # Create a test referral first
+        from referrals.models import Referral
+        from accounts.models import User
+        
+        user = User.objects.create_user(
+            email='test@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User',
+            phone='1234567890',
+            user_type='gp'
+        )
+        
+        # Create a patient user
+        patient = User.objects.create_user(
+            email='patient@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='Patient',
+            phone='1234567890',
+            user_type='patient'
+        )
+        
+        referral = Referral.objects.create(
+            referrer=user,
+            patient=patient,
+            presenting_problem='Test problem',
+            service_type='nhs',
+            modality='in_person',
+            priority='routine'
+        )
+        
         run = MatchingRun.objects.create(
+            referral=referral,
             algorithm_name='Test Algorithm',
             algorithm_version='1.0',
             total_referrals=100,
@@ -248,12 +280,45 @@ class TestMatchingRun(TestCase):
         self.assertEqual(run.failed_matches, 20)
         self.assertEqual(run.average_confidence, 0.75)
         self.assertEqual(run.processing_time_seconds, 30.5)
-        self.assertIsNotNone(run.started_at)
-        self.assertIsNotNone(run.completed_at)
+        self.assertIsNone(run.started_at)
+        self.assertIsNone(run.completed_at)
     
     def test_str_representation(self):
         """Test string representation."""
+        # Create a test referral first
+        from referrals.models import Referral
+        from accounts.models import User
+        
+        user = User.objects.create_user(
+            email='test@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User',
+            phone='1234567890',
+            user_type='gp'
+        )
+        
+        # Create a patient user
+        patient = User.objects.create_user(
+            email='patient@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='Patient',
+            phone='1234567890',
+            user_type='patient'
+        )
+        
+        referral = Referral.objects.create(
+            referrer=user,
+            patient=patient,
+            presenting_problem='Test problem',
+            service_type='nhs',
+            modality='in_person',
+            priority='routine'
+        )
+        
         run = MatchingRun.objects.create(
+            referral=referral,
             algorithm_name='Test Algorithm',
             algorithm_version='1.0',
             total_referrals=100,
@@ -263,12 +328,45 @@ class TestMatchingRun(TestCase):
             processing_time_seconds=30.5
         )
         
-        expected = 'Test Algorithm v1.0 - 100 referrals (80 successful)'
+        expected = f'Matching run for {referral.referral_id} - Pending'
         self.assertEqual(str(run), expected)
     
     def test_success_rate_property(self):
         """Test success rate calculation."""
+        # Create a test referral first
+        from referrals.models import Referral
+        from accounts.models import User
+        
+        user = User.objects.create_user(
+            email='test2@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User',
+            phone='1234567890',
+            user_type='gp'
+        )
+        
+        # Create a patient user
+        patient = User.objects.create_user(
+            email='patient2@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='Patient2',
+            phone='1234567890',
+            user_type='patient'
+        )
+        
+        referral = Referral.objects.create(
+            referrer=user,
+            patient=patient,
+            presenting_problem='Test problem 2',
+            service_type='nhs',
+            modality='in_person',
+            priority='routine'
+        )
+        
         run = MatchingRun.objects.create(
+            referral=referral,
             algorithm_name='Test Algorithm',
             algorithm_version='1.0',
             total_referrals=100,
@@ -283,7 +381,40 @@ class TestMatchingRun(TestCase):
     
     def test_success_rate_zero_division(self):
         """Test success rate with zero total referrals."""
+        # Create a test referral first
+        from referrals.models import Referral
+        from accounts.models import User
+        
+        user = User.objects.create_user(
+            email='test3@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User',
+            phone='1234567890',
+            user_type='gp'
+        )
+        
+        # Create a patient user
+        patient = User.objects.create_user(
+            email='patient3@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='Patient3',
+            phone='1234567890',
+            user_type='patient'
+        )
+        
+        referral = Referral.objects.create(
+            referrer=user,
+            patient=patient,
+            presenting_problem='Test problem 3',
+            service_type='nhs',
+            modality='in_person',
+            priority='routine'
+        )
+        
         run = MatchingRun.objects.create(
+            referral=referral,
             algorithm_name='Test Algorithm',
             algorithm_version='1.0',
             total_referrals=0,
@@ -297,21 +428,95 @@ class TestMatchingRun(TestCase):
     
     def test_duration_property(self):
         """Test duration calculation."""
+        # Create a test referral first
+        from referrals.models import Referral
+        from accounts.models import User
+        
+        user = User.objects.create_user(
+            email='test4@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User',
+            phone='1234567890',
+            user_type='gp'
+        )
+        
+        # Create a patient user
+        patient = User.objects.create_user(
+            email='patient4@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='Patient4',
+            phone='1234567890',
+            user_type='patient'
+        )
+        
+        referral = Referral.objects.create(
+            referrer=user,
+            patient=patient,
+            presenting_problem='Test problem 4',
+            service_type='nhs',
+            modality='in_person',
+            priority='routine'
+        )
+        
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        started_at = timezone.now()
+        completed_at = started_at + timedelta(seconds=30.5)
+        
         run = MatchingRun.objects.create(
+            referral=referral,
             algorithm_name='Test Algorithm',
             algorithm_version='1.0',
             total_referrals=100,
             successful_matches=80,
             failed_matches=20,
             average_confidence=0.75,
-            processing_time_seconds=30.5
+            processing_time_seconds=30.5,
+            started_at=started_at,
+            completed_at=completed_at
         )
         
         self.assertEqual(run.duration, 30.5)
     
     def test_metadata_property(self):
         """Test metadata property."""
+        # Create a test referral first
+        from referrals.models import Referral
+        from accounts.models import User
+        
+        user = User.objects.create_user(
+            email='test5@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User',
+            phone='1234567890',
+            user_type='gp'
+        )
+        
+        # Create a patient user
+        patient = User.objects.create_user(
+            email='patient5@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='Patient5',
+            phone='1234567890',
+            user_type='patient'
+        )
+        
+        referral = Referral.objects.create(
+            referrer=user,
+            patient=patient,
+            presenting_problem='Test problem 5',
+            service_type='nhs',
+            modality='in_person',
+            priority='routine'
+        )
+        
         run = MatchingRun.objects.create(
+            referral=referral,
             algorithm_name='Test Algorithm',
             algorithm_version='1.0',
             total_referrals=100,
@@ -327,7 +532,40 @@ class TestMatchingRun(TestCase):
     
     def test_metadata_default(self):
         """Test metadata default value."""
+        # Create a test referral first
+        from referrals.models import Referral
+        from accounts.models import User
+        
+        user = User.objects.create_user(
+            email='test6@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User',
+            phone='1234567890',
+            user_type='gp'
+        )
+        
+        # Create a patient user
+        patient = User.objects.create_user(
+            email='patient6@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='Patient6',
+            phone='1234567890',
+            user_type='patient'
+        )
+        
+        referral = Referral.objects.create(
+            referrer=user,
+            patient=patient,
+            presenting_problem='Test problem 6',
+            service_type='nhs',
+            modality='in_person',
+            priority='routine'
+        )
+        
         run = MatchingRun.objects.create(
+            referral=referral,
             algorithm_name='Test Algorithm',
             algorithm_version='1.0',
             total_referrals=100,

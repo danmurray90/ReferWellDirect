@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psychologist Details - ReferWell Direct</title>
+</head>
+<body>
+    <h1>{{ psychologist.title }} {{ psychologist.user.first_name }} {{ psychologist.user.last_name }}</h1>
+    <p>Service Type: {{ psychologist.get_service_type_display }}</p>
+    <p>Modality: {{ psychologist.get_modality_display }}</p>
+    <p>Specialisms: {{ psychologist.specialisms|join:", " }}</p>
+    <p>Languages: {{ psychologist.languages|join:", " }}</p>
+    <p>Years Experience: {{ psychologist.years_experience }}</p>
+    <p>Availability: {{ psychologist.get_availability_status_display }}</p>
+    <a href="{% url 'catalogue:psychologist_list' %}">Back to List</a>
+</body>
+</html>

@@ -20,6 +20,12 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
     
+    # Authentication views
+    path('signin/', views.signin, name='signin'),
+    path('signout/', views.signout, name='signout'),
+    path('signup/', views.signup, name='signup'),
+    path('profile/', views.profile, name='profile'),
+    
     # Onboarding views
     path('onboarding/start/', views.onboarding_start, name='onboarding_start'),
     path('onboarding/step/<uuid:step_id>/', views.onboarding_step, name='onboarding_step'),

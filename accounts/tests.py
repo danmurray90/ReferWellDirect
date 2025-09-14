@@ -234,7 +234,7 @@ class UserAPITest(APITestCase):
     def test_user_detail_api(self):
         """Test user detail API."""
         self.client.force_authenticate(user=self.admin_user)
-        response = self.client.get(reverse('accounts_api:user-detail', kwargs={'id': self.user.id}))
+        response = self.client.get(reverse('accounts_api:user-detail', kwargs={'pk': self.user.id}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['email'], 'test@example.com')
     
@@ -256,7 +256,7 @@ class UserAPITest(APITestCase):
         """Test user update API."""
         self.client.force_authenticate(user=self.user)
         data = {'first_name': 'Updated'}
-        response = self.client.patch(reverse('accounts_api:user-detail', kwargs={'id': self.user.id}), data)
+        response = self.client.patch(reverse('accounts_api:user-detail', kwargs={'pk': self.user.id}), data)
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, 'Updated')

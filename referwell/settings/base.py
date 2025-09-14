@@ -167,6 +167,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Authentication settings
+LOGIN_URL = '/accounts/signin/'
+LOGIN_REDIRECT_URL = '/referrals/'
+LOGOUT_REDIRECT_URL = '/accounts/signin/'
+
 # Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

@@ -3,15 +3,18 @@ Views for the accounts app.
 """
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_http_methods
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db import models, transaction
-from .models import User, Organisation, OnboardingStep, UserOnboardingProgress, OnboardingSession
+from .models import User, Organisation, UserOrganisation, OnboardingStep, UserOnboardingProgress, OnboardingSession
 from .serializers import (
     UserSerializer, OrganisationSerializer, OnboardingStepSerializer,
     UserOnboardingProgressSerializer, OnboardingSessionSerializer,
@@ -42,6 +45,92 @@ def dashboard(request):
         'user_type': user.get_user_type_display(),
     }
     return render(request, 'accounts/dashboard.html', context)
+
+
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def signin(request):
+    """
+    User sign in view.
+    """
+    if request.user.is_authenticated:
+        return redirect('accounts:dashboard')
+    
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        if email and password:
+            user = authenticate(request, username=email, password=password)
+            if user is not None:
+                login(request, user)
+                next_url = request.GET.get('next', 'referrals:dashboard')
+                return redirect(next_url)
+            else:
+                messages.error(request, 'Invalid email or password.')
+        else:
+            messages.error(request, 'Please provide both email and password.')
+    
+    return render(request, 'accounts/signin.html')
+
+
+@require_http_methods(["POST"])
+def signout(request):
+    """
+    User sign out view.
+    """
+    logout(request)
+    messages.success(request, 'You have been signed out successfully.')
+    return redirect('accounts:home')
+
+
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def signup(request):
+    """
+    User sign up view.
+    """
+    if request.user.is_authenticated:
+        return redirect('accounts:dashboard')
+    
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        user_type = request.POST.get('user_type')
+        
+        if all([email, password, first_name, last_name, user_type]):
+            try:
+                user = User.objects.create_user(
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    user_type=user_type
+                )
+                login(request, user)
+                messages.success(request, 'Account created successfully!')
+                return redirect('accounts:dashboard')
+            except Exception as e:
+                messages.error(request, f'Error creating account: {str(e)}')
+        else:
+            messages.error(request, 'Please fill in all required fields.')
+    
+    return render(request, 'accounts/signup.html')
+
+
+@login_required
+def profile(request):
+    """
+    User profile view.
+    """
+    user = request.user
+    context = {
+        'title': f'Profile - {user.get_full_name()}',
+        'user': user,
+    }
+    return render(request, 'accounts/profile.html', context)
 
 
 class UserViewSet(viewsets.ModelViewSet):

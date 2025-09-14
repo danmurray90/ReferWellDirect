@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Referrals Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="page-title">Referrals Dashboard</h1>
+            <p class="page-description">Manage your referrals and track their progress.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Referrals</h2>
+                </div>
+                <div class="card-body">
+                    {% if referrals %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Referral ID</th>
+                                        <th>Patient</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for referral in referrals %}
+                                    <tr>
+                                        <td>{{ referral.referral_id }}</td>
+                                        <td>{{ referral.patient.get_full_name }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ referral.status|lower }}">
+                                                {{ referral.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-{{ referral.priority|lower }}">
+                                                {{ referral.get_priority_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ referral.created_at|date:"d M Y" }}</td>
+                                        <td>
+                                            <a href="{% url 'referrals:referral_detail' referral.id %}" class="btn btn-sm btn-primary">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <p>No referrals found.</p>
+                            <a href="{% url 'referrals:create' %}" class="btn btn-primary">
+                                Create New Referral
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'referrals:create' %}" class="btn btn-primary">
+                            Create New Referral
+                        </a>
+                        <a href="{% url 'referrals:list' %}" class="btn btn-outline-primary">
+                            View All Referrals
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h2 class="card-title">Statistics</h2>
+                </div>
+                <div class="card-body">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Referrals:</span>
+                        <span class="stat-value">{{ total_referrals }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Active Referrals:</span>
+                        <span class="stat-value">{{ active_referrals }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Completed:</span>
+                        <span class="stat-value">{{ completed_referrals }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

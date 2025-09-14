@@ -127,6 +127,12 @@ class Psychologist(models.Model):
             self.capacity_available
         )
 
+    @property
+    def appointments_as_psychologist(self):
+        """Get appointments where this psychologist is the provider."""
+        from referrals.models import Appointment
+        return Appointment.objects.filter(psychologist=self.user)
+
     def update_embedding(self, embedding_vector):
         """Update the embedding vector for similarity matching."""
         import json

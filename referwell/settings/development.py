@@ -46,7 +46,6 @@ DATABASES['default'].update({
 # Development static files
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-    BASE_DIR / 'node_modules',  # For any frontend dependencies
 ]
 
 # Development media files

@@ -915,10 +915,6 @@ class MatchingService:
         if referral.required_specialisms:
             query_parts.extend(referral.required_specialisms)
         
-        # Add preferred specialisms
-        if referral.preferred_specialisms:
-            query_parts.extend(referral.preferred_specialisms)
-        
         # Add language requirements
         if referral.language_requirements:
             query_parts.extend(referral.language_requirements)
@@ -988,7 +984,7 @@ class MatchingService:
         total_weight = 0.0
         
         # Specialism matching (weight: 0.4)
-        if referral.required_specialisms or referral.preferred_specialisms:
+        if referral.required_specialisms:
             specialism_score = self._calculate_specialism_score(psychologist, referral)
             score += specialism_score * 0.4
             total_weight += 0.4
@@ -1033,14 +1029,14 @@ class MatchingService:
                 if req_spec in psychologist.specialisms:
                     required_matches += 1
         
-        if referral.preferred_specialisms:
-            for pref_spec in referral.preferred_specialisms:
+        if referral.required_specialisms:
+            for pref_spec in referral.required_specialisms:
                 if pref_spec in psychologist.specialisms:
                     preferred_matches += 1
         
         # Calculate score
         total_required = len(referral.required_specialisms) if referral.required_specialisms else 0
-        total_preferred = len(referral.preferred_specialisms) if referral.preferred_specialisms else 0
+        total_preferred = len(referral.required_specialisms) if referral.required_specialisms else 0
         
         if total_required == 0 and total_preferred == 0:
             return 1.0  # No specialism requirements

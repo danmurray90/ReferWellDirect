@@ -2,12 +2,14 @@
 Views for referrals app.
 """
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -130,6 +132,32 @@ class ReferralDetailView(LoginRequiredMixin, DetailView):
         context['appointments'] = referral.appointments.all().order_by('-scheduled_at')
         context['messages'] = referral.messages.all().order_by('-created_at')
         return context
+
+
+class EditReferralView(LoginRequiredMixin, UpdateView):
+    """
+    Edit referral view.
+    """
+    model = Referral
+    template_name = 'referrals/edit_referral.html'
+    fields = [
+        'presenting_problem', 'clinical_notes', 'urgency_notes',
+        'service_type', 'modality', 'priority', 'patient_preferences',
+        'preferred_latitude', 'preferred_longitude', 'max_distance_km',
+        'preferred_language', 'required_specialisms'
+    ]
+    
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_gp:
+            return Referral.objects.filter(referrer=user)
+        elif user.is_admin:
+            return Referral.objects.all()
+        else:
+            return Referral.objects.none()
+    
+    def get_success_url(self):
+        return reverse('referrals:referral_detail', kwargs={'pk': self.object.pk})
 
 
 class ShortlistView(LoginRequiredMixin, TemplateView):

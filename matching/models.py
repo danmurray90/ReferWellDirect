@@ -3,6 +3,8 @@ Matching models for ReferWell Direct.
 """
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 import uuid
 
 User = get_user_model()
@@ -22,18 +24,28 @@ class MatchingRun(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     referral = models.ForeignKey('referrals.Referral', on_delete=models.CASCADE, related_name='matching_runs')
     
+    # Algorithm information
+    algorithm_name = models.CharField(max_length=100, default='Default Algorithm')
+    algorithm_version = models.CharField(max_length=20, default='1.0')
+    
     # Status and timing
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     started_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    processing_time_seconds = models.FloatField(null=True, blank=True, help_text="Processing time in seconds")
     
     # Results
     candidates_found = models.PositiveIntegerField(default=0)
     candidates_shortlisted = models.PositiveIntegerField(default=0)
     candidates_invited = models.PositiveIntegerField(default=0)
+    total_referrals = models.PositiveIntegerField(default=0, help_text="Total referrals processed")
+    successful_matches = models.PositiveIntegerField(default=0, help_text="Successful matches found")
+    failed_matches = models.PositiveIntegerField(default=0, help_text="Failed matches")
+    average_confidence = models.FloatField(null=True, blank=True, help_text="Average confidence score")
     
     # Configuration
     config = models.JSONField(default=dict, help_text="Matching configuration used")
+    metadata = models.JSONField(default=dict, blank=True, help_text="Additional metadata")
     
     # Error handling
     error_message = models.TextField(blank=True, help_text="Error message if failed")
@@ -54,6 +66,20 @@ class MatchingRun(models.Model):
 
     def __str__(self):
         return f"Matching run for {self.referral.referral_id} - {self.get_status_display()}"
+    
+    @property
+    def duration(self):
+        """Calculate duration in seconds."""
+        if self.started_at and self.completed_at:
+            return (self.completed_at - self.started_at).total_seconds()
+        return None
+    
+    @property
+    def success_rate(self):
+        """Calculate success rate."""
+        if self.total_referrals == 0:
+            return 0.0
+        return self.successful_matches / self.total_referrals
 
 
 class MatchingAlgorithm(models.Model):
@@ -190,3 +216,19 @@ class MatchingThreshold(models.Model):
 
     def __str__(self):
         return f"Thresholds for {self.get_user_type_display()}"
+
+
+@receiver(pre_save, sender=MatchingAlgorithm)
+def ensure_single_default_algorithm(sender, instance, **kwargs):
+    """Ensure only one algorithm is marked as default."""
+    if instance.is_default:
+        # Unset all other algorithms as default
+        MatchingAlgorithm.objects.filter(is_default=True).exclude(pk=instance.pk).update(is_default=False)
+
+
+@receiver(pre_save, sender=CalibrationModel)
+def ensure_single_default_calibration(sender, instance, **kwargs):
+    """Ensure only one calibration model is marked as default."""
+    if instance.is_default:
+        # Unset all other calibration models as default
+        CalibrationModel.objects.filter(is_default=True).exclude(pk=instance.pk).update(is_default=False)

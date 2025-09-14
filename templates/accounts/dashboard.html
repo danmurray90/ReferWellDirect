@@ -46,7 +46,7 @@
                 <p class="card__subtitle">Common tasks and shortcuts</p>
             </div>
             <div class="card__content">
-                {% if not user.onboarding_session.is_completed %}
+                {% if not user.onboarding_session or not user.onboarding_session.is_completed %}
                     <a href="{% url 'accounts:onboarding_start' %}" class="btn btn--primary" style="width: 100%; margin-bottom: var(--space-3);">
                         Complete Onboarding
                     </a>
@@ -138,7 +138,7 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) 0;">
                         <span style="font-weight: var(--font-weight-medium); color: var(--color-gray-600);">Onboarding</span>
-                        {% if user.onboarding_session.is_completed %}
+                        {% if user.onboarding_session and user.onboarding_session.is_completed %}
                             <span class="badge badge--success">Complete</span>
                         {% else %}
                             <div style="display: flex; align-items: center; gap: var(--space-2);">

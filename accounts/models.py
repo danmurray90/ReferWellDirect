@@ -3,8 +3,8 @@ User account models for ReferWell Direct.
 """
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
-# from django.contrib.gis.db import models as gis_models
-# from django.contrib.gis.geos import Point
+from django.contrib.gis.db import models as gis_models
+from django.contrib.gis.geos import Point
 from django.core.validators import RegexValidator
 import uuid
 
@@ -17,6 +17,8 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
+        # Remove username from extra_fields if present to avoid conflict
+        extra_fields.pop('username', None)
         user = self.model(email=email, username=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -150,7 +152,7 @@ class Organisation(models.Model):
     country = models.CharField(max_length=50, default='United Kingdom')
     
     # Geographic location (temporarily disabled - requires PostGIS/GDAL)
-    # location = gis_models.PointField(null=True, blank=True, srid=4326)
+    location = gis_models.PointField(null=True, blank=True, srid=4326)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     

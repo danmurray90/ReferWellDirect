@@ -12,5 +12,6 @@ urlpatterns = [
     path('create/', views.CreateReferralView.as_view(), name='create'),
     path('list/', views.ReferralListView.as_view(), name='list'),
     path('<uuid:pk>/', views.ReferralDetailView.as_view(), name='referral_detail'),
+    path('<uuid:pk>/edit/', views.EditReferralView.as_view(), name='edit'),
     path('<uuid:referral_id>/shortlist/', views.ShortlistView.as_view(), name='shortlist'),
 ]

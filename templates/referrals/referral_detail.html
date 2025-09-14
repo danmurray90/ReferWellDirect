@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Referral {{ referral.referral_id }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1 class="page-title">Referral {{ referral.referral_id }}</h1>
+                <div class="page-actions">
+                    <a href="{% url 'referrals:edit' referral.id %}" class="btn btn-outline-primary">
+                        Edit
+                    </a>
+                    <a href="{% url 'referrals:dashboard' %}" class="btn btn-outline-secondary">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Referral Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">Status:</label>
+                                <span class="badge badge-{{ referral.status|lower }}">
+                                    {{ referral.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <label class="info-label">Priority:</label>
+                                <span class="badge badge-{{ referral.priority|lower }}">
+                                    {{ referral.get_priority_display }}
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <label class="info-label">Service Type:</label>
+                                <span>{{ referral.get_service_type_display }}</span>
+                            </div>
+                            <div class="info-item">
+                                <label class="info-label">Modality:</label>
+                                <span>{{ referral.get_modality_display }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">Patient:</label>
+                                <span>{{ referral.patient.get_full_name }}</span>
+                            </div>
+                            <div class="info-item">
+                                <label class="info-label">Referrer:</label>
+                                <span>{{ referral.referrer.get_full_name }}</span>
+                            </div>
+                            <div class="info-item">
+                                <label class="info-label">Created:</label>
+                                <span>{{ referral.created_at|date:"d M Y H:i" }}</span>
+                            </div>
+                            <div class="info-item">
+                                <label class="info-label">Last Updated:</label>
+                                <span>{{ referral.updated_at|date:"d M Y H:i" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h2 class="card-title">Clinical Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label">Presenting Problem:</label>
+                        <div class="form-control-static">
+                            {{ referral.presenting_problem|linebreaks }}
+                        </div>
+                    </div>
+
+                    {% if referral.clinical_notes %}
+                    <div class="form-group">
+                        <label class="form-label">Clinical Notes:</label>
+                        <div class="form-control-static">
+                            {{ referral.clinical_notes|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if referral.urgency_notes %}
+                    <div class="form-group">
+                        <label class="form-label">Urgency Notes:</label>
+                        <div class="form-control-static">
+                            {{ referral.urgency_notes|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h2 class="card-title">Patient Preferences</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="info-label">Preferred Language:</label>
+                                <span>{{ referral.preferred_language|upper }}</span>
+                            </div>
+                            <div class="info-item">
+                                <label class="info-label">Maximum Distance:</label>
+                                <span>{{ referral.max_distance_km }} km</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            {% if referral.preferred_latitude and referral.preferred_longitude %}
+                            <div class="info-item">
+                                <label class="info-label">Preferred Location:</label>
+                                <span>{{ referral.preferred_latitude }}, {{ referral.preferred_longitude }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if referral.required_specialisms %}
+                    <div class="form-group">
+                        <label class="form-label">Required Specialisms:</label>
+                        <div class="form-control-static">
+                            {% for specialism in referral.required_specialisms %}
+                                <span class="badge badge-secondary">{{ specialism }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Candidates</h2>
+                </div>
+                <div class="card-body">
+                    {% if candidates %}
+                        {% for candidate in candidates %}
+                        <div class="candidate-item">
+                            <div class="candidate-header">
+                                <h4>{{ candidate.psychologist.get_full_name }}</h4>
+                                <span class="badge badge-{{ candidate.status|lower }}">
+                                    {{ candidate.get_status_display }}
+                                </span>
+                            </div>
+                            {% if candidate.final_score %}
+                            <div class="candidate-score">
+                                <span class="score-label">Score:</span>
+                                <span class="score-value">{{ candidate.final_score|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No candidates found yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h2 class="card-title">Timeline</h2>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>Referral Created</h4>
+                                <p>{{ referral.created_at|date:"d M Y H:i" }}</p>
+                            </div>
+                        </div>
+                        {% if referral.submitted_at %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>Referral Submitted</h4>
+                                <p>{{ referral.submitted_at|date:"d M Y H:i" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if referral.completed_at %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h4>Referral Completed</h4>
+                                <p>{{ referral.completed_at|date:"d M Y H:i" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
