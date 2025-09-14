@@ -79,8 +79,14 @@ class Referral(models.Model):
     preferred_language = models.CharField(max_length=10, default='en', help_text="Preferred language code")
     language_requirements = models.JSONField(default=list, blank=True, help_text="List of language requirements")
     
+    # Patient demographics
+    patient_age_group = models.CharField(max_length=20, blank=True, help_text="Patient age group")
+    
     # Specialism requirements
     required_specialisms = models.JSONField(default=list, blank=True, help_text="List of required specialisms")
+    
+    # Routing metadata
+    routing_metadata = models.JSONField(default=dict, blank=True, help_text="Metadata for routing decisions")
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

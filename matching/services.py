@@ -705,7 +705,7 @@ class FeasibilityFilter:
             psychologists = Psychologist.objects.filter(
                 is_active=True,
                 is_accepting_referrals=True
-            ).select_related('user').prefetch_related('specialisms', 'qualifications')
+            ).select_related('user')
         
         self.logger.info(f"Starting feasibility filter for referral {referral.id}")
         initial_count = psychologists.count()
@@ -737,6 +737,8 @@ class FeasibilityFilter:
             return psychologists.filter(service_type__in=['nhs', 'mixed'])
         elif referral.service_type == 'private':
             return psychologists.filter(service_type__in=['private', 'mixed'])
+        elif referral.service_type == 'mixed':
+            return psychologists  # Mixed accepts all
         
         return psychologists
     
@@ -753,6 +755,8 @@ class FeasibilityFilter:
             return psychologists.filter(modality__in=['remote', 'mixed'])
         elif referral.modality == 'in_person':
             return psychologists.filter(modality__in=['in_person', 'mixed'])
+        elif referral.modality == 'mixed':
+            return psychologists  # Mixed accepts all
         
         return psychologists
     
@@ -791,10 +795,9 @@ class FeasibilityFilter:
         )
         
         # Filter using PostGIS ST_DWithin for efficient radius queries
+        # Only filter by radius if the psychologist has a location set
         return psychologists.filter(
-            location__isnull=False
-        ).filter(
-            location__dwithin=(patient_point, max_distance_meters)
+            Q(location__isnull=True) | Q(location__dwithin=(patient_point, max_distance_meters))
         )
     
     def _filter_by_capacity(
@@ -908,7 +911,9 @@ class MatchingService:
         query_parts = []
         
         # Add condition/issue description
-        if referral.condition_description:
+        if referral.presenting_problem:
+            query_parts.append(referral.presenting_problem)
+        elif referral.condition_description:
             query_parts.append(referral.condition_description)
         
         # Add specialism requirements
