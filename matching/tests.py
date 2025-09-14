@@ -5,9 +5,17 @@ import pytest
 from django.test import TestCase
 from django.contrib.gis.geos import Point
 from django.contrib.auth import get_user_model
+from unittest.mock import patch, MagicMock
+import numpy as np
 from catalogue.models import Psychologist
 from referrals.models import Referral
-from matching.services import FeasibilityFilter, MatchingService
+from matching.services import (
+    FeasibilityFilter, 
+    MatchingService, 
+    VectorEmbeddingService, 
+    BM25Service, 
+    HybridRetrievalService
+)
 
 User = get_user_model()
 
@@ -336,3 +344,183 @@ class MatchingServiceTest(TestCase):
         matches = self.matching_service.find_matches(impossible_referral)
         
         assert len(matches) == 0
+
+
+class VectorEmbeddingServiceTest(TestCase):
+    """Test cases for VectorEmbeddingService."""
+    
+    def setUp(self):
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User',
+            role='psychologist'
+        )
+        
+        self.psychologist = Psychologist.objects.create(
+            user=self.user,
+            specialisms=['anxiety', 'depression'],
+            qualifications=['PhD', 'Clinical Psychology'],
+            preferred_conditions=['anxiety disorders']
+        )
+    
+    @patch('matching.services.SentenceTransformer')
+    def test_generate_embedding(self, mock_transformer):
+        """Test embedding generation."""
+        # Mock the transformer
+        mock_model = MagicMock()
+        mock_model.encode.return_value = np.array([0.1, 0.2, 0.3])
+        mock_transformer.return_value = mock_model
+        
+        service = VectorEmbeddingService()
+        embedding = service.generate_embedding("test text")
+        
+        assert embedding.shape == (3,)
+        mock_model.encode.assert_called_once_with("test text", convert_to_numpy=True)
+    
+    @patch('matching.services.SentenceTransformer')
+    def test_update_psychologist_embedding(self, mock_transformer):
+        """Test updating psychologist embedding."""
+        # Mock the transformer
+        mock_model = MagicMock()
+        mock_model.encode.return_value = np.array([0.1, 0.2, 0.3])
+        mock_transformer.return_value = mock_model
+        
+        service = VectorEmbeddingService()
+        success = service.update_psychologist_embedding(self.psychologist)
+        
+        assert success is True
+        self.psychologist.refresh_from_db()
+        assert self.psychologist.embedding is not None
+    
+    def test_calculate_similarity(self):
+        """Test similarity calculation."""
+        service = VectorEmbeddingService()
+        
+        # Mock the model to avoid loading
+        service.model = MagicMock()
+        
+        embedding1 = np.array([1, 0, 0])
+        embedding2 = np.array([0, 1, 0])
+        
+        similarity = service.calculate_similarity(embedding1, embedding2)
+        assert similarity == 0.0  # Orthogonal vectors
+
+
+class BM25ServiceTest(TestCase):
+    """Test cases for BM25Service."""
+    
+    def setUp(self):
+        """Set up test data."""
+        self.user1 = User.objects.create_user(
+            email='test1@example.com',
+            password='testpass123',
+            first_name='Test1',
+            last_name='User1',
+            role='psychologist'
+        )
+        
+        self.user2 = User.objects.create_user(
+            email='test2@example.com',
+            password='testpass123',
+            first_name='Test2',
+            last_name='User2',
+            role='psychologist'
+        )
+        
+        self.psychologist1 = Psychologist.objects.create(
+            user=self.user1,
+            specialisms=['anxiety', 'depression'],
+            qualifications=['PhD']
+        )
+        
+        self.psychologist2 = Psychologist.objects.create(
+            user=self.user2,
+            specialisms=['trauma', 'ptsd'],
+            qualifications=['MSc']
+        )
+    
+    def test_build_index(self):
+        """Test building BM25 index."""
+        service = BM25Service()
+        psychologists = Psychologist.objects.all()
+        
+        success = service.build_index(psychologists)
+        assert success is True
+        assert service.vectorizer is not None
+        assert service.document_vectors is not None
+        assert len(service.document_ids) == 2
+    
+    def test_search(self):
+        """Test BM25 search."""
+        service = BM25Service()
+        psychologists = Psychologist.objects.all()
+        
+        # Build index
+        service.build_index(psychologists)
+        
+        # Search
+        results = service.search("anxiety depression", top_k=2)
+        
+        assert isinstance(results, list)
+        assert len(results) <= 2
+        
+        for psych_id, score in results:
+            assert psych_id in [str(p.id) for p in psychologists]
+            assert score >= 0.0
+
+
+class HybridRetrievalServiceTest(TestCase):
+    """Test cases for HybridRetrievalService."""
+    
+    def setUp(self):
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User',
+            role='psychologist'
+        )
+        
+        self.psychologist = Psychologist.objects.create(
+            user=self.user,
+            specialisms=['anxiety', 'depression'],
+            service_type='nhs',
+            modality='mixed',
+            location=Point(-0.1276, 51.5074, srid=4326),
+            latitude=51.5074,
+            longitude=-0.1276,
+            max_patients=50,
+            current_patients=25,
+            availability_status=Psychologist.AvailabilityStatus.AVAILABLE,
+            is_active=True,
+            is_accepting_referrals=True
+        )
+    
+    @patch('matching.services.VectorEmbeddingService')
+    @patch('matching.services.BM25Service')
+    def test_search_hybrid(self, mock_bm25, mock_vector):
+        """Test hybrid search."""
+        # Mock services
+        mock_vector_instance = MagicMock()
+        mock_vector_instance.generate_embedding.return_value = np.array([0.1, 0.2, 0.3])
+        mock_vector_instance.calculate_similarity.return_value = 0.8
+        mock_vector.return_value = mock_vector_instance
+        
+        mock_bm25_instance = MagicMock()
+        mock_bm25_instance.build_index.return_value = True
+        mock_bm25_instance.search.return_value = [(str(self.psychologist.id), 0.6)]
+        mock_bm25.return_value = mock_bm25_instance
+        
+        service = HybridRetrievalService()
+        psychologists = Psychologist.objects.all()
+        
+        results = service.search("anxiety depression", psychologists, top_k=1)
+        
+        assert len(results) == 1
+        assert results[0]['psychologist'] == self.psychologist
+        assert results[0]['score'] > 0.0
+        assert results[0]['explanation']['hybrid_search'] is True

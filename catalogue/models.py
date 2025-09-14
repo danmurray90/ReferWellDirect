@@ -39,7 +39,7 @@ class Psychologist(models.Model):
     title = models.CharField(max_length=50, blank=True, help_text="Professional title (Dr., Prof., etc.)")
     qualifications = models.JSONField(default=list, blank=True, help_text="List of qualifications")
     specialisms = models.JSONField(default=list, blank=True, help_text="List of specialisms")
-    languages = models.JSONField(default=['en'], help_text="Languages spoken")
+    languages = models.JSONField(default=list, help_text="Languages spoken")
     
     # Service information
     service_type = models.CharField(max_length=10, choices=ServiceType.choices, default=ServiceType.MIXED)

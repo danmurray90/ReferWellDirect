@@ -58,12 +58,14 @@
 
 ## Medium Priority (Next Sprint)
 
-### Matching Engine Foundation
+### Matching Engine Completion
 - [x] Implement feasibility filter
-- [ ] Set up dual retrieval system (vector embeddings with Sentence-Transformers)
-- [ ] Create reranking algorithm
-- [ ] Implement probability calibration
+- [x] Set up dual retrieval system (vector embeddings with Sentence-Transformers)
+- [x] Create reranking algorithm
+- [x] Implement probability calibration
+- [x] Add matching explanation generation
 - [ ] Add threshold routing logic
+- [ ] Add performance optimization and caching
 
 ### User Interface
 - [ ] Implement NHS.UK design patterns
@@ -122,6 +124,35 @@
 - [x] PostGIS and pgvector support enabled
 - [x] Cursor rules directory with comprehensive guidelines
 - [x] Feasibility filter implementation with PostGIS radius filtering
+- [x] Dual retrieval system with vector embeddings and BM25
+- [x] Hybrid retrieval service combining vector and lexical search
+- [x] Reranking algorithm with structured features
+- [x] Probability calibration service (isotonic/Platt scaling)
+- [x] Management command for updating embeddings
+- [x] Comprehensive test suite for matching services
+- [x] Probability calibration service with isotonic regression and Platt scaling
+- [x] Hybrid retrieval service combining vector and lexical search
+- [x] Management command for testing matching system
+- [x] Updated requirements.txt with latest dependencies
+
+## Recently Completed (Latest Sprint)
+
+### Core Matching Engine
+- [x] **VectorEmbeddingService**: Complete implementation with Sentence-Transformers
+- [x] **BM25Service**: TF-IDF based lexical search with configurable parameters
+- [x] **HybridRetrievalService**: Combines vector similarity and BM25 with weighted scoring
+- [x] **ProbabilityCalibrationService**: Isotonic regression and Platt scaling support
+- [x] **Enhanced MatchingService**: Integrated hybrid retrieval with calibration
+- [x] **Management Commands**: `update_embeddings` and `test_matching` commands
+- [x] **Comprehensive Testing**: Full test suite with proper mocking
+- [x] **Documentation Updates**: Updated milestones and task tracking
+
+### Technical Improvements
+- [x] Fixed JSONField default values to use callables
+- [x] Updated requirements.txt with compatible dependency versions
+- [x] Added proper error handling and logging throughout
+- [x] Implemented fallback mechanisms for service failures
+- [x] Added detailed match explanations for auditability
 
 ## Notes
 - All external integrations must be stubbed behind feature flags
