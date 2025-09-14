@@ -10,9 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- NHS.UK Design System CSS (for accessibility compliance) -->
-    <link rel="stylesheet" href="https://assets.nhs.uk/css/nhsuk.css" media="screen">
-    
     <!-- Premium Design System CSS -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/premium-design-system.css' %}">
@@ -35,7 +32,7 @@
                     <a href="{% url 'accounts:dashboard' %}" class="navbar__link {% if 'dashboard' in request.resolver_match.url_name %}navbar__link--active{% endif %}">
                         Dashboard
                     </a>
-                    <a href="{% url 'matching:dashboard' %}" class="navbar__link {% if 'matching' in request.resolver_match.url_name %}navbar__link--active{% endif %}">
+                    <a href="/matching/" class="navbar__link {% if 'matching' in request.resolver_match.url_name %}navbar__link--active{% endif %}">
                         Matching
                     </a>
                     <a href="{% url 'admin:index' %}" class="navbar__link">
@@ -121,9 +118,6 @@
         </div>
     </footer>
 
-    <!-- NHS.UK JavaScript (for accessibility features) -->
-    <script src="https://assets.nhs.uk/js/nhsuk.js"></script>
-    
     <!-- Premium JavaScript -->
     <script>
         // Mobile menu toggle

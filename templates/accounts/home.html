@@ -3,83 +3,84 @@
 {% block title %}{{ title }} - ReferWell Direct{% endblock %}
 
 {% block content %}
-<div class="nhsuk-grid-row">
-    <div class="nhsuk-grid-column-two-thirds">
-        <h1 class="nhsuk-heading-xl">{{ title }}</h1>
-        <p class="nhsuk-body-l">{{ description }}</p>
-        
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h2 class="nhsuk-card__heading">Intelligent Referral Matching</h2>
-                <p class="nhsuk-card__description">
-                    Our AI-powered system matches patients with the most suitable mental health professionals 
-                    based on their needs, location, and preferences.
-                </p>
-            </div>
-        </div>
-        
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h2 class="nhsuk-card__heading">Key Features</h2>
-                <ul class="nhsuk-list nhsuk-list--bullet">
-                    <li>Smart matching algorithm using machine learning</li>
-                    <li>Geographic proximity filtering</li>
-                    <li>Specialism and modality matching</li>
-                    <li>Real-time availability checking</li>
-                    <li>Secure, privacy-focused design</li>
-                    <li>NHS.UK compliant accessibility</li>
-                </ul>
-            </div>
-        </div>
-        
-        {% if not user.is_authenticated %}
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h2 class="nhsuk-card__heading">Get Started</h2>
-                <p class="nhsuk-card__description">
-                    Sign in to access the referral system and start matching patients with the right care.
-                </p>
-                <a href="{% url 'admin:login' %}" class="nhsuk-button nhsuk-button--primary">
-                    Sign in
-                </a>
-            </div>
-        </div>
-        {% else %}
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h2 class="nhsuk-card__heading">Welcome back, {{ user.get_full_name }}</h2>
-                <p class="nhsuk-card__description">
-                    Access your dashboard to manage referrals and view your activity.
-                </p>
-                <a href="{% url 'accounts:dashboard' %}" class="nhsuk-button nhsuk-button--primary">
-                    Go to Dashboard
-                </a>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-    
-    <div class="nhsuk-grid-column-one-third">
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h3 class="nhsuk-card__heading">System Status</h3>
-                <div class="nhsuk-inset-text">
-                    <span class="nhsuk-u-visually-hidden">Information: </span>
-                    <p><strong>All systems operational</strong></p>
-                    <p>Last updated: {{ "now"|date:"d M Y H:i" }}</p>
+<div class="container">
+    <div class="grid grid-cols-3" style="gap: var(--space-8);">
+        <div class="grid-cols-2">
+            <h1>{{ title }}</h1>
+            <p class="text-lg text-gray-600 mb-8">{{ description }}</p>
+            
+            <div class="card mb-6">
+                <div class="card__content">
+                    <h2 class="card__title">Intelligent Referral Matching</h2>
+                    <p class="text-gray-600">
+                        Our AI-powered system matches patients with the most suitable mental health professionals 
+                        based on their needs, location, and preferences.
+                    </p>
                 </div>
             </div>
+            
+            <div class="card mb-6">
+                <div class="card__content">
+                    <h2 class="card__title">Key Features</h2>
+                    <ul style="list-style: disc; padding-left: var(--space-6); color: var(--color-gray-600);">
+                        <li class="mb-2">Smart matching algorithm using machine learning</li>
+                        <li class="mb-2">Geographic proximity filtering</li>
+                        <li class="mb-2">Specialism and modality matching</li>
+                        <li class="mb-2">Real-time availability checking</li>
+                        <li class="mb-2">Secure, privacy-focused design</li>
+                        <li class="mb-2">NHS.UK compliant accessibility</li>
+                    </ul>
+                </div>
+            </div>
+            
+            {% if not user.is_authenticated %}
+            <div class="card">
+                <div class="card__content">
+                    <h2 class="card__title">Get Started</h2>
+                    <p class="text-gray-600 mb-4">
+                        Sign in to access the referral system and start matching patients with the right care.
+                    </p>
+                    <a href="{% url 'admin:login' %}" class="btn btn--primary">
+                        Sign in
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="card">
+                <div class="card__content">
+                    <h2 class="card__title">Welcome back, {{ user.get_full_name }}</h2>
+                    <p class="text-gray-600 mb-4">
+                        Access your dashboard to manage referrals and view your activity.
+                    </p>
+                    <a href="{% url 'accounts:dashboard' %}" class="btn btn--primary">
+                        Go to Dashboard
+                    </a>
+                </div>
+            </div>
+            {% endif %}
         </div>
         
-        <div class="nhsuk-card">
-            <div class="nhsuk-card__content">
-                <h3 class="nhsuk-card__heading">Quick Stats</h3>
-                <ul class="nhsuk-list">
-                    <li><strong>Active Referrals:</strong> 0</li>
-                    <li><strong>Matched Today:</strong> 0</li>
-                    <li><strong>Psychologists:</strong> 0</li>
-                    <li><strong>Success Rate:</strong> 0%</li>
-                </ul>
+        <div>
+            <div class="card mb-6">
+                <div class="card__content">
+                    <h3 class="card__title">System Status</h3>
+                    <div style="background: var(--color-success); color: white; padding: var(--space-4); border-radius: var(--radius-md); margin: var(--space-4) 0;">
+                        <p class="mb-2"><strong>All systems operational</strong></p>
+                        <p class="text-sm">Last updated: {{ "now"|date:"d M Y H:i" }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card__content">
+                    <h3 class="card__title">Quick Stats</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li class="mb-2"><strong>Active Referrals:</strong> 0</li>
+                        <li class="mb-2"><strong>Matched Today:</strong> 0</li>
+                        <li class="mb-2"><strong>Psychologists:</strong> 0</li>
+                        <li class="mb-2"><strong>Success Rate:</strong> 0%</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
