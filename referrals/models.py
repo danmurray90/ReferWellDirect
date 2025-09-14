@@ -77,6 +77,7 @@ class Referral(models.Model):
     
     # Language preferences
     preferred_language = models.CharField(max_length=10, default='en', help_text="Preferred language code")
+    language_requirements = models.JSONField(default=list, blank=True, help_text="List of language requirements")
     
     # Specialism requirements
     required_specialisms = models.JSONField(default=list, blank=True, help_text="List of required specialisms")

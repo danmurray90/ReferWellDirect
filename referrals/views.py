@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Referral, Candidate, Appointment, Message, Task
 from .serializers import ReferralSerializer, CandidateSerializer, AppointmentSerializer, MessageSerializer, TaskSerializer
+from .forms import ReferralForm
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -29,10 +30,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         user = self.request.user
         
         if user.is_gp:
-            context['referrals'] = Referral.objects.filter(referrer=user).order_by('-created_at')[:10]
+            referrals = Referral.objects.filter(referrer=user)
+            context['referrals'] = referrals.order_by('-created_at')[:10]
             context['pending_tasks'] = Task.objects.filter(assigned_to=user, is_completed=False).order_by('-due_at')[:5]
         elif user.is_patient:
-            context['referrals'] = Referral.objects.filter(patient=user).order_by('-created_at')[:10]
+            referrals = Referral.objects.filter(patient=user)
+            context['referrals'] = referrals.order_by('-created_at')[:10]
             context['upcoming_appointments'] = Appointment.objects.filter(
                 patient=user, 
                 status__in=[Appointment.Status.SCHEDULED, Appointment.Status.CONFIRMED]
@@ -43,9 +46,23 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 psychologist=user,
                 status__in=[Appointment.Status.SCHEDULED, Appointment.Status.CONFIRMED]
             ).order_by('scheduled_at')[:5]
+            referrals = Referral.objects.none()  # Psychologists don't see referrals directly
         elif user.is_admin:
-            context['recent_referrals'] = Referral.objects.all().order_by('-created_at')[:10]
+            referrals = Referral.objects.all()
+            context['recent_referrals'] = referrals.order_by('-created_at')[:10]
             context['pending_tasks'] = Task.objects.filter(is_completed=False).order_by('-due_at')[:10]
+        else:
+            referrals = Referral.objects.none()
+        
+        # Add statistics for all user types
+        if 'referrals' in context:
+            context['total_referrals'] = referrals.count()
+            context['active_referrals'] = referrals.exclude(status__in=[Referral.Status.COMPLETED, Referral.Status.CANCELLED, Referral.Status.REJECTED]).count()
+            context['completed_referrals'] = referrals.filter(status=Referral.Status.COMPLETED).count()
+        else:
+            context['total_referrals'] = 0
+            context['active_referrals'] = 0
+            context['completed_referrals'] = 0
         
         return context
 
@@ -58,31 +75,28 @@ class CreateReferralView(LoginRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['referral'] = Referral()
+        context['form'] = ReferralForm(user=self.request.user)
         return context
     
     def post(self, request, *args, **kwargs):
-        # Handle form submission
-        referral_data = {
-            'referrer': request.user,
-            'patient': request.user,  # For MVP, assume referrer is also patient
-            'presenting_problem': request.POST.get('presenting_problem'),
-            'clinical_notes': request.POST.get('clinical_notes', ''),
-            'service_type': request.POST.get('service_type', Referral.ServiceType.NHS),
-            'modality': request.POST.get('modality', Referral.Modality.MIXED),
-            'priority': request.POST.get('priority', Referral.Priority.MEDIUM),
-            'max_distance_km': int(request.POST.get('max_distance_km', 50)),
-            'preferred_language': request.POST.get('preferred_language', 'en'),
-            'created_by': request.user,
-        }
+        form = ReferralForm(request.POST, user=request.user)
         
-        try:
-            referral = Referral.objects.create(**referral_data)
-            messages.success(request, f'Referral {referral.referral_id} created successfully!')
-            return redirect('referrals:referral_detail', pk=referral.pk)
-        except Exception as e:
-            messages.error(request, f'Error creating referral: {str(e)}')
-            return self.get(request, *args, **kwargs)
+        if form.is_valid():
+            try:
+                referral = form.save(commit=False)
+                referral.referrer = request.user
+                referral.created_by = request.user
+                referral.save()
+                messages.success(request, f'Referral {referral.referral_id} created successfully!')
+                return redirect('referrals:referral_detail', pk=referral.pk)
+            except Exception as e:
+                messages.error(request, f'Error creating referral: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+        
+        context = self.get_context_data()
+        context['form'] = form
+        return self.render_to_response(context)
 
 
 class ReferralListView(LoginRequiredMixin, ListView):

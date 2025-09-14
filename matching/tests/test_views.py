@@ -90,7 +90,7 @@ class TestMatchingViews(TestCase):
             {'referral_id': str(self.referral.id)},
             content_type='application/json'
         )
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
     
     def test_find_matches_api_authenticated(self):
         """Test find matches API for authenticated user."""
@@ -138,7 +138,7 @@ class TestMatchingViews(TestCase):
     def test_routing_statistics_api_requires_login(self):
         """Test that routing statistics API requires login."""
         response = self.client.get(reverse('matching:routing_statistics'))
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
     
     def test_routing_statistics_api_authenticated(self):
         """Test routing statistics API for authenticated user."""
@@ -156,7 +156,7 @@ class TestMatchingViews(TestCase):
     def test_high_touch_queue_api_requires_login(self):
         """Test that high-touch queue API requires login."""
         response = self.client.get(reverse('matching:high_touch_queue'))
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
     
     def test_high_touch_queue_api_authenticated(self):
         """Test high-touch queue API for authenticated user."""
@@ -181,7 +181,7 @@ class TestMatchingViews(TestCase):
     def test_clear_cache_api_requires_login(self):
         """Test that clear cache API requires login."""
         response = self.client.post(reverse('matching:clear_cache'))
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
     
     def test_clear_cache_api_authenticated(self):
         """Test clear cache API for authenticated user."""
@@ -202,7 +202,7 @@ class TestMatchingViews(TestCase):
     def test_threshold_config_api_requires_login(self):
         """Test that threshold config API requires login."""
         response = self.client.get(reverse('matching:threshold_config'))
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
     
     def test_threshold_config_api_authenticated(self):
         """Test threshold config API for authenticated user."""
@@ -223,7 +223,7 @@ class TestMatchingViews(TestCase):
             {'user_type': 'gp', 'auto_threshold': 0.8, 'high_touch_threshold': 0.6},
             content_type='application/json'
         )
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
     
     def test_update_threshold_api_authenticated(self):
         """Test update threshold API for authenticated user."""
@@ -263,7 +263,7 @@ class TestMatchingViews(TestCase):
     def test_performance_metrics_api_requires_login(self):
         """Test that performance metrics API requires login."""
         response = self.client.get(reverse('matching:performance_metrics'))
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
     
     def test_performance_metrics_api_authenticated(self):
         """Test performance metrics API for authenticated user."""
