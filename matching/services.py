@@ -19,6 +19,7 @@ import json
 import pickle
 from django.conf import settings
 from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 
 logger = logging.getLogger(__name__)
 
@@ -222,15 +223,17 @@ class VectorEmbeddingService:
     Service for generating and managing vector embeddings using Sentence-Transformers.
     """
     
-    def __init__(self, model_name: str = 'all-MiniLM-L6-v2'):
+    def __init__(self, model_name: str = 'all-MiniLM-L6-v2', cache_timeout: int = 3600):
         """
         Initialize the embedding service.
         
         Args:
             model_name: Name of the Sentence-Transformers model to use
+            cache_timeout: Cache timeout in seconds (default: 1 hour)
         """
         self.model_name = model_name
         self.model = None
+        self.cache_timeout = cache_timeout
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self._load_model()
     
@@ -245,7 +248,7 @@ class VectorEmbeddingService:
     
     def generate_embedding(self, text: str) -> np.ndarray:
         """
-        Generate embedding for a single text.
+        Generate embedding for a single text with caching.
         
         Args:
             text: Text to embed
@@ -256,8 +259,21 @@ class VectorEmbeddingService:
         if not self.model:
             raise RuntimeError("Model not loaded")
         
+        # Check cache first
+        cache_key = f"embedding_{self.model_name}_{hash(text)}"
+        cached_embedding = cache.get(cache_key)
+        
+        if cached_embedding is not None:
+            self.logger.debug(f"Cache hit for embedding: {cache_key}")
+            return cached_embedding
+        
         try:
             embedding = self.model.encode(text, convert_to_numpy=True)
+            
+            # Cache the embedding
+            cache.set(cache_key, embedding, self.cache_timeout)
+            self.logger.debug(f"Cached embedding: {cache_key}")
+            
             return embedding
         except Exception as e:
             self.logger.error(f"Failed to generate embedding: {e}")
@@ -265,7 +281,7 @@ class VectorEmbeddingService:
     
     def generate_embeddings_batch(self, texts: List[str]) -> np.ndarray:
         """
-        Generate embeddings for multiple texts.
+        Generate embeddings for multiple texts with caching.
         
         Args:
             texts: List of texts to embed
@@ -276,12 +292,38 @@ class VectorEmbeddingService:
         if not self.model:
             raise RuntimeError("Model not loaded")
         
-        try:
-            embeddings = self.model.encode(texts, convert_to_numpy=True)
-            return embeddings
-        except Exception as e:
-            self.logger.error(f"Failed to generate batch embeddings: {e}")
-            raise
+        # Check cache for each text
+        embeddings = []
+        texts_to_process = []
+        text_indices = []
+        
+        for i, text in enumerate(texts):
+            cache_key = f"embedding_{self.model_name}_{hash(text)}"
+            cached_embedding = cache.get(cache_key)
+            
+            if cached_embedding is not None:
+                embeddings.append(cached_embedding)
+            else:
+                texts_to_process.append(text)
+                text_indices.append(i)
+                embeddings.append(None)  # Placeholder
+        
+        # Process uncached texts
+        if texts_to_process:
+            try:
+                new_embeddings = self.model.encode(texts_to_process, convert_to_numpy=True)
+                
+                # Cache new embeddings and update results
+                for i, (text, embedding) in enumerate(zip(texts_to_process, new_embeddings)):
+                    cache_key = f"embedding_{self.model_name}_{hash(text)}"
+                    cache.set(cache_key, embedding, self.cache_timeout)
+                    embeddings[text_indices[i]] = embedding
+                    
+            except Exception as e:
+                self.logger.error(f"Failed to generate batch embeddings: {e}")
+                raise
+        
+        return np.array(embeddings)
     
     def calculate_similarity(self, embedding1: np.ndarray, embedding2: np.ndarray) -> float:
         """
@@ -359,10 +401,11 @@ class BM25Service:
     Service for BM25-based lexical search.
     """
     
-    def __init__(self):
+    def __init__(self, cache_timeout: int = 1800):
         self.vectorizer = None
         self.document_vectors = None
         self.document_ids = []
+        self.cache_timeout = cache_timeout
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
     
     def build_index(self, psychologists: QuerySet[Psychologist]) -> bool:
@@ -426,7 +469,7 @@ class BM25Service:
     
     def search(self, query: str, top_k: int = 10) -> List[Tuple[str, float]]:
         """
-        Search using BM25.
+        Search using BM25 with caching.
         
         Args:
             query: Search query
@@ -438,6 +481,14 @@ class BM25Service:
         if not self.vectorizer or self.document_vectors is None:
             self.logger.warning("BM25 index not built")
             return []
+        
+        # Check cache first
+        cache_key = f"bm25_search_{hash(query)}_{top_k}_{len(self.document_ids)}"
+        cached_results = cache.get(cache_key)
+        
+        if cached_results is not None:
+            self.logger.debug(f"Cache hit for BM25 search: {cache_key}")
+            return cached_results
         
         try:
             # Transform query
@@ -455,6 +506,10 @@ class BM25Service:
                     psychologist_id = self.document_ids[idx]
                     score = float(similarities[idx])
                     results.append((psychologist_id, score))
+            
+            # Cache the results
+            cache.set(cache_key, results, self.cache_timeout)
+            self.logger.debug(f"Cached BM25 search results: {cache_key}")
             
             return results
             
@@ -650,7 +705,7 @@ class FeasibilityFilter:
             psychologists = Psychologist.objects.filter(
                 is_active=True,
                 is_accepting_referrals=True
-            )
+            ).select_related('user').prefetch_related('specialisms', 'qualifications')
         
         self.logger.info(f"Starting feasibility filter for referral {referral.id}")
         initial_count = psychologists.count()
@@ -778,7 +833,7 @@ class MatchingService:
         referral: Referral, 
         limit: int = 10,
         use_hybrid: bool = True
-    ) -> List[Dict[str, Any]]:
+    ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         """
         Find matching psychologists for a referral.
         
@@ -826,8 +881,19 @@ class MatchingService:
                 'calibrated': self.calibration_service is not None and self.calibration_service.is_fitted,
             })
         
+        # Step 7: Apply threshold routing
+        routing_decision = self._apply_threshold_routing(matches, referral)
+        
+        # Step 8: Route the referral based on decision
+        from matching.routing_service import ReferralRoutingService
+        routing_service = ReferralRoutingService()
+        routing_success = routing_service.route_referral(referral, routing_decision)
+        
+        if not routing_success:
+            self.logger.warning(f"Failed to route referral {referral.id}, keeping in matching status")
+        
         self.logger.info(f"Found {len(matches)} matches for referral {referral.id}")
-        return matches
+        return matches, routing_decision
     
     def _create_search_query(self, referral: Referral) -> str:
         """
@@ -1171,3 +1237,113 @@ class MatchingService:
         except Exception as e:
             self.logger.error(f"Failed to calculate calibration metrics: {e}")
             return {}
+    
+    def _apply_threshold_routing(
+        self, 
+        matches: List[Dict[str, Any]], 
+        referral: Referral
+    ) -> Dict[str, Any]:
+        """
+        Apply threshold routing to determine if referral should go to High-Touch queue.
+        
+        Args:
+            matches: List of matches with scores
+            referral: The referral being processed
+            
+        Returns:
+            Dictionary with routing decision and details
+        """
+        try:
+            # Get thresholds for the referrer's user type
+            from matching.models import MatchingThreshold
+            
+            # Determine user type based on referrer role
+            user_type = self._get_user_type_for_referrer(referral.referrer)
+            
+            # Get active thresholds for this user type (with caching)
+            cache_key = f"threshold_config_{user_type}"
+            threshold_config = cache.get(cache_key)
+            
+            if threshold_config is None:
+                threshold_config = MatchingThreshold.objects.filter(
+                    user_type=user_type,
+                    is_active=True
+                ).first()
+                if threshold_config:
+                    cache.set(cache_key, threshold_config, 3600)  # Cache for 1 hour
+            
+            if not threshold_config:
+                # Use default thresholds if none configured
+                auto_threshold = 0.7
+                high_touch_threshold = 0.5
+                self.logger.warning(f"No threshold config found for user type {user_type}, using defaults")
+            else:
+                auto_threshold = threshold_config.auto_threshold
+                high_touch_threshold = threshold_config.high_touch_threshold
+            
+            # Get the highest confidence score
+            if not matches:
+                highest_score = 0.0
+            else:
+                highest_score = max(match['score'] for match in matches)
+            
+            # Determine routing decision
+            if highest_score >= auto_threshold:
+                routing_decision = 'auto'
+                reason = f"Highest score {highest_score:.3f} >= auto threshold {auto_threshold:.3f}"
+            elif highest_score >= high_touch_threshold:
+                routing_decision = 'high_touch'
+                reason = f"Highest score {highest_score:.3f} >= high-touch threshold {high_touch_threshold:.3f}"
+            else:
+                routing_decision = 'manual_review'
+                reason = f"Highest score {highest_score:.3f} < high-touch threshold {high_touch_threshold:.3f}"
+            
+            routing_info = {
+                'decision': routing_decision,
+                'reason': reason,
+                'highest_score': highest_score,
+                'auto_threshold': auto_threshold,
+                'high_touch_threshold': high_touch_threshold,
+                'user_type': user_type,
+                'match_count': len(matches)
+            }
+            
+            self.logger.info(f"Threshold routing for referral {referral.id}: {routing_decision} - {reason}")
+            return routing_info
+            
+        except Exception as e:
+            self.logger.error(f"Failed to apply threshold routing: {e}")
+            return {
+                'decision': 'manual_review',
+                'reason': f'Error in threshold routing: {str(e)}',
+                'highest_score': 0.0,
+                'auto_threshold': 0.7,
+                'high_touch_threshold': 0.5,
+                'user_type': 'unknown',
+                'match_count': len(matches)
+            }
+    
+    def _get_user_type_for_referrer(self, referrer) -> str:
+        """
+        Determine user type for threshold routing based on referrer.
+        
+        Args:
+            referrer: The user making the referral
+            
+        Returns:
+            User type string for threshold lookup
+        """
+        # This is a simplified mapping - in a real system you'd check user roles/groups
+        if hasattr(referrer, 'role'):
+            role = referrer.role
+            if role in ['gp', 'doctor', 'referrer']:
+                return 'gp'
+            elif role in ['patient']:
+                return 'patient'
+            elif role in ['psychologist']:
+                return 'psychologist'
+            elif role in ['admin', 'administrator']:
+                return 'admin'
+        
+        # Default to GP for now
+        return 'gp'

@@ -20,6 +20,7 @@ class Referral(models.Model):
         SUBMITTED = 'submitted', 'Submitted'
         MATCHING = 'matching', 'Matching'
         SHORTLISTED = 'shortlisted', 'Shortlisted'
+        HIGH_TOUCH_QUEUE = 'high_touch_queue', 'High-Touch Queue'
         INVITED = 'invited', 'Invited'
         RESPONDED = 'responded', 'Responded'
         APPOINTMENT_BOOKED = 'appointment_booked', 'Appointment Booked'
@@ -126,6 +127,10 @@ class Referral(models.Model):
     @property
     def is_matching(self):
         return self.status == self.Status.MATCHING
+
+    @property
+    def is_high_touch_queue(self):
+        return self.status == self.Status.HIGH_TOUCH_QUEUE
 
     @property
     def is_completed(self):

@@ -1,0 +1,563 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Matching Results - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+    .results-header {
+        background: #f0f4f5;
+        padding: 2rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    .confidence-score {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 1.125rem;
+    }
+    .confidence-score--high {
+        background-color: #00a499;
+        color: white;
+    }
+    .confidence-score--medium {
+        background-color: #f9b000;
+        color: #212b32;
+    }
+    .confidence-score--low {
+        background-color: #d5281b;
+        color: white;
+    }
+    .match-card {
+        border: 1px solid #d8e2e3;
+        border-radius: 4px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        background: white;
+        transition: box-shadow 0.2s ease-in-out;
+    }
+    .match-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .match-card--top {
+        border-left: 4px solid #00a499;
+    }
+    .match-card--good {
+        border-left: 4px solid #f9b000;
+    }
+    .match-card--fair {
+        border-left: 4px solid #d5281b;
+    }
+    .match-score {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #005eb8;
+    }
+    .match-explanation {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+    }
+    .explanation-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 0;
+        border-bottom: 1px solid #e8edee;
+    }
+    .explanation-item:last-child {
+        border-bottom: none;
+    }
+    .explanation-label {
+        font-weight: 500;
+        color: #425563;
+    }
+    .explanation-value {
+        color: #212b32;
+    }
+    .specialism-tag {
+        display: inline-block;
+        background: #005eb8;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        margin: 0.125rem;
+    }
+    .routing-decision {
+        background: #f0f4f5;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    .routing-decision--auto {
+        border-left: 4px solid #00a499;
+    }
+    .routing-decision--high-touch {
+        border-left: 4px solid #d5281b;
+    }
+    .routing-decision--manual {
+        border-left: 4px solid #f9b000;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+    .nhsuk-button--small {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    .no-matches {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #425563;
+    }
+    .no-matches-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .stat-item {
+        background: #f0f4f5;
+        padding: 1rem;
+        border-radius: 4px;
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #005eb8;
+        margin: 0;
+    }
+    .stat-label {
+        font-size: 0.875rem;
+        color: #425563;
+        margin: 0.25rem 0 0 0;
+    }
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+    }
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #005eb8;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+        .stats-summary {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <nav class="nhsuk-breadcrumb" aria-label="Breadcrumb">
+            <div class="nhsuk-width-container">
+                <ol class="nhsuk-breadcrumb__list">
+                    <li class="nhsuk-breadcrumb__item">
+                        <a class="nhsuk-breadcrumb__link" href="{% url 'matching:dashboard' %}">Matching Dashboard</a>
+                    </li>
+                    <li class="nhsuk-breadcrumb__item">Matching Results</li>
+                </ol>
+            </div>
+        </nav>
+        
+        <h1 class="nhsuk-heading-xl" id="page-title">Matching Results</h1>
+        
+        <!-- Status announcements for screen readers -->
+        <div class="nhsuk-u-visually-hidden" aria-live="polite" id="status-announcements"></div>
+    </div>
+</div>
+
+<!-- Referral Information -->
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <div class="results-header" role="region" aria-labelledby="referral-details-heading">
+            <div class="nhsuk-grid-row">
+                <div class="nhsuk-grid-column-two-thirds">
+                    <h2 class="nhsuk-heading-l" id="referral-details-heading">{{ referral.referral_id }}</h2>
+                    <p class="nhsuk-body-l" id="referral-problem">{{ referral.presenting_problem }}</p>
+                    <p class="nhsuk-body-s" id="referral-details">
+                        <strong>Patient:</strong> {{ referral.patient.get_full_name }} |
+                        <strong>Referrer:</strong> {{ referral.referrer.get_full_name }} |
+                        <strong>Priority:</strong> {{ referral.get_priority_display }} |
+                        <strong>Service Type:</strong> {{ referral.get_service_type_display }}
+                    </p>
+                </div>
+                <div class="nhsuk-grid-column-one-third">
+                    <div class="nhsuk-u-text-align-right">
+                        <p class="nhsuk-body-s" id="confidence-label">Confidence Score</p>
+                        <span class="confidence-score confidence-score--{{ confidence_level }}" 
+                              id="confidence-score" 
+                              aria-labelledby="confidence-label"
+                              aria-label="Confidence score: {{ highest_score|floatformat:3 }}">
+                            {{ highest_score|floatformat:3 }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Routing Decision -->
+{% if routing_decision %}
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <div class="routing-decision routing-decision--{{ routing_decision.decision }}" 
+             role="region" aria-labelledby="routing-decision-heading">
+            <h3 class="nhsuk-heading-m" id="routing-decision-heading">Routing Decision</h3>
+            <p class="nhsuk-body-m" id="routing-reason">
+                <strong>{{ routing_decision.decision|title }}:</strong> {{ routing_decision.reason }}
+            </p>
+            <div class="nhsuk-grid-row">
+                <div class="nhsuk-grid-column-one-third">
+                    <p class="nhsuk-body-s" id="highest-score">
+                        <strong>Highest Score:</strong> {{ routing_decision.highest_score|floatformat:3 }}
+                    </p>
+                </div>
+                <div class="nhsuk-grid-column-one-third">
+                    <p class="nhsuk-body-s" id="auto-threshold">
+                        <strong>Auto Threshold:</strong> {{ routing_decision.auto_threshold|floatformat:3 }}
+                    </p>
+                </div>
+                <div class="nhsuk-grid-column-one-third">
+                    <p class="nhsuk-body-s" id="high-touch-threshold">
+                        <strong>High-Touch Threshold:</strong> {{ routing_decision.high_touch_threshold|floatformat:3 }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Results Summary -->
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <div class="stats-summary" role="region" aria-label="Matching results summary">
+            <div class="stat-item" role="group" aria-labelledby="total-matches-label">
+                <p class="stat-number" id="total-matches" aria-label="{{ matches|length }} total matches">{{ matches|length }}</p>
+                <p class="stat-label" id="total-matches-label">Total Matches</p>
+            </div>
+            <div class="stat-item" role="group" aria-labelledby="high-confidence-label">
+                <p class="stat-number" id="high-confidence" aria-label="{{ high_confidence_matches|length }} high confidence matches">{{ high_confidence_matches|length }}</p>
+                <p class="stat-label" id="high-confidence-label">High Confidence</p>
+            </div>
+            <div class="stat-item" role="group" aria-labelledby="processing-time-label">
+                <p class="stat-number" id="processing-time" aria-label="{{ processing_time|floatformat:2 }} seconds processing time">{{ processing_time|floatformat:2 }}s</p>
+                <p class="stat-label" id="processing-time-label">Processing Time</p>
+            </div>
+            <div class="stat-item" role="group" aria-labelledby="algorithm-version-label">
+                <p class="stat-number" id="algorithm-version" aria-label="Algorithm version {{ algorithm_version }}">{{ algorithm_version }}</p>
+                <p class="stat-label" id="algorithm-version-label">Algorithm Version</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loading-spinner">
+    <div class="spinner"></div>
+    <p class="nhsuk-body">Finding matches...</p>
+</div>
+
+<!-- Matching Results -->
+<div class="nhsuk-grid-row" id="results-container">
+    <div class="nhsuk-grid-column-full">
+        {% if matches %}
+            <h2 class="nhsuk-heading-l" id="matching-psychologists-heading">Matching Psychologists</h2>
+            <p class="nhsuk-body" id="matches-summary">Found {{ matches|length }} potential matches, ordered by confidence score.</p>
+            
+            {% for match in matches %}
+            <div class="match-card match-card--{{ match.card_class }}" 
+                 role="article" 
+                 aria-labelledby="psychologist-{{ forloop.counter0 }}-name">
+                <div class="nhsuk-grid-row">
+                    <div class="nhsuk-grid-column-two-thirds">
+                        <h3 class="nhsuk-heading-m" id="psychologist-{{ forloop.counter0 }}-name">
+                            <a href="{% url 'catalogue:psychologist_detail' match.psychologist.id %}" 
+                               class="nhsuk-link"
+                               aria-describedby="psychologist-{{ forloop.counter0 }}-specialisms">
+                                {{ match.psychologist.user.get_full_name }}
+                            </a>
+                        </h3>
+                        <p class="nhsuk-body-s" id="psychologist-{{ forloop.counter0 }}-specialisms">
+                            <strong>Specialisms:</strong>
+                            {% for specialism in match.psychologist.specialisms %}
+                                <span class="specialism-tag" aria-label="Specialism: {{ specialism }}">{{ specialism }}</span>
+                            {% endfor %}
+                        </p>
+                        <p class="nhsuk-body-s" id="psychologist-{{ forloop.counter0 }}-qualifications">
+                            <strong>Qualifications:</strong> {{ match.psychologist.qualifications|join:", " }}
+                        </p>
+                        <p class="nhsuk-body-s" id="psychologist-{{ forloop.counter0 }}-details">
+                            <strong>Service Type:</strong> {{ match.psychologist.get_service_type_display }} |
+                            <strong>Modality:</strong> {{ match.psychologist.get_modality_display }} |
+                            <strong>Experience:</strong> {{ match.psychologist.years_experience }} years
+                        </p>
+                        {% if match.psychologist.preferred_conditions %}
+                        <p class="nhsuk-body-s" id="psychologist-{{ forloop.counter0 }}-conditions">
+                            <strong>Preferred Conditions:</strong> {{ match.psychologist.preferred_conditions|join:", " }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="nhsuk-grid-column-one-third">
+                        <div class="nhsuk-u-text-align-right">
+                            <p class="match-score" id="psychologist-{{ forloop.counter0 }}-score" 
+                               aria-label="Confidence score: {{ match.score|floatformat:3 }}">{{ match.score|floatformat:3 }}</p>
+                            <p class="nhsuk-body-s" id="psychologist-{{ forloop.counter0 }}-score-label">Confidence Score</p>
+                        </div>
+                        <div class="action-buttons" role="group" aria-label="Actions for {{ match.psychologist.user.get_full_name }}">
+                            <a href="{% url 'catalogue:psychologist_detail' match.psychologist.id %}" 
+                               class="nhsuk-button nhsuk-button--small"
+                               aria-describedby="view-profile-help-{{ forloop.counter0 }}">View Profile</a>
+                            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" 
+                                    onclick="showExplanation('{{ forloop.counter0 }}')"
+                                    aria-describedby="show-details-help-{{ forloop.counter0 }}"
+                                    aria-expanded="false"
+                                    aria-controls="explanation-{{ forloop.counter0 }}">Show Details</button>
+                            
+                            <div class="nhsuk-u-visually-hidden" id="view-profile-help-{{ forloop.counter0 }}">
+                                View full profile for {{ match.psychologist.user.get_full_name }}
+                            </div>
+                            <div class="nhsuk-u-visually-hidden" id="show-details-help-{{ forloop.counter0 }}">
+                                Show detailed explanation for why {{ match.psychologist.user.get_full_name }} was matched
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Match Explanation (Hidden by default) -->
+                <div class="match-explanation" id="explanation-{{ forloop.counter0 }}" 
+                     style="display: none;" 
+                     role="region" 
+                     aria-labelledby="explanation-heading-{{ forloop.counter0 }}">
+                    <h4 class="nhsuk-heading-s" id="explanation-heading-{{ forloop.counter0 }}">Why this match?</h4>
+                    <div class="explanation-item">
+                        <span class="explanation-label">Overall Score:</span>
+                        <span class="explanation-value" aria-label="Overall score: {{ match.score|floatformat:3 }}">{{ match.score|floatformat:3 }}</span>
+                    </div>
+                    {% if match.explanation.vector_score %}
+                    <div class="explanation-item">
+                        <span class="explanation-label">Vector Similarity:</span>
+                        <span class="explanation-value" aria-label="Vector similarity score: {{ match.explanation.vector_score|floatformat:3 }}">{{ match.explanation.vector_score|floatformat:3 }}</span>
+                    </div>
+                    {% endif %}
+                    {% if match.explanation.bm25_score %}
+                    <div class="explanation-item">
+                        <span class="explanation-label">BM25 Score:</span>
+                        <span class="explanation-value" aria-label="BM25 score: {{ match.explanation.bm25_score|floatformat:3 }}">{{ match.explanation.bm25_score|floatformat:3 }}</span>
+                    </div>
+                    {% endif %}
+                    {% if match.explanation.structured_score %}
+                    <div class="explanation-item">
+                        <span class="explanation-label">Structured Features:</span>
+                        <span class="explanation-value" aria-label="Structured features score: {{ match.explanation.structured_score|floatformat:3 }}">{{ match.explanation.structured_score|floatformat:3 }}</span>
+                    </div>
+                    {% endif %}
+                    {% if match.explanation.calibrated_score %}
+                    <div class="explanation-item">
+                        <span class="explanation-label">Calibrated Score:</span>
+                        <span class="explanation-value" aria-label="Calibrated score: {{ match.explanation.calibrated_score|floatformat:3 }}">{{ match.explanation.calibrated_score|floatformat:3 }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="explanation-item">
+                        <span class="explanation-label">Feasibility Passed:</span>
+                        <span class="explanation-value" aria-label="Feasibility passed: {% if match.explanation.feasibility_passed %}Yes{% else %}No{% endif %}">
+                            {% if match.explanation.feasibility_passed %}✅ Yes{% else %}❌ No{% endif %}
+                        </span>
+                    </div>
+                    <div class="explanation-item">
+                        <span class="explanation-label">Service Type Match:</span>
+                        <span class="explanation-value" aria-label="Service type match: {% if match.explanation.service_type_match %}Yes{% else %}No{% endif %}">
+                            {% if match.explanation.service_type_match %}✅ Yes{% else %}❌ No{% endif %}
+                        </span>
+                    </div>
+                    <div class="explanation-item">
+                        <span class="explanation-label">Modality Match:</span>
+                        <span class="explanation-value" aria-label="Modality match: {% if match.explanation.modality_match %}Yes{% else %}No{% endif %}">
+                            {% if match.explanation.modality_match %}✅ Yes{% else %}❌ No{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-matches" role="region" aria-labelledby="no-matches-heading">
+                <div class="no-matches-icon" aria-hidden="true">🔍</div>
+                <h2 class="nhsuk-heading-l" id="no-matches-heading">No Matches Found</h2>
+                <p class="nhsuk-body-l" id="no-matches-description">We couldn't find any suitable psychologists for this referral.</p>
+                <p class="nhsuk-body" id="no-matches-reasons">This could be due to:</p>
+                <ul class="nhsuk-list nhsuk-list--bullet" id="no-matches-list">
+                    <li>No psychologists available in the required specialisms</li>
+                    <li>Geographic constraints</li>
+                    <li>Service type preferences</li>
+                    <li>Availability constraints</li>
+                </ul>
+                <div class="action-buttons" role="group" aria-label="Actions when no matches found">
+                    <a href="{% url 'matching:dashboard' %}" class="nhsuk-button"
+                       aria-describedby="back-to-dashboard-help">Back to Dashboard</a>
+                    <a href="{% url 'referrals:edit' referral.id %}" class="nhsuk-button nhsuk-button--secondary"
+                       aria-describedby="edit-referral-help">Edit Referral</a>
+                    
+                    <div class="nhsuk-u-visually-hidden" id="back-to-dashboard-help">
+                        Return to the matching dashboard
+                    </div>
+                    <div class="nhsuk-u-visually-hidden" id="edit-referral-help">
+                        Edit this referral to improve matching chances
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Action Buttons -->
+{% if matches %}
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h3 class="nhsuk-card__heading" id="next-steps-heading">Next Steps</h3>
+                <div class="action-buttons" role="group" aria-labelledby="next-steps-heading">
+                    <a href="{% url 'referrals:shortlist' referral.id %}" class="nhsuk-button"
+                       aria-describedby="create-shortlist-help">Create Shortlist</a>
+                    <a href="{% url 'matching:find_matches' referral.id %}" class="nhsuk-button nhsuk-button--secondary"
+                       aria-describedby="refresh-matches-help">Refresh Matches</a>
+                    <a href="{% url 'referrals:detail' referral.id %}" class="nhsuk-button nhsuk-button--secondary"
+                       aria-describedby="view-referral-help">View Referral</a>
+                    <a href="{% url 'matching:dashboard' %}" class="nhsuk-button nhsuk-button--secondary"
+                       aria-describedby="back-to-dashboard-help">Back to Dashboard</a>
+                    
+                    <div class="nhsuk-u-visually-hidden" id="create-shortlist-help">
+                        Create a shortlist of selected psychologists
+                    </div>
+                    <div class="nhsuk-u-visually-hidden" id="refresh-matches-help">
+                        Refresh the matching results with latest data
+                    </div>
+                    <div class="nhsuk-u-visually-hidden" id="view-referral-help">
+                        View full details of this referral
+                    </div>
+                    <div class="nhsuk-u-visually-hidden" id="back-to-dashboard-help">
+                        Return to the matching dashboard
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide explanation details
+    window.showExplanation = function(index) {
+        const explanation = document.getElementById('explanation-' + index);
+        const button = event.target;
+        
+        if (explanation.style.display === 'none') {
+            explanation.style.display = 'block';
+            button.textContent = 'Hide Details';
+            button.setAttribute('aria-expanded', 'true');
+            button.setAttribute('aria-label', 'Hide detailed explanation');
+            
+            // Announce to screen readers
+            const statusAnnouncements = document.getElementById('status-announcements');
+            if (statusAnnouncements) {
+                statusAnnouncements.textContent = 'Detailed explanation shown';
+            }
+        } else {
+            explanation.style.display = 'none';
+            button.textContent = 'Show Details';
+            button.setAttribute('aria-expanded', 'false');
+            button.setAttribute('aria-label', 'Show detailed explanation');
+            
+            // Announce to screen readers
+            const statusAnnouncements = document.getElementById('status-announcements');
+            if (statusAnnouncements) {
+                statusAnnouncements.textContent = 'Detailed explanation hidden';
+            }
+        }
+    };
+    
+    // Auto-refresh functionality
+    const refreshButton = document.querySelector('a[href*="find_matches"]');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            showLoadingSpinner();
+            window.location.href = this.href;
+        });
+    }
+    
+    function showLoadingSpinner() {
+        const spinner = document.getElementById('loading-spinner');
+        const container = document.getElementById('results-container');
+        
+        if (spinner && container) {
+            spinner.style.display = 'block';
+            container.style.display = 'none';
+            
+            // Announce loading to screen readers
+            const statusAnnouncements = document.getElementById('status-announcements');
+            if (statusAnnouncements) {
+                statusAnnouncements.textContent = 'Refreshing matches, please wait';
+            }
+        }
+    }
+    
+    // Keyboard navigation for explanations
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            // Hide all explanations
+            const explanations = document.querySelectorAll('.match-explanation');
+            explanations.forEach(function(explanation) {
+                explanation.style.display = 'none';
+            });
+            
+            // Reset all buttons
+            const buttons = document.querySelectorAll('button[onclick*="showExplanation"]');
+            buttons.forEach(function(button) {
+                button.textContent = 'Show Details';
+                button.setAttribute('aria-expanded', 'false');
+                button.setAttribute('aria-label', 'Show detailed explanation');
+            });
+            
+            // Announce to screen readers
+            const statusAnnouncements = document.getElementById('status-announcements');
+            if (statusAnnouncements) {
+                statusAnnouncements.textContent = 'All detailed explanations hidden';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Performance Metrics - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .metric-card {
+        background: white;
+        border: 1px solid #d8e2e3;
+        border-radius: 4px;
+        padding: 1.5rem;
+    }
+    .metric-card--cache {
+        border-left: 4px solid #00a499;
+    }
+    .metric-card--matching {
+        border-left: 4px solid #005eb8;
+    }
+    .metric-card--performance {
+        border-left: 4px solid #f9b000;
+    }
+    .metric-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #005eb8;
+        margin: 0;
+    }
+    .metric-label {
+        font-size: 0.875rem;
+        color: #425563;
+        margin: 0.25rem 0 0 0;
+    }
+    .metric-description {
+        font-size: 0.75rem;
+        color: #768692;
+        margin: 0.5rem 0 0 0;
+    }
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background-color: #f0f4f5;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 0.5rem 0;
+    }
+    .progress-fill {
+        height: 100%;
+        background-color: #005eb8;
+        transition: width 0.3s ease;
+    }
+    .progress-fill--good {
+        background-color: #00a499;
+    }
+    .progress-fill--warning {
+        background-color: #f9b000;
+    }
+    .progress-fill--danger {
+        background-color: #d5281b;
+    }
+    .chart-container {
+        background: white;
+        border: 1px solid #d8e2e3;
+        border-radius: 4px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .chart-title {
+        font-size: 1.125rem;
+        font-weight: bold;
+        color: #212b32;
+        margin: 0 0 1rem 0;
+    }
+    .chart-placeholder {
+        height: 200px;
+        background: #f8f9fa;
+        border: 2px dashed #d8e2e3;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #768692;
+        font-style: italic;
+    }
+    .threshold-config {
+        background: #f0f4f5;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    .threshold-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #d8e2e3;
+    }
+    .threshold-item:last-child {
+        border-bottom: none;
+    }
+    .threshold-label {
+        font-weight: 500;
+        color: #425563;
+    }
+    .threshold-value {
+        color: #212b32;
+        font-family: monospace;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+    .nhsuk-button--small {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    .status-indicator--good {
+        background-color: #00a499;
+    }
+    .status-indicator--warning {
+        background-color: #f9b000;
+    }
+    .status-indicator--danger {
+        background-color: #d5281b;
+    }
+    .status-indicator--unknown {
+        background-color: #768692;
+    }
+    .refresh-indicator {
+        display: none;
+        color: #005eb8;
+        font-size: 0.875rem;
+        margin-left: 0.5rem;
+    }
+    .refresh-indicator.active {
+        display: inline;
+    }
+    @media (max-width: 768px) {
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+        .action-buttons {
+            flex-direction: column;
+        }
+        .threshold-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <nav class="nhsuk-breadcrumb" aria-label="Breadcrumb">
+            <div class="nhsuk-width-container">
+                <ol class="nhsuk-breadcrumb__list">
+                    <li class="nhsuk-breadcrumb__item">
+                        <a class="nhsuk-breadcrumb__link" href="{% url 'matching:dashboard' %}">Matching Dashboard</a>
+                    </li>
+                    <li class="nhsuk-breadcrumb__item">Performance Metrics</li>
+                </ol>
+            </div>
+        </nav>
+        
+        <h1 class="nhsuk-heading-xl">Performance Metrics</h1>
+        <p class="nhsuk-body-l">Monitor system performance, cache efficiency, and matching statistics.</p>
+    </div>
+</div>
+
+<!-- Cache Statistics -->
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <h2 class="nhsuk-heading-l">Cache Performance</h2>
+        <div class="metrics-grid">
+            <div class="metric-card metric-card--cache">
+                <p class="metric-value" id="total-cache-keys">{{ cache_stats.total_keys|default:0 }}</p>
+                <p class="metric-label">Total Cache Keys</p>
+                <p class="metric-description">Number of items currently cached</p>
+            </div>
+            <div class="metric-card metric-card--cache">
+                <p class="metric-value" id="embedding-cache-keys">{{ cache_stats.embedding_keys|default:0 }}</p>
+                <p class="metric-label">Embedding Cache</p>
+                <p class="metric-description">Cached vector embeddings</p>
+            </div>
+            <div class="metric-card metric-card--cache">
+                <p class="metric-value" id="bm25-cache-keys">{{ cache_stats.bm25_keys|default:0 }}</p>
+                <p class="metric-label">BM25 Cache</p>
+                <p class="metric-description">Cached search results</p>
+            </div>
+            <div class="metric-card metric-card--cache">
+                <p class="metric-value" id="threshold-cache-keys">{{ cache_stats.threshold_keys|default:0 }}</p>
+                <p class="metric-label">Threshold Cache</p>
+                <p class="metric-description">Cached threshold configurations</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Matching Statistics -->
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <h2 class="nhsuk-heading-l">Matching Performance</h2>
+        <div class="metrics-grid">
+            <div class="metric-card metric-card--matching">
+                <p class="metric-value" id="total-referrals">{{ matching_stats.total_referrals|default:0 }}</p>
+                <p class="metric-label">Total Referrals</p>
+                <p class="metric-description">All referrals processed</p>
+            </div>
+            <div class="metric-card metric-card--matching">
+                <p class="metric-value" id="successful-matches">{{ matching_stats.successful_matches|default:0 }}</p>
+                <p class="metric-label">Successful Matches</p>
+                <p class="metric-description">Referrals with matches found</p>
+            </div>
+            <div class="metric-card metric-card--matching">
+                <p class="metric-value" id="success-rate">{{ matching_stats.success_rate|floatformat:1 }}%</p>
+                <p class="metric-label">Success Rate</p>
+                <p class="metric-description">Percentage of successful matches</p>
+                <div class="progress-bar">
+                    <div class="progress-fill progress-fill--{{ matching_stats.success_rate|floatformat:0|add:0|div:20|floatformat:0|add:0|default:0|lt:3|yesno:'good,warning,danger' }}" 
+                         style="width: {{ matching_stats.success_rate|default:0 }}%"></div>
+                </div>
+            </div>
+            <div class="metric-card metric-card--matching">
+                <p class="metric-value" id="avg-processing-time">{{ matching_stats.avg_processing_time|floatformat:2 }}s</p>
+                <p class="metric-label">Avg Processing Time</p>
+                <p class="metric-description">Average time per matching run</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Health -->
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <h2 class="nhsuk-heading-l">System Health</h2>
+        <div class="metrics-grid">
+            <div class="metric-card metric-card--performance">
+                <p class="metric-value">
+                    <span class="status-indicator status-indicator--{{ system_health.cache_status }}"></span>
+                    {{ system_health.cache_status|title }}
+                </p>
+                <p class="metric-label">Cache Status</p>
+                <p class="metric-description">Redis cache connectivity</p>
+            </div>
+            <div class="metric-card metric-card--performance">
+                <p class="metric-value">
+                    <span class="status-indicator status-indicator--{{ system_health.database_status }}"></span>
+                    {{ system_health.database_status|title }}
+                </p>
+                <p class="metric-label">Database Status</p>
+                <p class="metric-description">PostgreSQL connectivity</p>
+            </div>
+            <div class="metric-card metric-card--performance">
+                <p class="metric-value">
+                    <span class="status-indicator status-indicator--{{ system_health.vector_service_status }}"></span>
+                    {{ system_health.vector_service_status|title }}
+                </p>
+                <p class="metric-label">Vector Service</p>
+                <p class="metric-description">Sentence-Transformers model</p>
+            </div>
+            <div class="metric-card metric-card--performance">
+                <p class="metric-value">{{ system_health.uptime|default:"Unknown" }}</p>
+                <p class="metric-label">System Uptime</p>
+                <p class="metric-description">Time since last restart</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Threshold Configuration -->
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <h2 class="nhsuk-heading-l">Threshold Configuration</h2>
+        <div class="threshold-config">
+            <h3 class="nhsuk-heading-m">Current Thresholds</h3>
+            {% if thresholds %}
+                {% for threshold in thresholds %}
+                <div class="threshold-item">
+                    <span class="threshold-label">{{ threshold.get_user_type_display }}</span>
+                    <div>
+                        <span class="threshold-value">Auto: {{ threshold.auto_threshold|floatformat:3 }}</span>
+                        <span class="threshold-value" style="margin-left: 1rem;">High-Touch: {{ threshold.high_touch_threshold|floatformat:3 }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="nhsuk-body">No threshold configurations found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Performance Charts -->
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <h2 class="nhsuk-heading-l">Performance Trends</h2>
+        <div class="chart-container">
+            <h3 class="chart-title">Matching Success Rate Over Time</h3>
+            <div class="chart-placeholder">
+                Chart visualization would go here
+                <br>
+                <small>(Integration with Chart.js or similar would be implemented)</small>
+            </div>
+        </div>
+        <div class="chart-container">
+            <h3 class="chart-title">Processing Time Distribution</h3>
+            <div class="chart-placeholder">
+                Histogram showing processing time distribution
+                <br>
+                <small>(Integration with Chart.js or similar would be implemented)</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h3 class="nhsuk-card__heading">System Actions</h3>
+                <div class="action-buttons">
+                    <button id="refresh-metrics" class="nhsuk-button">Refresh Metrics</button>
+                    <button id="clear-cache" class="nhsuk-button nhsuk-button--secondary">Clear All Caches</button>
+                    <a href="{% url 'matching:threshold_config' %}" class="nhsuk-button nhsuk-button--secondary">Configure Thresholds</a>
+                    <a href="{% url 'matching:dashboard' %}" class="nhsuk-button nhsuk-button--secondary">Back to Dashboard</a>
+                </div>
+                <span class="refresh-indicator" id="refresh-indicator">Refreshing...</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Refresh metrics functionality
+    const refreshButton = document.getElementById('refresh-metrics');
+    const refreshIndicator = document.getElementById('refresh-indicator');
+    
+    if (refreshButton) {
+        refreshButton.addEventListener('click', function() {
+            refreshIndicator.classList.add('active');
+            refreshButton.disabled = true;
+            refreshButton.textContent = 'Refreshing...';
+            
+            // Simulate refresh (in real implementation, this would make an AJAX call)
+            setTimeout(function() {
+                location.reload();
+            }, 1000);
+        });
+    }
+    
+    // Clear cache functionality
+    const clearCacheButton = document.getElementById('clear-cache');
+    
+    if (clearCacheButton) {
+        clearCacheButton.addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all caches? This may temporarily slow down the system.')) {
+                // Make AJAX call to clear cache
+                fetch('{% url "matching:clear_cache" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Cache cleared successfully');
+                        location.reload();
+                    } else {
+                        alert('Failed to clear cache: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error clearing cache: ' + error.message);
+                });
+            }
+        });
+    }
+    
+    // Auto-refresh every 30 seconds
+    setInterval(function() {
+        if (document.visibilityState === 'visible') {
+            // Only refresh if user is actively viewing the page
+            refreshButton.click();
+        }
+    }, 30000);
+    
+    // Add CSRF token for AJAX requests
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        const form = document.createElement('form');
+        form.innerHTML = '{% csrf_token %}';
+        document.body.appendChild(form);
+    }
+});
+</script>
+{% endblock %}
