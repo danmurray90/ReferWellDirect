@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ReferWell Direct{% endblock %}
+
+{% block content %}
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-full">
+        <h1 class="nhsuk-heading-xl">{{ title }}</h1>
+        <p class="nhsuk-body-l">Welcome back, {{ user.get_full_name }}. You are logged in as a {{ user_type }}.</p>
+    </div>
+</div>
+
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-one-half">
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h2 class="nhsuk-card__heading">Recent Activity</h2>
+                <p class="nhsuk-card__description">Your latest referrals and matches</p>
+                <div class="nhsuk-inset-text">
+                    <span class="nhsuk-u-visually-hidden">Information: </span>
+                    <p>No recent activity to display.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="nhsuk-grid-column-one-half">
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h2 class="nhsuk-card__heading">Quick Actions</h2>
+                <div class="nhsuk-button-group">
+                    <a href="#" class="nhsuk-button nhsuk-button--primary">
+                        Create Referral
+                    </a>
+                    <a href="#" class="nhsuk-button nhsuk-button--secondary">
+                        View Matches
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-one-third">
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h3 class="nhsuk-card__heading">My Profile</h3>
+                <dl class="nhsuk-summary-list">
+                    <div class="nhsuk-summary-list__row">
+                        <dt class="nhsuk-summary-list__key">Name</dt>
+                        <dd class="nhsuk-summary-list__value">{{ user.get_full_name }}</dd>
+                    </div>
+                    <div class="nhsuk-summary-list__row">
+                        <dt class="nhsuk-summary-list__key">Email</dt>
+                        <dd class="nhsuk-summary-list__value">{{ user.email }}</dd>
+                    </div>
+                    <div class="nhsuk-summary-list__row">
+                        <dt class="nhsuk-summary-list__key">Role</dt>
+                        <dd class="nhsuk-summary-list__value">{{ user_type }}</dd>
+                    </div>
+                    <div class="nhsuk-summary-list__row">
+                        <dt class="nhsuk-summary-list__key">Status</dt>
+                        <dd class="nhsuk-summary-list__value">
+                            {% if user.is_active %}
+                                <span class="nhsuk-tag nhsuk-tag--green">Active</span>
+                            {% else %}
+                                <span class="nhsuk-tag nhsuk-tag--red">Inactive</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <div class="nhsuk-grid-column-one-third">
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h3 class="nhsuk-card__heading">Statistics</h3>
+                <ul class="nhsuk-list">
+                    <li><strong>Total Referrals:</strong> 0</li>
+                    <li><strong>Successful Matches:</strong> 0</li>
+                    <li><strong>Pending Reviews:</strong> 0</li>
+                    <li><strong>This Month:</strong> 0</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="nhsuk-grid-column-one-third">
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h3 class="nhsuk-card__heading">System Information</h3>
+                <ul class="nhsuk-list">
+                    <li><strong>Version:</strong> 1.0.0</li>
+                    <li><strong>Last Login:</strong> {{ user.last_login|date:"d M Y H:i"|default:"Never" }}</li>
+                    <li><strong>Account Created:</strong> {{ user.date_joined|date:"d M Y" }}</li>
+                    <li><strong>Timezone:</strong> {{ user.timezone }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

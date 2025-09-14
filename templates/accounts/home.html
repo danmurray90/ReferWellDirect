@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ReferWell Direct{% endblock %}
+
+{% block content %}
+<div class="nhsuk-grid-row">
+    <div class="nhsuk-grid-column-two-thirds">
+        <h1 class="nhsuk-heading-xl">{{ title }}</h1>
+        <p class="nhsuk-body-l">{{ description }}</p>
+        
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h2 class="nhsuk-card__heading">Intelligent Referral Matching</h2>
+                <p class="nhsuk-card__description">
+                    Our AI-powered system matches patients with the most suitable mental health professionals 
+                    based on their needs, location, and preferences.
+                </p>
+            </div>
+        </div>
+        
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h2 class="nhsuk-card__heading">Key Features</h2>
+                <ul class="nhsuk-list nhsuk-list--bullet">
+                    <li>Smart matching algorithm using machine learning</li>
+                    <li>Geographic proximity filtering</li>
+                    <li>Specialism and modality matching</li>
+                    <li>Real-time availability checking</li>
+                    <li>Secure, privacy-focused design</li>
+                    <li>NHS.UK compliant accessibility</li>
+                </ul>
+            </div>
+        </div>
+        
+        {% if not user.is_authenticated %}
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h2 class="nhsuk-card__heading">Get Started</h2>
+                <p class="nhsuk-card__description">
+                    Sign in to access the referral system and start matching patients with the right care.
+                </p>
+                <a href="{% url 'admin:login' %}" class="nhsuk-button nhsuk-button--primary">
+                    Sign in
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h2 class="nhsuk-card__heading">Welcome back, {{ user.get_full_name }}</h2>
+                <p class="nhsuk-card__description">
+                    Access your dashboard to manage referrals and view your activity.
+                </p>
+                <a href="{% url 'accounts:dashboard' %}" class="nhsuk-button nhsuk-button--primary">
+                    Go to Dashboard
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="nhsuk-grid-column-one-third">
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h3 class="nhsuk-card__heading">System Status</h3>
+                <div class="nhsuk-inset-text">
+                    <span class="nhsuk-u-visually-hidden">Information: </span>
+                    <p><strong>All systems operational</strong></p>
+                    <p>Last updated: {{ "now"|date:"d M Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nhsuk-card">
+            <div class="nhsuk-card__content">
+                <h3 class="nhsuk-card__heading">Quick Stats</h3>
+                <ul class="nhsuk-list">
+                    <li><strong>Active Referrals:</strong> 0</li>
+                    <li><strong>Matched Today:</strong> 0</li>
+                    <li><strong>Psychologists:</strong> 0</li>
+                    <li><strong>Success Rate:</strong> 0%</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

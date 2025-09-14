@@ -149,7 +149,7 @@ class Organisation(models.Model):
     postcode = models.CharField(max_length=10)
     country = models.CharField(max_length=50, default='United Kingdom')
     
-    # Geographic location (temporarily disabled - requires PostGIS)
+    # Geographic location (temporarily disabled - requires PostGIS/GDAL)
     # location = gis_models.PointField(null=True, blank=True, srid=4326)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)

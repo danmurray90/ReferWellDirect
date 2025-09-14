@@ -23,8 +23,8 @@ urlpatterns = [
     path('payments/', include('payments.urls')),
     path('ops/', include('ops.urls')),
     
-    # Root redirect to referrals (for now)
-    path('', RedirectView.as_view(url='/referrals/', permanent=False)),
+    # Root redirect to accounts home
+    path('', RedirectView.as_view(url='/accounts/', permanent=False)),
 ]
 
 # Serve media files in development

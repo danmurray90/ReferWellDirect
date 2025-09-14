@@ -64,7 +64,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'django.contrib.gis',  # Temporarily disabled - requires GDAL
+    # 'django.contrib.gis',  # PostGIS support - requires GDAL installation
 ]
 
 THIRD_PARTY_APPS = [
@@ -128,9 +128,6 @@ DATABASES = {
         'PASSWORD': env('DB_PASSWORD'),
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT'),
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
     }
 }
 
