@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Notifications - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/premium-design-system.css' %}">
+<style>
+    .notification-item {
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        background: #ffffff;
+        transition: all 0.2s ease;
+    }
+    
+    .notification-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .notification-item.unread {
+        border-left: 4px solid #005eb8;
+        background: #f8f9ff;
+    }
+    
+    .notification-item.important {
+        border-left: 4px solid #d4351c;
+        background: #fef7f7;
+    }
+    
+    .notification-item.high-priority {
+        border-left: 4px solid #ff8c00;
+        background: #fff8f0;
+    }
+    
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+    
+    .notification-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0b0c0c;
+        margin: 0;
+    }
+    
+    .notification-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 14px;
+        color: #626a6e;
+    }
+    
+    .notification-type {
+        background: #005eb8;
+        color: #ffffff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .notification-priority {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .priority-high {
+        background: #ff8c00;
+        color: #ffffff;
+    }
+    
+    .priority-urgent {
+        background: #d4351c;
+        color: #ffffff;
+    }
+    
+    .priority-medium {
+        background: #626a6e;
+        color: #ffffff;
+    }
+    
+    .priority-low {
+        background: #e8e8e8;
+        color: #0b0c0c;
+    }
+    
+    .notification-message {
+        font-size: 16px;
+        color: #0b0c0c;
+        line-height: 1.5;
+        margin: 10px 0;
+    }
+    
+    .notification-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    .filters {
+        background: #f8f8f8;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .filter-group {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .filter-group label {
+        font-weight: 600;
+        color: #0b0c0c;
+    }
+    
+    .filter-group select {
+        padding: 8px 12px;
+        border: 1px solid #d0d0d0;
+        border-radius: 4px;
+        background: #ffffff;
+    }
+    
+    .bulk-actions {
+        background: #e8f4fd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+    }
+    
+    .bulk-actions.show {
+        display: block;
+    }
+    
+    .notification-stats {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: #ffffff;
+        border: 1px solid #d0d0d0;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        flex: 1;
+    }
+    
+    .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #005eb8;
+        margin: 0;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        color: #626a6e;
+        margin: 5px 0 0 0;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #626a6e;
+    }
+    
+    .empty-state h3 {
+        font-size: 24px;
+        margin: 0 0 10px 0;
+    }
+    
+    .empty-state p {
+        font-size: 16px;
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Notifications</h1>
+        <p>Manage your notifications and stay updated on important activities</p>
+    </div>
+    
+    <!-- Notification Stats -->
+    <div class="notification-stats">
+        <div class="stat-card">
+            <p class="stat-number">{{ stats.total|default:0 }}</p>
+            <p class="stat-label">Total Notifications</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-number">{{ stats.unread|default:0 }}</p>
+            <p class="stat-label">Unread</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-number">{{ stats.important|default:0 }}</p>
+            <p class="stat-label">Important</p>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filters">
+        <form method="get" id="filter-form">
+            <div class="filter-group">
+                <label for="notification_type">Type:</label>
+                <select name="notification_type" id="notification_type">
+                    <option value="">All Types</option>
+                    <option value="referral_update" {% if request.GET.notification_type == 'referral_update' %}selected{% endif %}>Referral Update</option>
+                    <option value="matching_complete" {% if request.GET.notification_type == 'matching_complete' %}selected{% endif %}>Matching Complete</option>
+                    <option value="invitation" {% if request.GET.notification_type == 'invitation' %}selected{% endif %}>Invitation</option>
+                    <option value="response" {% if request.GET.notification_type == 'response' %}selected{% endif %}>Response</option>
+                    <option value="appointment" {% if request.GET.notification_type == 'appointment' %}selected{% endif %}>Appointment</option>
+                    <option value="system" {% if request.GET.notification_type == 'system' %}selected{% endif %}>System</option>
+                    <option value="reminder" {% if request.GET.notification_type == 'reminder' %}selected{% endif %}>Reminder</option>
+                </select>
+                
+                <label for="is_read">Status:</label>
+                <select name="is_read" id="is_read">
+                    <option value="">All</option>
+                    <option value="false" {% if request.GET.is_read == 'false' %}selected{% endif %}>Unread</option>
+                    <option value="true" {% if request.GET.is_read == 'true' %}selected{% endif %}>Read</option>
+                </select>
+                
+                <label for="priority">Priority:</label>
+                <select name="priority" id="priority">
+                    <option value="">All Priorities</option>
+                    <option value="urgent" {% if request.GET.priority == 'urgent' %}selected{% endif %}>Urgent</option>
+                    <option value="high" {% if request.GET.priority == 'high' %}selected{% endif %}>High</option>
+                    <option value="medium" {% if request.GET.priority == 'medium' %}selected{% endif %}>Medium</option>
+                    <option value="low" {% if request.GET.priority == 'low' %}selected{% endif %}>Low</option>
+                </select>
+                
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'inbox:notification_list' %}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" id="bulk-actions">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span id="selected-count">0 notifications selected</span>
+            <button type="button" class="btn btn-sm btn-primary" onclick="markSelectedRead()">Mark as Read</button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="markSelectedUnread()">Mark as Unread</button>
+            <button type="button" class="btn btn-sm btn-danger" onclick="deleteSelected()">Delete</button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="clearSelection()">Clear Selection</button>
+        </div>
+    </div>
+    
+    <!-- Notifications List -->
+    {% if notifications %}
+        {% for notification in notifications %}
+        <div class="notification-item {% if not notification.is_read %}unread{% endif %} {% if notification.is_important %}important{% endif %} {% if notification.priority == 'high' or notification.priority == 'urgent' %}high-priority{% endif %}">
+            <div class="notification-header">
+                <h3 class="notification-title">{{ notification.title }}</h3>
+                <div class="notification-meta">
+                    <span class="notification-type">{{ notification.get_notification_type_display }}</span>
+                    <span class="notification-priority priority-{{ notification.priority }}">{{ notification.get_priority_display }}</span>
+                    <span>{{ notification.created_at|date:"d M Y H:i" }}</span>
+                    <input type="checkbox" class="notification-checkbox" value="{{ notification.id }}" onchange="updateSelection()">
+                </div>
+            </div>
+            
+            <div class="notification-message">
+                {{ notification.message|linebreaks }}
+            </div>
+            
+            <div class="notification-actions">
+                {% if not notification.is_read %}
+                <a href="{% url 'inbox:notification_mark_read' notification.id %}" class="btn btn-sm btn-primary">Mark as Read</a>
+                {% endif %}
+                
+                {% if notification.referral %}
+                <a href="{% url 'referrals:referral_detail' notification.referral.id %}" class="btn btn-sm btn-secondary">View Referral</a>
+                {% endif %}
+                
+                {% if notification.appointment %}
+                <a href="{% url 'referrals:appointment_detail' notification.appointment.id %}" class="btn btn-sm btn-secondary">View Appointment</a>
+                {% endif %}
+                
+                <a href="{% url 'inbox:notification_detail' notification.id %}" class="btn btn-sm btn-outline">View Details</a>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn btn-secondary">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-secondary">Previous</a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-secondary">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-secondary">Last</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state">
+            <h3>No notifications found</h3>
+            <p>You don't have any notifications matching your current filters.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function updateSelection() {
+    const checkboxes = document.querySelectorAll('.notification-checkbox:checked');
+    const bulkActions = document.getElementById('bulk-actions');
+    const selectedCount = document.getElementById('selected-count');
+    
+    selectedCount.textContent = `${checkboxes.length} notification${checkboxes.length !== 1 ? 's' : ''} selected`;
+    
+    if (checkboxes.length > 0) {
+        bulkActions.classList.add('show');
+    } else {
+        bulkActions.classList.remove('show');
+    }
+}
+
+function clearSelection() {
+    const checkboxes = document.querySelectorAll('.notification-checkbox');
+    checkboxes.forEach(checkbox => checkbox.checked = false);
+    updateSelection();
+}
+
+function markSelectedRead() {
+    const selectedIds = Array.from(document.querySelectorAll('.notification-checkbox:checked'))
+        .map(checkbox => checkbox.value);
+    
+    if (selectedIds.length === 0) return;
+    
+    // TODO: Implement bulk mark as read API call
+    console.log('Mark as read:', selectedIds);
+}
+
+function markSelectedUnread() {
+    const selectedIds = Array.from(document.querySelectorAll('.notification-checkbox:checked'))
+        .map(checkbox => checkbox.value);
+    
+    if (selectedIds.length === 0) return;
+    
+    // TODO: Implement bulk mark as unread API call
+    console.log('Mark as unread:', selectedIds);
+}
+
+function deleteSelected() {
+    const selectedIds = Array.from(document.querySelectorAll('.notification-checkbox:checked'))
+        .map(checkbox => checkbox.value);
+    
+    if (selectedIds.length === 0) return;
+    
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} notification(s)?`)) {
+        // TODO: Implement bulk delete API call
+        console.log('Delete:', selectedIds);
+    }
+}
+</script>
+{% endblock %}

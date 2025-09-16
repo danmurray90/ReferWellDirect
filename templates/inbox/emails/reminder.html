@@ -1,0 +1,51 @@
+{% extends "inbox/emails/base_email.html" %}
+
+{% block title %}Reminder - ReferWell Direct{% endblock %}
+
+{% block header_title %}Reminder{% endblock %}
+
+{% block content %}
+<div class="notification-card priority-{{ notification.priority }}">
+    <h2 class="notification-title">{{ notification.title }}</h2>
+    <div class="notification-message">
+        {{ notification.message|linebreaks }}
+    </div>
+    <p class="notification-meta">
+        {% if notification.referral %}
+        Referral ID: {{ notification.referral.referral_id }}<br>
+        Patient: {{ notification.referral.patient.get_full_name }}<br>
+        {% endif %}
+        {% if notification.appointment %}
+        Appointment Date: {{ notification.appointment.appointment_date|date:"d M Y H:i" }}<br>
+        {% endif %}
+        Date: {{ notification.created_at|date:"d M Y H:i" }}
+    </p>
+</div>
+
+<div style="margin: 30px 0;">
+    {% if notification.referral %}
+    <a href="{{ site_url }}/referrals/{{ notification.referral.id }}/" class="cta-button">
+        View Referral
+    </a>
+    {% endif %}
+    {% if notification.appointment %}
+    <a href="{{ site_url }}/appointments/{{ notification.appointment.id }}/" class="cta-button">
+        View Appointment
+    </a>
+    {% endif %}
+    <a href="{{ site_url }}/dashboard" class="cta-button cta-button-secondary">
+        Go to Dashboard
+    </a>
+</div>
+
+<p>
+    This is a friendly reminder about an upcoming task or deadline. 
+    Please take the necessary action to avoid any delays.
+</p>
+
+{% if notification.is_important %}
+<div style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+    <strong>Reminder:</strong> This item is approaching its deadline. Please take action soon.
+</div>
+{% endif %}
+{% endblock %}

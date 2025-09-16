@@ -1,0 +1,38 @@
+{% extends "inbox/emails/base_email.html" %}
+
+{% block title %}System Notification - ReferWell Direct{% endblock %}
+
+{% block header_title %}System Notification{% endblock %}
+
+{% block content %}
+<div class="notification-card priority-{{ notification.priority }}">
+    <h2 class="notification-title">{{ notification.title }}</h2>
+    <div class="notification-message">
+        {{ notification.message|linebreaks }}
+    </div>
+    <p class="notification-meta">
+        Date: {{ notification.created_at|date:"d M Y H:i" }}
+    </p>
+</div>
+
+<div style="margin: 30px 0;">
+    <a href="{{ site_url }}/dashboard" class="cta-button">
+        Go to Dashboard
+    </a>
+    <a href="{{ site_url }}/help" class="cta-button cta-button-secondary">
+        Get Help
+    </a>
+</div>
+
+<p>
+    This is an important system notification. Please review the information carefully 
+    and take any necessary action.
+</p>
+
+{% if notification.is_important %}
+<div style="background-color: #fef7f7; border: 1px solid #d4351c; padding: 15px; margin: 20px 0; border-radius: 4px;">
+    <strong>System Alert:</strong> This notification requires your immediate attention. 
+    Please review and take appropriate action.
+</div>
+{% endif %}
+{% endblock %}

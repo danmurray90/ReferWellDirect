@@ -1,0 +1,44 @@
+{% extends "inbox/emails/base_email.html" %}
+
+{% block title %}Appointment Notification - ReferWell Direct{% endblock %}
+
+{% block header_title %}Appointment Notification{% endblock %}
+
+{% block content %}
+<div class="notification-card priority-{{ notification.priority }}">
+    <h2 class="notification-title">{{ notification.title }}</h2>
+    <div class="notification-message">
+        {{ notification.message|linebreaks }}
+    </div>
+    <p class="notification-meta">
+        {% if notification.appointment %}
+        Appointment Date: {{ notification.appointment.appointment_date|date:"d M Y H:i" }}<br>
+        Duration: {{ notification.appointment.duration }} minutes<br>
+        Type: {{ notification.appointment.get_appointment_type_display }}<br>
+        {% endif %}
+        Date: {{ notification.created_at|date:"d M Y H:i" }}
+    </p>
+</div>
+
+{% if notification.appointment %}
+<div style="margin: 30px 0;">
+    <a href="{{ site_url }}/appointments/{{ notification.appointment.id }}/" class="cta-button">
+        View Appointment Details
+    </a>
+    <a href="{{ site_url }}/appointments/" class="cta-button cta-button-secondary">
+        View All Appointments
+    </a>
+</div>
+{% endif %}
+
+<p>
+    This appointment notification has been sent to keep you informed about your upcoming schedule. 
+    Please ensure you are available at the specified time.
+</p>
+
+{% if notification.is_important %}
+<div style="background-color: #fef7f7; border: 1px solid #d4351c; padding: 15px; margin: 20px 0; border-radius: 4px;">
+    <strong>Important:</strong> This appointment requires your immediate attention. Please review the details carefully.
+</div>
+{% endif %}
+{% endblock %}

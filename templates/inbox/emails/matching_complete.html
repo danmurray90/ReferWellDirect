@@ -1,0 +1,42 @@
+{% extends "inbox/emails/base_email.html" %}
+
+{% block title %}Matching Complete - ReferWell Direct{% endblock %}
+
+{% block header_title %}Matching Complete{% endblock %}
+
+{% block content %}
+<div class="notification-card priority-{{ notification.priority }}">
+    <h2 class="notification-title">{{ notification.title }}</h2>
+    <div class="notification-message">
+        {{ notification.message|linebreaks }}
+    </div>
+    <p class="notification-meta">
+        Referral ID: {{ notification.referral.referral_id }}<br>
+        Patient: {{ notification.referral.patient.get_full_name }}<br>
+        Matches Found: {{ notification.referral.candidates.count }}<br>
+        Date: {{ notification.created_at|date:"d M Y H:i" }}
+    </p>
+</div>
+
+{% if notification.referral %}
+<div style="margin: 30px 0;">
+    <a href="{{ site_url }}/referrals/{{ notification.referral.id }}/matches/" class="cta-button">
+        View Matching Results
+    </a>
+    <a href="{{ site_url }}/referrals/{{ notification.referral.id }}/" class="cta-button cta-button-secondary">
+        View Referral Details
+    </a>
+</div>
+{% endif %}
+
+<p>
+    Our matching system has found potential psychologists for this referral. 
+    Please review the results and take appropriate action.
+</p>
+
+{% if notification.is_important %}
+<div style="background-color: #fef7f7; border: 1px solid #d4351c; padding: 15px; margin: 20px 0; border-radius: 4px;">
+    <strong>Important:</strong> This referral requires urgent attention. Please review and respond as soon as possible.
+</div>
+{% endif %}
+{% endblock %}
