@@ -5,18 +5,24 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView, ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone
+from django.db.models import Q
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 from .models import Referral, Candidate, Appointment, Message, Task
 from .serializers import ReferralSerializer, CandidateSerializer, AppointmentSerializer, MessageSerializer, TaskSerializer
 from .forms import ReferralForm
+from .search_service import AdvancedSearchService, BulkOperationsService
+from .bulk_operations_service import AppointmentBulkOperationsService, TaskBulkOperationsService
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -99,25 +105,102 @@ class CreateReferralView(LoginRequiredMixin, TemplateView):
         return self.render_to_response(context)
 
 
-class ReferralListView(LoginRequiredMixin, ListView):
+class ReferralListView(LoginRequiredMixin, TemplateView):
     """
-    List view for referrals.
+    Enhanced list view for referrals with advanced search and filtering.
     """
-    model = Referral
     template_name = 'referrals/referral_list.html'
-    context_object_name = 'referrals'
-    paginate_by = 20
     
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_gp:
-            return Referral.objects.filter(referrer=user).order_by('-created_at')
-        elif user.is_patient:
-            return Referral.objects.filter(patient=user).order_by('-created_at')
-        elif user.is_admin:
-            return Referral.objects.all().order_by('-created_at')
-        else:
-            return Referral.objects.none()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get search parameters
+        search_params = self._get_search_params()
+        
+        # Perform search
+        search_service = AdvancedSearchService()
+        referrals, metadata = search_service.search_referrals(
+            user=self.request.user,
+            search_params=search_params,
+            page=search_params.get('page', 1),
+            page_size=search_params.get('page_size', 20)
+        )
+        
+        # Get search facets
+        facets = search_service.get_search_facets(self.request.user, search_params)
+        
+        # Get search analytics
+        analytics = search_service.get_search_analytics(self.request.user, search_params)
+        
+        context.update({
+            'referrals': referrals,
+            'metadata': metadata,
+            'facets': facets,
+            'analytics': analytics,
+            'search_params': search_params,
+            'status_choices': Referral.Status.choices,
+            'priority_choices': Referral.Priority.choices,
+            'service_type_choices': Referral.ServiceType.choices,
+            'modality_choices': Referral.Modality.choices,
+        })
+        
+        return context
+    
+    def _get_search_params(self):
+        """Extract search parameters from request."""
+        params = {}
+        
+        # Text search
+        if self.request.GET.get('q'):
+            params['q'] = self.request.GET.get('q')
+        
+        # Basic filters
+        for field in ['status', 'priority', 'service_type', 'modality', 'patient_age_group', 'preferred_language']:
+            if self.request.GET.get(field):
+                params[field] = self.request.GET.get(field)
+        
+        # Date filters
+        for field in ['created_from', 'created_to', 'submitted_from', 'submitted_to']:
+            if self.request.GET.get(field):
+                try:
+                    params[field] = timezone.datetime.strptime(self.request.GET.get(field), '%Y-%m-%d').date()
+                except ValueError:
+                    pass
+        
+        # Specialism filters
+        if self.request.GET.get('required_specialisms'):
+            specialisms = self.request.GET.getlist('required_specialisms')
+            params['required_specialisms'] = specialisms
+        
+        # Numeric filters
+        for field in ['max_distance_km', 'min_candidates', 'max_candidates', 'min_score', 'max_score']:
+            if self.request.GET.get(field):
+                try:
+                    params[field] = float(self.request.GET.get(field))
+                except ValueError:
+                    pass
+        
+        # Boolean filters
+        for field in ['has_candidates', 'has_appointments']:
+            if self.request.GET.get(field):
+                params[field] = self.request.GET.get(field).lower() == 'true'
+        
+        # Pagination
+        try:
+            params['page'] = int(self.request.GET.get('page', 1))
+        except ValueError:
+            params['page'] = 1
+        
+        try:
+            params['page_size'] = int(self.request.GET.get('page_size', 20))
+        except ValueError:
+            params['page_size'] = 20
+        
+        # Sorting
+        if self.request.GET.get('sort'):
+            params['sort'] = self.request.GET.get('sort')
+        
+        return params
 
 
 class ReferralDetailView(LoginRequiredMixin, DetailView):
@@ -199,6 +282,59 @@ class ShortlistView(LoginRequiredMixin, TemplateView):
 
 
 # API Views
+@extend_schema_view(
+    get=extend_schema(
+        summary="List referrals",
+        description="Retrieve a list of referrals based on user permissions",
+        tags=["Referrals"],
+        parameters=[
+            OpenApiParameter(
+                name='status',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Filter by referral status',
+                enum=['draft', 'submitted', 'matching', 'shortlisted', 'high_touch_queue', 'completed', 'cancelled', 'rejected']
+            ),
+            OpenApiParameter(
+                name='priority',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Filter by priority level',
+                enum=['urgent', 'high', 'medium', 'low']
+            ),
+            OpenApiParameter(
+                name='service_type',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Filter by service type',
+                enum=['nhs', 'private', 'mixed']
+            ),
+        ]
+    ),
+    post=extend_schema(
+        summary="Create referral",
+        description="Create a new referral",
+        tags=["Referrals"],
+        examples=[
+            OpenApiExample(
+                'Example referral',
+                summary='Basic referral creation',
+                description='Example of creating a new referral',
+                value={
+                    'patient': 'uuid-of-patient',
+                    'presenting_problem': 'Patient presenting with anxiety and depression',
+                    'condition_description': 'Generalized anxiety disorder with depressive symptoms',
+                    'clinical_notes': 'Patient has been experiencing symptoms for 6 months',
+                    'service_type': 'nhs',
+                    'modality': 'mixed',
+                    'priority': 'medium',
+                    'preferred_language': 'en',
+                    'max_distance_km': 50
+                }
+            )
+        ]
+    )
+)
 class ReferralListAPIView(generics.ListCreateAPIView):
     """
     API view for listing and creating referrals.
@@ -333,5 +469,444 @@ def respond_to_invitation(request, candidate_id):
         
     except Candidate.DoesNotExist:
         return Response({'error': 'Candidate not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Advanced Search API Views
+@extend_schema(
+    summary="Get search suggestions",
+    description="Get search suggestions based on query text for autocomplete functionality",
+    tags=["Search"],
+    parameters=[
+        OpenApiParameter(
+            name='q',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            description='Search query text',
+            required=True,
+            examples=[
+                OpenApiExample('Anxiety', value='anxiety'),
+                OpenApiExample('Depression', value='depression'),
+                OpenApiExample('CBT', value='cbt'),
+            ]
+        ),
+        OpenApiParameter(
+            name='limit',
+            type=OpenApiTypes.INT,
+            location=OpenApiParameter.QUERY,
+            description='Maximum number of suggestions to return',
+            default=10
+        ),
+    ],
+    responses={
+        200: {
+            'description': 'Search suggestions',
+            'examples': {
+                'application/json': {
+                    'suggestions': [
+                        'anxiety and depression',
+                        'anxiety management techniques',
+                        'anxiety cognitive behavioral therapy'
+                    ]
+                }
+            }
+        },
+        400: {
+            'description': 'Bad request',
+            'examples': {
+                'application/json': {
+                    'error': 'Invalid query parameter'
+                }
+            }
+        }
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_suggestions(request):
+    """
+    API endpoint for search suggestions.
+    """
+    try:
+        query = request.GET.get('q', '')
+        limit = int(request.GET.get('limit', 10))
+        
+        search_service = AdvancedSearchService()
+        suggestions = search_service.get_search_suggestions(
+            user=request.user,
+            query=query,
+            limit=limit
+        )
+        
+        return Response({'suggestions': suggestions}, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_facets(request):
+    """
+    API endpoint for search facets.
+    """
+    try:
+        # Get search parameters from request
+        search_params = {}
+        for field in ['status', 'priority', 'service_type', 'modality', 'patient_age_group', 'preferred_language']:
+            if request.GET.get(field):
+                search_params[field] = request.GET.get(field)
+        
+        search_service = AdvancedSearchService()
+        facets = search_service.get_search_facets(
+            user=request.user,
+            search_params=search_params
+        )
+        
+        return Response({'facets': facets}, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_analytics(request):
+    """
+    API endpoint for search analytics.
+    """
+    try:
+        # Get search parameters from request
+        search_params = {}
+        for field in ['status', 'priority', 'service_type', 'modality', 'patient_age_group', 'preferred_language']:
+            if request.GET.get(field):
+                search_params[field] = request.GET.get(field)
+        
+        search_service = AdvancedSearchService()
+        analytics = search_service.get_search_analytics(
+            user=request.user,
+            search_params=search_params
+        )
+        
+        return Response({'analytics': analytics}, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Bulk Operations API Views
+@extend_schema(
+    summary="Bulk update referral status",
+    description="Update the status of multiple referrals in a single operation",
+    tags=["Bulk Operations"],
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'referral_ids': {
+                    'type': 'array',
+                    'items': {'type': 'string', 'format': 'uuid'},
+                    'description': 'List of referral IDs to update',
+                    'example': ['123e4567-e89b-12d3-a456-426614174000', '123e4567-e89b-12d3-a456-426614174001']
+                },
+                'new_status': {
+                    'type': 'string',
+                    'enum': ['draft', 'submitted', 'matching', 'shortlisted', 'high_touch_queue', 'completed', 'cancelled', 'rejected'],
+                    'description': 'New status to set for all referrals',
+                    'example': 'completed'
+                },
+                'notes': {
+                    'type': 'string',
+                    'description': 'Optional notes about the status update',
+                    'example': 'Bulk status update - all referrals completed'
+                }
+            },
+            'required': ['referral_ids', 'new_status']
+        }
+    },
+    responses={
+        200: {
+            'description': 'Bulk update completed successfully',
+            'examples': {
+                'application/json': {
+                    'success': True,
+                    'updated_count': 5,
+                    'total_requested': 5,
+                    'errors': []
+                }
+            }
+        },
+        400: {
+            'description': 'Bad request',
+            'examples': {
+                'application/json': {
+                    'success': False,
+                    'error': 'referral_ids and new_status are required',
+                    'updated_count': 0,
+                    'total_requested': 0
+                }
+            }
+        }
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_update_status(request):
+    """
+    API endpoint for bulk status updates.
+    """
+    try:
+        referral_ids = request.data.get('referral_ids', [])
+        new_status = request.data.get('new_status')
+        notes = request.data.get('notes', '')
+        
+        if not referral_ids or not new_status:
+            return Response({'error': 'referral_ids and new_status are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        bulk_service = BulkOperationsService()
+        result = bulk_service.bulk_update_status(
+            user=request.user,
+            referral_ids=referral_ids,
+            new_status=new_status,
+            notes=notes
+        )
+        
+        return Response(result, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_assign_referrer(request):
+    """
+    API endpoint for bulk referrer assignment.
+    """
+    try:
+        referral_ids = request.data.get('referral_ids', [])
+        new_referrer_id = request.data.get('new_referrer_id')
+        
+        if not referral_ids or not new_referrer_id:
+            return Response({'error': 'referral_ids and new_referrer_id are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        bulk_service = BulkOperationsService()
+        result = bulk_service.bulk_assign_referrer(
+            user=request.user,
+            referral_ids=referral_ids,
+            new_referrer_id=new_referrer_id
+        )
+        
+        return Response(result, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_export(request):
+    """
+    API endpoint for bulk export.
+    """
+    try:
+        referral_ids = request.data.get('referral_ids', [])
+        export_format = request.data.get('format', 'csv')
+        
+        if not referral_ids:
+            return Response({'error': 'referral_ids are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        bulk_service = BulkOperationsService()
+        result = bulk_service.bulk_export(
+            user=request.user,
+            referral_ids=referral_ids,
+            format=export_format
+        )
+        
+        if not result['success']:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Return file as response
+        response = HttpResponse(
+            result['data'],
+            content_type=result['content_type']
+        )
+        response['Content-Disposition'] = f'attachment; filename="{result["filename"]}"'
+        return response
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Appointment Bulk Operations API Views
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_update_appointment_status(request):
+    """
+    API endpoint for bulk appointment status updates.
+    """
+    try:
+        appointment_ids = request.data.get('appointment_ids', [])
+        new_status = request.data.get('new_status')
+        notes = request.data.get('notes', '')
+        
+        if not appointment_ids or not new_status:
+            return Response({'error': 'appointment_ids and new_status are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        bulk_service = AppointmentBulkOperationsService()
+        result = bulk_service.bulk_update_status(
+            user=request.user,
+            appointment_ids=appointment_ids,
+            new_status=new_status,
+            notes=notes
+        )
+        
+        return Response(result, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_reschedule_appointments(request):
+    """
+    API endpoint for bulk appointment rescheduling.
+    """
+    try:
+        appointment_ids = request.data.get('appointment_ids', [])
+        new_datetime = request.data.get('new_datetime')
+        notes = request.data.get('notes', '')
+        
+        if not appointment_ids or not new_datetime:
+            return Response({'error': 'appointment_ids and new_datetime are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        bulk_service = AppointmentBulkOperationsService()
+        result = bulk_service.bulk_reschedule(
+            user=request.user,
+            appointment_ids=appointment_ids,
+            new_datetime=new_datetime,
+            notes=notes
+        )
+        
+        return Response(result, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_assign_psychologist(request):
+    """
+    API endpoint for bulk psychologist assignment.
+    """
+    try:
+        appointment_ids = request.data.get('appointment_ids', [])
+        new_psychologist_id = request.data.get('new_psychologist_id')
+        
+        if not appointment_ids or not new_psychologist_id:
+            return Response({'error': 'appointment_ids and new_psychologist_id are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        bulk_service = AppointmentBulkOperationsService()
+        result = bulk_service.bulk_assign_psychologist(
+            user=request.user,
+            appointment_ids=appointment_ids,
+            new_psychologist_id=new_psychologist_id
+        )
+        
+        return Response(result, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_export_appointments(request):
+    """
+    API endpoint for bulk appointment export.
+    """
+    try:
+        appointment_ids = request.data.get('appointment_ids', [])
+        export_format = request.data.get('format', 'csv')
+        
+        if not appointment_ids:
+            return Response({'error': 'appointment_ids are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        bulk_service = AppointmentBulkOperationsService()
+        result = bulk_service.bulk_export(
+            user=request.user,
+            appointment_ids=appointment_ids,
+            format=export_format
+        )
+        
+        if not result['success']:
+            return Response(result, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Return file as response
+        response = HttpResponse(
+            result['data'],
+            content_type=result['content_type']
+        )
+        response['Content-Disposition'] = f'attachment; filename="{result["filename"]}"'
+        return response
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Task Bulk Operations API Views
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_update_task_status(request):
+    """
+    API endpoint for bulk task status updates.
+    """
+    try:
+        task_ids = request.data.get('task_ids', [])
+        new_status = request.data.get('new_status')
+        notes = request.data.get('notes', '')
+        
+        if not task_ids or not new_status:
+            return Response({'error': 'task_ids and new_status are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        bulk_service = TaskBulkOperationsService()
+        result = bulk_service.bulk_update_status(
+            user=request.user,
+            task_ids=task_ids,
+            new_status=new_status,
+            notes=notes
+        )
+        
+        return Response(result, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulk_assign_task_user(request):
+    """
+    API endpoint for bulk task user assignment.
+    """
+    try:
+        task_ids = request.data.get('task_ids', [])
+        new_user_id = request.data.get('new_user_id')
+        
+        if not task_ids or not new_user_id:
+            return Response({'error': 'task_ids and new_user_id are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        bulk_service = TaskBulkOperationsService()
+        result = bulk_service.bulk_assign_user(
+            user=request.user,
+            task_ids=task_ids,
+            new_user_id=new_user_id
+        )
+        
+        return Response(result, status=status.HTTP_200_OK)
+        
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

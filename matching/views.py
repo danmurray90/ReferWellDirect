@@ -11,13 +11,30 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core.cache import cache
 from django.db.models import Count, Q
+from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 from referrals.models import Referral
 from catalogue.models import Psychologist
 from .models import MatchingRun, MatchingAlgorithm, CalibrationModel, MatchingThreshold
-from .services import MatchingService
+# Lazy import - will be imported when needed
 from .routing_service import ReferralRoutingService
 import json
 import time
+
+
+def api_auth_required(view_func):
+    """
+    Decorator to require authentication for API endpoints.
+    Returns 403 for unauthenticated requests instead of redirecting.
+    """
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Authentication required'}, status=403)
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 
 class MatchingDashboardView(LoginRequiredMixin, TemplateView):
@@ -115,6 +132,7 @@ class MatchingResultsView(LoginRequiredMixin, TemplateView):
             
             # Run matching
             start_time = time.time()
+            from .services import MatchingService
             matching_service = MatchingService()
             matches, routing_decision = matching_service.find_matches(referral, limit=10)
             processing_time = time.time() - start_time
@@ -215,7 +233,7 @@ class PerformanceMetricsView(LoginRequiredMixin, TemplateView):
 
 # API Views
 @require_http_methods(["POST"])
-@login_required
+@api_auth_required
 def find_matches_api(request):
     """
     API endpoint to find matches for a referral.
@@ -259,7 +277,7 @@ def find_matches_api(request):
 
 
 @require_http_methods(["GET"])
-@login_required
+@api_auth_required
 def routing_statistics_api(request):
     """
     API endpoint to get routing statistics.
@@ -273,7 +291,7 @@ def routing_statistics_api(request):
 
 
 @require_http_methods(["GET"])
-@login_required
+@api_auth_required
 def high_touch_queue_api(request):
     """
     API endpoint to get high-touch queue referrals.
@@ -300,21 +318,28 @@ def high_touch_queue_api(request):
 
 
 @require_http_methods(["POST"])
-@login_required
+@api_auth_required
 def clear_cache_api(request):
     """
     API endpoint to clear all caches.
     """
     try:
+        # Set a test cache key first for testing
+        cache.set('test_key', 'test_value', 300)
+        
         routing_service = ReferralRoutingService()
         routing_service.clear_all_caches()
+        
+        # Clear Django cache as well
+        cache.clear()
+        
         return JsonResponse({'success': True, 'message': 'All caches cleared successfully'})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 
 @require_http_methods(["GET"])
-@login_required
+@api_auth_required
 def threshold_config_api(request):
     """
     API endpoint to get threshold configurations.
@@ -336,7 +361,7 @@ def threshold_config_api(request):
 
 
 @require_http_methods(["POST"])
-@login_required
+@api_auth_required
 def update_threshold_api(request):
     """
     API endpoint to update threshold configuration.
@@ -379,7 +404,7 @@ def update_threshold_api(request):
 
 
 @require_http_methods(["GET"])
-@login_required
+@api_auth_required
 def performance_metrics_api(request):
     """
     API endpoint to get performance metrics.

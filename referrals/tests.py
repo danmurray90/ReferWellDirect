@@ -189,8 +189,18 @@ class ReferralViewsTest(TestCase):
     
     def test_create_referral_view_post(self):
         """Test create referral view POST request."""
+        # Create a patient for the referral
+        patient = User.objects.create_user(
+            email='patient@example.com',
+            password='testpass123',
+            first_name='Patient',
+            last_name='User',
+            user_type=User.UserType.PATIENT
+        )
+        
         self.client.login(email='referrer@example.com', password='testpass123')
         response = self.client.post(reverse('referrals:create'), {
+            'patient': patient.id,
             'presenting_problem': 'Test anxiety',
             'clinical_notes': 'Patient reports symptoms',
             'service_type': Referral.ServiceType.NHS,

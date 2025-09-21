@@ -589,11 +589,18 @@ class TestReferralRoutingService(TestCase):
         cache.set('threshold_config_gp', 'test_value', 3600)
         cache.set('threshold_config_patient', 'test_value', 3600)
         
+        # Verify cache values are set
+        self.assertIsNotNone(cache.get('threshold_config_gp'))
+        self.assertIsNotNone(cache.get('threshold_config_patient'))
+        
         # Invalidate specific user type
         self.service.invalidate_threshold_cache('gp')
         
         self.assertIsNone(cache.get('threshold_config_gp'))
         self.assertIsNotNone(cache.get('threshold_config_patient'))
+        
+        # Set patient cache again for the final test
+        cache.set('threshold_config_patient', 'test_value', 3600)
         
         # Invalidate all
         self.service.invalidate_threshold_cache()

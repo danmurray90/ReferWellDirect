@@ -3,11 +3,13 @@ Inbox views for ReferWell Direct.
 """
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.generic import TemplateView, ListView, DetailView
 from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action
@@ -90,6 +92,10 @@ class NotificationViewSet(ModelViewSet):
         elif self.action == 'create':
             return NotificationCreateSerializer
         return NotificationSerializer
+    
+    def perform_create(self, serializer):
+        """Create notification for the authenticated user."""
+        serializer.save(user=self.request.user)
     
     @action(detail=False, methods=['get'])
     def stats(self, request):
@@ -202,6 +208,12 @@ class NotificationPreferenceViewSet(ModelViewSet):
         """Get or create preferences for the authenticated user."""
         obj, created = NotificationPreference.objects.get_or_create(user=self.request.user)
         return obj
+    
+    def list(self, request, *args, **kwargs):
+        """Return the user's preferences (create if not exist)."""
+        preferences, created = NotificationPreference.objects.get_or_create(user=request.user)
+        serializer = self.get_serializer(preferences)
+        return Response(serializer.data)
     
     def perform_create(self, serializer):
         """Create preferences for the authenticated user."""

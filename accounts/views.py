@@ -193,15 +193,16 @@ def onboarding_start(request):
         messages.info(request, "You have already completed the onboarding process.")
         return redirect('accounts:dashboard')
     
-    # Start the session if not already started
-    if session.status == OnboardingSession.Status.NOT_STARTED:
-        session.start()
-    
     # Create progress records for all steps if they don't exist
     steps = OnboardingStep.objects.filter(
         user_type=user.user_type,
         is_active=True
     ).order_by('order')
+    
+    # Check if there are any onboarding steps for this user type
+    if not steps.exists():
+        messages.warning(request, "No onboarding steps are configured for your user type. Please contact an administrator.")
+        return redirect('accounts:dashboard')
     
     for step in steps:
         UserOnboardingProgress.objects.get_or_create(
@@ -209,6 +210,15 @@ def onboarding_start(request):
             step=step,
             defaults={'status': UserOnboardingProgress.Status.PENDING}
         )
+    
+    # Start the session if not already started
+    if session.status == OnboardingSession.Status.NOT_STARTED:
+        session.start()
+    
+    # Check if current_step is set (should be after start())
+    if not session.current_step:
+        messages.error(request, "Unable to determine the next onboarding step. Please contact an administrator.")
+        return redirect('accounts:dashboard')
     
     return redirect('accounts:onboarding_step', step_id=session.current_step.id)
 

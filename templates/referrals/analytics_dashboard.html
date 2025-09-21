@@ -1,0 +1,484 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/premium-design-system.css' %}">
+<style>
+    .analytics-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-6);
+        margin-bottom: var(--space-8);
+    }
+    
+    .metrics-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: var(--space-6);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--color-gray-200);
+    }
+    
+    .metrics-card h3 {
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-gray-800);
+        margin-bottom: var(--space-4);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+    
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: var(--space-4);
+    }
+    
+    .metric-item {
+        text-align: center;
+        padding: var(--space-3);
+        background: var(--color-gray-50);
+        border-radius: var(--border-radius-md);
+    }
+    
+    .metric-value {
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-primary-600);
+        margin-bottom: var(--space-1);
+    }
+    
+    .metric-label {
+        font-size: var(--font-size-sm);
+        color: var(--color-gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: var(--space-6);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--color-gray-200);
+        margin-bottom: var(--space-6);
+    }
+    
+    .chart-container h3 {
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-gray-800);
+        margin-bottom: var(--space-4);
+    }
+    
+    .chart-placeholder {
+        height: 300px;
+        background: var(--color-gray-50);
+        border: 2px dashed var(--color-gray-300);
+        border-radius: var(--border-radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-gray-500);
+        font-size: var(--font-size-lg);
+    }
+    
+    .filters-container {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: var(--space-6);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--color-gray-200);
+        margin-bottom: var(--space-6);
+    }
+    
+    .filters-row {
+        display: flex;
+        gap: var(--space-4);
+        align-items: end;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        min-width: 200px;
+    }
+    
+    .filter-group label {
+        font-weight: var(--font-weight-medium);
+        color: var(--color-gray-700);
+        margin-bottom: var(--space-1);
+    }
+    
+    .filter-group select,
+    .filter-group input {
+        padding: var(--space-2) var(--space-3);
+        border: 1px solid var(--color-gray-300);
+        border-radius: var(--border-radius-md);
+        font-size: var(--font-size-sm);
+    }
+    
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+        box-shadow: 0 0 0 2px var(--color-primary-100);
+    }
+    
+    .trends-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-6);
+    }
+    
+    .trend-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: var(--space-6);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--color-gray-200);
+    }
+    
+    .trend-card h4 {
+        font-size: var(--font-size-md);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-gray-800);
+        margin-bottom: var(--space-4);
+    }
+    
+    .trend-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .trend-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-2) 0;
+        border-bottom: 1px solid var(--color-gray-100);
+    }
+    
+    .trend-item:last-child {
+        border-bottom: none;
+    }
+    
+    .trend-label {
+        font-size: var(--font-size-sm);
+        color: var(--color-gray-600);
+    }
+    
+    .trend-value {
+        font-weight: var(--font-weight-medium);
+        color: var(--color-gray-800);
+    }
+    
+    .export-actions {
+        display: flex;
+        gap: var(--space-2);
+        justify-content: flex-end;
+        margin-bottom: var(--space-6);
+    }
+    
+    .loading {
+        display: none;
+        text-align: center;
+        padding: var(--space-8);
+        color: var(--color-gray-500);
+    }
+    
+    .loading.show {
+        display: block;
+    }
+    
+    @media (max-width: 768px) {
+        .analytics-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .trends-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .filters-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .filter-group {
+            min-width: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Analytics Dashboard</h1>
+        <p class="page-description">Comprehensive analytics and insights for referrals and appointments</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-container">
+        <h3>Filters</h3>
+        <form method="get" id="filters-form">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="date_range">Date Range</label>
+                    <select name="date_range" id="date_range" onchange="updateFilters()">
+                        {% for option in date_range_options %}
+                            <option value="{{ option.value }}" {% if date_range == option.value %}selected{% endif %}>
+                                {{ option.label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <button type="submit" class="btn btn--primary">Apply Filters</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Export Actions -->
+    <div class="export-actions">
+        <button type="button" class="btn btn--secondary" onclick="exportReport('referrals', 'csv')">Export Referrals (CSV)</button>
+        <button type="button" class="btn btn--secondary" onclick="exportReport('appointments', 'csv')">Export Appointments (CSV)</button>
+        <button type="button" class="btn btn--secondary" onclick="exportReport('performance', 'xlsx')">Export Performance (XLSX)</button>
+        <button type="button" class="btn btn--primary" onclick="exportReport('comprehensive', 'xlsx')">Export Full Report (XLSX)</button>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading" id="loading">
+        <p>Loading analytics data...</p>
+    </div>
+
+    <!-- Main Analytics Container -->
+    <div id="analytics-content">
+        <!-- Key Metrics -->
+        <div class="analytics-container">
+            <div class="metrics-card">
+                <h3>
+                    <i class="icon-referral"></i>
+                    Referral Metrics
+                </h3>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-value">{{ metrics.total_referrals|default:0 }}</div>
+                        <div class="metric-label">Total Referrals</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">{{ metrics.referral_metrics.submitted|default:0 }}</div>
+                        <div class="metric-label">Submitted</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">{{ metrics.referral_metrics.completed|default:0 }}</div>
+                        <div class="metric-label">Completed</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">{{ metrics.referral_metrics.cancelled|default:0 }}</div>
+                        <div class="metric-label">Cancelled</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics-card">
+                <h3>
+                    <i class="icon-appointment"></i>
+                    Appointment Metrics
+                </h3>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-value">{{ metrics.total_appointments|default:0 }}</div>
+                        <div class="metric-label">Total Appointments</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">{{ metrics.appointment_metrics.scheduled|default:0 }}</div>
+                        <div class="metric-label">Scheduled</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">{{ metrics.appointment_metrics.completed|default:0 }}</div>
+                        <div class="metric-label">Completed</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">{{ metrics.appointment_metrics.cancelled|default:0 }}</div>
+                        <div class="metric-label">Cancelled</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-container">
+            <h3>Referral Trends</h3>
+            <div class="chart-placeholder">
+                <div>
+                    <i class="icon-chart" style="font-size: 48px; margin-bottom: var(--space-2);"></i>
+                    <p>Chart visualization would go here</p>
+                    <p style="font-size: var(--font-size-sm);">Integration with Chart.js or similar library</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>Appointment Trends</h3>
+            <div class="chart-placeholder">
+                <div>
+                    <i class="icon-chart" style="font-size: 48px; margin-bottom: var(--space-2);"></i>
+                    <p>Chart visualization would go here</p>
+                    <p style="font-size: var(--font-size-sm);">Integration with Chart.js or similar library</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trends -->
+        <div class="trends-container">
+            <div class="trend-card">
+                <h4>Top Referrers</h4>
+                <ul class="trend-list">
+                    {% for referrer in metrics.trends.top_referrers|slice:":5" %}
+                    <li class="trend-item">
+                        <span class="trend-label">{{ referrer.referrer__first_name }} {{ referrer.referrer__last_name }}</span>
+                        <span class="trend-value">{{ referrer.count }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="trend-item">
+                        <span class="trend-label">No data available</span>
+                        <span class="trend-value">-</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="trend-card">
+                <h4>Top Specialisms</h4>
+                <ul class="trend-list">
+                    {% for specialism in metrics.trends.top_specialisms|slice:":5" %}
+                    <li class="trend-item">
+                        <span class="trend-label">{{ specialism.0 }}</span>
+                        <span class="trend-value">{{ specialism.1 }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="trend-item">
+                        <span class="trend-label">No data available</span>
+                        <span class="trend-value">-</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="chart-container">
+            <h3>Performance Metrics</h3>
+            <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="metric-item">
+                    <div class="metric-value">
+                        {% if metrics.performance_metrics.avg_processing_time %}
+                            {{ metrics.performance_metrics.avg_processing_time|floatformat:1 }}h
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                    <div class="metric-label">Avg Processing Time</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value">
+                        {% if metrics.performance_metrics.avg_appointment_duration %}
+                            {{ metrics.performance_metrics.avg_appointment_duration|floatformat:0 }}min
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
+                    <div class="metric-label">Avg Appointment Duration</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-value">-</div>
+                    <div class="metric-label">Total Revenue</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateFilters() {
+        document.getElementById('filters-form').submit();
+    }
+    
+    function exportReport(reportType, format) {
+        const loading = document.getElementById('loading');
+        const content = document.getElementById('analytics-content');
+        
+        loading.classList.add('show');
+        content.style.opacity = '0.5';
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/api/referrals/analytics/generate-report/';
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = 'csrfmiddlewaretoken';
+        csrfToken.value = getCookie('csrftoken');
+        form.appendChild(csrfToken);
+        
+        const reportTypeInput = document.createElement('input');
+        reportTypeInput.type = 'hidden';
+        reportTypeInput.name = 'report_type';
+        reportTypeInput.value = reportType;
+        form.appendChild(reportTypeInput);
+        
+        const formatInput = document.createElement('input');
+        formatInput.type = 'hidden';
+        formatInput.name = 'format';
+        formatInput.value = format;
+        form.appendChild(formatInput);
+        
+        const filtersInput = document.createElement('input');
+        filtersInput.type = 'hidden';
+        filtersInput.name = 'filters';
+        filtersInput.value = JSON.stringify({
+            date_range: document.getElementById('date_range').value
+        });
+        form.appendChild(filtersInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+        
+        // Reset loading state after a delay
+        setTimeout(() => {
+            loading.classList.remove('show');
+            content.style.opacity = '1';
+        }, 2000);
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Auto-refresh data every 5 minutes
+    setInterval(() => {
+        location.reload();
+    }, 300000);
+</script>
+{% endblock %}

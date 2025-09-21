@@ -7,7 +7,7 @@ from django.utils import timezone
 from inbox.models import Notification, NotificationPreference
 from inbox.services import NotificationService
 from referrals.models import Referral
-from accounts.models import Patient, GP
+from accounts.models import User
 
 User = get_user_model()
 
@@ -138,27 +138,30 @@ class Command(BaseCommand):
         try:
             return Referral.objects.first()
         except Referral.DoesNotExist:
-            # Create a test patient and GP if they don't exist
-            patient, _ = Patient.objects.get_or_create(
-                user=user,
+            # Create test users for patient and GP if they don't exist
+            patient_user, _ = User.objects.get_or_create(
+                email='test.patient@example.com',
                 defaults={
+                    'user_type': User.UserType.PATIENT,
+                    'first_name': 'Test',
+                    'last_name': 'Patient',
                     'date_of_birth': timezone.now().date().replace(year=1990),
-                    'nhs_number': '1234567890',
                 }
             )
             
-            gp, _ = GP.objects.get_or_create(
-                user=user,
+            gp_user, _ = User.objects.get_or_create(
+                email='test.gp@example.com',
                 defaults={
-                    'gmc_number': '12345678',
-                    'specialty': 'General Practice',
+                    'user_type': User.UserType.GP,
+                    'first_name': 'Test',
+                    'last_name': 'GP',
                 }
             )
             
             # Create test referral
             referral = Referral.objects.create(
-                patient=patient,
-                referrer=gp,
+                patient=patient_user,
+                referrer=gp_user,
                 condition_description='Test condition for notification testing',
                 urgency='routine',
                 language_requirements='English',

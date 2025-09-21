@@ -1,0 +1,782 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Referrals - Advanced Search{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/premium-design-system.css' %}">
+<style>
+    .search-container {
+        background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-secondary-50) 100%);
+        border-radius: var(--border-radius-lg);
+        padding: var(--space-6);
+        margin-bottom: var(--space-6);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .search-form {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: var(--space-4);
+        align-items: end;
+    }
+    
+    .search-input-group {
+        position: relative;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: var(--space-3) var(--space-4);
+        padding-right: var(--space-10);
+        border: 2px solid var(--color-gray-300);
+        border-radius: var(--border-radius-md);
+        font-size: var(--font-size-lg);
+        transition: all 0.2s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+        box-shadow: 0 0 0 3px var(--color-primary-100);
+    }
+    
+    .search-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid var(--color-gray-300);
+        border-top: none;
+        border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
+        box-shadow: var(--shadow-lg);
+        z-index: 1000;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .suggestion-item {
+        padding: var(--space-2) var(--space-4);
+        cursor: pointer;
+        border-bottom: 1px solid var(--color-gray-100);
+    }
+    
+    .suggestion-item:hover {
+        background-color: var(--color-primary-50);
+    }
+    
+    .filters-container {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: var(--space-6);
+        margin-bottom: var(--space-6);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-4);
+        margin-bottom: var(--space-4);
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .filter-group label {
+        font-weight: var(--font-weight-medium);
+        color: var(--color-gray-700);
+        margin-bottom: var(--space-1);
+    }
+    
+    .filter-group select,
+    .filter-group input {
+        padding: var(--space-2) var(--space-3);
+        border: 1px solid var(--color-gray-300);
+        border-radius: var(--border-radius-md);
+        font-size: var(--font-size-sm);
+    }
+    
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+        box-shadow: 0 0 0 2px var(--color-primary-100);
+    }
+    
+    .filter-actions {
+        display: flex;
+        gap: var(--space-2);
+        justify-content: flex-end;
+    }
+    
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-4);
+        padding: var(--space-4);
+        background: var(--color-gray-50);
+        border-radius: var(--border-radius-md);
+    }
+    
+    .results-count {
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-gray-700);
+    }
+    
+    .sort-controls {
+        display: flex;
+        gap: var(--space-2);
+        align-items: center;
+    }
+    
+    .bulk-actions {
+        background: var(--color-warning-50);
+        border: 1px solid var(--color-warning-200);
+        border-radius: var(--border-radius-md);
+        padding: var(--space-3);
+        margin-bottom: var(--space-4);
+        display: none;
+    }
+    
+    .bulk-actions.show {
+        display: block;
+    }
+    
+    .bulk-actions-content {
+        display: flex;
+        gap: var(--space-2);
+        align-items: center;
+    }
+    
+    .referrals-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .referrals-table th {
+        background: var(--color-gray-50);
+        padding: var(--space-3) var(--space-4);
+        text-align: left;
+        font-weight: var(--font-weight-medium);
+        color: var(--color-gray-700);
+        border-bottom: 1px solid var(--color-gray-200);
+    }
+    
+    .referrals-table td {
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--color-gray-100);
+    }
+    
+    .referrals-table tbody tr:hover {
+        background-color: var(--color-gray-50);
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: var(--space-1) var(--space-2);
+        border-radius: var(--border-radius-sm);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-medium);
+        text-transform: uppercase;
+    }
+    
+    .status-draft { background-color: var(--color-gray-100); color: var(--color-gray-700); }
+    .status-submitted { background-color: var(--color-blue-100); color: var(--color-blue-700); }
+    .status-matching { background-color: var(--color-yellow-100); color: var(--color-yellow-700); }
+    .status-shortlisted { background-color: var(--color-green-100); color: var(--color-green-700); }
+    .status-high_touch_queue { background-color: var(--color-orange-100); color: var(--color-orange-700); }
+    .status-completed { background-color: var(--color-green-100); color: var(--color-green-700); }
+    .status-cancelled { background-color: var(--color-red-100); color: var(--color-red-700); }
+    .status-rejected { background-color: var(--color-red-100); color: var(--color-red-700); }
+    
+    .priority-badge {
+        display: inline-block;
+        padding: var(--space-1) var(--space-2);
+        border-radius: var(--border-radius-sm);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-medium);
+    }
+    
+    .priority-urgent { background-color: var(--color-red-100); color: var(--color-red-700); }
+    .priority-high { background-color: var(--color-orange-100); color: var(--color-orange-700); }
+    .priority-medium { background-color: var(--color-yellow-100); color: var(--color-yellow-700); }
+    .priority-low { background-color: var(--color-gray-100); color: var(--color-gray-700); }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--space-2);
+        margin-top: var(--space-6);
+    }
+    
+    .pagination a,
+    .pagination span {
+        display: inline-block;
+        padding: var(--space-2) var(--space-3);
+        border: 1px solid var(--color-gray-300);
+        border-radius: var(--border-radius-md);
+        text-decoration: none;
+        color: var(--color-gray-700);
+        transition: all 0.2s ease;
+    }
+    
+    .pagination a:hover {
+        background-color: var(--color-primary-50);
+        border-color: var(--color-primary-500);
+    }
+    
+    .pagination .current {
+        background-color: var(--color-primary-500);
+        color: white;
+        border-color: var(--color-primary-500);
+    }
+    
+    .analytics-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-4);
+        margin-bottom: var(--space-6);
+    }
+    
+    .analytics-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: var(--space-4);
+        box-shadow: var(--shadow-sm);
+        text-align: center;
+    }
+    
+    .analytics-card h3 {
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-primary-600);
+        margin-bottom: var(--space-1);
+    }
+    
+    .analytics-card p {
+        color: var(--color-gray-600);
+        font-size: var(--font-size-sm);
+    }
+    
+    @media (max-width: 768px) {
+        .search-form {
+            grid-template-columns: 1fr;
+        }
+        
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .results-header {
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+        
+        .referrals-table {
+            font-size: var(--font-size-sm);
+        }
+        
+        .referrals-table th,
+        .referrals-table td {
+            padding: var(--space-2);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Advanced Referral Search</h1>
+        <p class="page-description">Search and filter referrals with advanced options and bulk operations</p>
+    </div>
+
+    <!-- Search Container -->
+    <div class="search-container">
+        <form method="get" class="search-form" id="search-form">
+            <div class="search-input-group">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="{{ search_params.q|default:'' }}"
+                    placeholder="Search referrals by ID, patient name, presenting problem, or clinical notes..."
+                    class="search-input"
+                    id="search-input"
+                    autocomplete="off"
+                >
+                <div class="search-suggestions" id="search-suggestions" style="display: none;"></div>
+            </div>
+            <button type="submit" class="btn btn--primary">
+                <i class="icon-search"></i> Search
+            </button>
+        </form>
+    </div>
+
+    <!-- Filters Container -->
+    <div class="filters-container">
+        <h3>Advanced Filters</h3>
+        <form method="get" id="filters-form">
+            <input type="hidden" name="q" value="{{ search_params.q|default:'' }}">
+            
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="status">Status</label>
+                    <select name="status" id="status">
+                        <option value="">All Statuses</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if search_params.status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="priority">Priority</label>
+                    <select name="priority" id="priority">
+                        <option value="">All Priorities</option>
+                        {% for value, label in priority_choices %}
+                            <option value="{{ value }}" {% if search_params.priority == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="service_type">Service Type</label>
+                    <select name="service_type" id="service_type">
+                        <option value="">All Service Types</option>
+                        {% for value, label in service_type_choices %}
+                            <option value="{{ value }}" {% if search_params.service_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="modality">Modality</label>
+                    <select name="modality" id="modality">
+                        <option value="">All Modalities</option>
+                        {% for value, label in modality_choices %}
+                            <option value="{{ value }}" {% if search_params.modality == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="patient_age_group">Patient Age Group</label>
+                    <input 
+                        type="text" 
+                        name="patient_age_group" 
+                        id="patient_age_group"
+                        value="{{ search_params.patient_age_group|default:'' }}"
+                        placeholder="e.g., 18-25, 26-35, etc."
+                    >
+                </div>
+                
+                <div class="filter-group">
+                    <label for="preferred_language">Language</label>
+                    <input 
+                        type="text" 
+                        name="preferred_language" 
+                        id="preferred_language"
+                        value="{{ search_params.preferred_language|default:'' }}"
+                        placeholder="e.g., en, es, fr"
+                    >
+                </div>
+                
+                <div class="filter-group">
+                    <label for="created_from">Created From</label>
+                    <input 
+                        type="date" 
+                        name="created_from" 
+                        id="created_from"
+                        value="{{ search_params.created_from|default:'' }}"
+                    >
+                </div>
+                
+                <div class="filter-group">
+                    <label for="created_to">Created To</label>
+                    <input 
+                        type="date" 
+                        name="created_to" 
+                        id="created_to"
+                        value="{{ search_params.created_to|default:'' }}"
+                    >
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn btn--primary">Apply Filters</button>
+                <a href="{% url 'referrals:referral_list' %}" class="btn btn--secondary">Clear All</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Analytics Cards -->
+    {% if analytics %}
+    <div class="analytics-cards">
+        <div class="analytics-card">
+            <h3>{{ analytics.total_referrals }}</h3>
+            <p>Total Referrals</p>
+        </div>
+        {% if analytics.avg_processing_time %}
+        <div class="analytics-card">
+            <h3>{{ analytics.avg_processing_time|floatformat:1 }}h</h3>
+            <p>Avg Processing Time</p>
+        </div>
+        {% endif %}
+        {% if analytics.top_specialisms %}
+        <div class="analytics-card">
+            <h3>{{ analytics.top_specialisms.0.1 }}</h3>
+            <p>{{ analytics.top_specialisms.0.0 }} (Most Common)</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Results Header -->
+    <div class="results-header">
+        <div class="results-count">
+            {{ metadata.total_count }} referral{{ metadata.total_count|pluralize }} found
+        </div>
+        <div class="sort-controls">
+            <label for="sort">Sort by:</label>
+            <select name="sort" id="sort" onchange="updateSort()">
+                <option value="created_at" {% if search_params.sort == 'created_at' %}selected{% endif %}>Created Date (Newest)</option>
+                <option value="created_at_asc" {% if search_params.sort == 'created_at_asc' %}selected{% endif %}>Created Date (Oldest)</option>
+                <option value="submitted_at" {% if search_params.sort == 'submitted_at' %}selected{% endif %}>Submitted Date (Newest)</option>
+                <option value="priority" {% if search_params.sort == 'priority' %}selected{% endif %}>Priority (High to Low)</option>
+                <option value="status" {% if search_params.sort == 'status' %}selected{% endif %}>Status (A-Z)</option>
+                <option value="patient_name" {% if search_params.sort == 'patient_name' %}selected{% endif %}>Patient Name (A-Z)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" id="bulk-actions">
+        <div class="bulk-actions-content">
+            <span id="bulk-count">0</span> referrals selected
+            <button type="button" class="btn btn--secondary" onclick="bulkUpdateStatus()">Update Status</button>
+            <button type="button" class="btn btn--secondary" onclick="bulkAssignReferrer()">Assign Referrer</button>
+            <button type="button" class="btn btn--secondary" onclick="bulkExport()">Export</button>
+            <button type="button" class="btn btn--secondary" onclick="clearSelection()">Clear Selection</button>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="table-container">
+        <table class="referrals-table">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="select-all" onchange="toggleAllSelection()">
+                    </th>
+                    <th>Referral ID</th>
+                    <th>Patient</th>
+                    <th>Referrer</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Service Type</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for referral in referrals %}
+                <tr>
+                    <td>
+                        <input type="checkbox" class="referral-checkbox" value="{{ referral.id }}" onchange="updateBulkActions()">
+                    </td>
+                    <td>
+                        <a href="{% url 'referrals:referral_detail' referral.id %}" class="text-link">
+                            {{ referral.referral_id }}
+                        </a>
+                    </td>
+                    <td>{{ referral.patient.get_full_name }}</td>
+                    <td>{{ referral.referrer.get_full_name }}</td>
+                    <td>
+                        <span class="status-badge status-{{ referral.status }}">
+                            {{ referral.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="priority-badge priority-{{ referral.priority }}">
+                            {{ referral.get_priority_display }}
+                        </span>
+                    </td>
+                    <td>{{ referral.get_service_type_display }}</td>
+                    <td>{{ referral.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'referrals:referral_detail' referral.id %}" class="btn btn--sm btn--secondary">View</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: var(--space-8); color: var(--color-gray-500);">
+                        No referrals found matching your criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if metadata.total_pages > 1 %}
+    <div class="pagination">
+        {% if metadata.has_previous %}
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ metadata.previous_page }}">Previous</a>
+        {% endif %}
+        
+        {% for page_num in metadata.page_range %}
+            {% if page_num == metadata.page %}
+                <span class="current">{{ page_num }}</span>
+            {% else %}
+                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_num }}">{{ page_num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if metadata.has_next %}
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ metadata.next_page }}">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Search suggestions
+    let searchTimeout;
+    const searchInput = document.getElementById('search-input');
+    const suggestionsContainer = document.getElementById('search-suggestions');
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            suggestionsContainer.style.display = 'none';
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            fetch(`/api/referrals/search/suggestions/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    displaySuggestions(data.suggestions);
+                })
+                .catch(error => console.error('Error fetching suggestions:', error));
+        }, 300);
+    });
+    
+    function displaySuggestions(suggestions) {
+        if (suggestions.length === 0) {
+            suggestionsContainer.style.display = 'none';
+            return;
+        }
+        
+        suggestionsContainer.innerHTML = suggestions.map(suggestion => 
+            `<div class="suggestion-item" onclick="selectSuggestion('${suggestion}')">${suggestion}</div>`
+        ).join('');
+        suggestionsContainer.style.display = 'block';
+    }
+    
+    function selectSuggestion(suggestion) {
+        searchInput.value = suggestion;
+        suggestionsContainer.style.display = 'none';
+        document.getElementById('search-form').submit();
+    }
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+    
+    // Sort control
+    function updateSort() {
+        const sortSelect = document.getElementById('sort');
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('sort', sortSelect.value);
+        window.location.href = currentUrl.toString();
+    }
+    
+    // Bulk actions
+    function toggleAllSelection() {
+        const selectAll = document.getElementById('select-all');
+        const checkboxes = document.querySelectorAll('.referral-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAll.checked;
+        });
+        
+        updateBulkActions();
+    }
+    
+    function updateBulkActions() {
+        const checkboxes = document.querySelectorAll('.referral-checkbox:checked');
+        const bulkActions = document.getElementById('bulk-actions');
+        const bulkCount = document.getElementById('bulk-count');
+        
+        if (checkboxes.length > 0) {
+            bulkActions.classList.add('show');
+            bulkCount.textContent = checkboxes.length;
+        } else {
+            bulkActions.classList.remove('show');
+        }
+    }
+    
+    function clearSelection() {
+        const checkboxes = document.querySelectorAll('.referral-checkbox');
+        const selectAll = document.getElementById('select-all');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        selectAll.checked = false;
+        
+        updateBulkActions();
+    }
+    
+    function getSelectedReferralIds() {
+        const checkboxes = document.querySelectorAll('.referral-checkbox:checked');
+        return Array.from(checkboxes).map(checkbox => checkbox.value);
+    }
+    
+    function bulkUpdateStatus() {
+        const referralIds = getSelectedReferralIds();
+        if (referralIds.length === 0) return;
+        
+        const newStatus = prompt('Enter new status:');
+        if (!newStatus) return;
+        
+        const notes = prompt('Enter notes (optional):') || '';
+        
+        fetch('/api/referrals/bulk/update-status/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                referral_ids: referralIds,
+                new_status: newStatus,
+                notes: notes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Successfully updated ${data.updated_count} referrals`);
+                location.reload();
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating referrals');
+        });
+    }
+    
+    function bulkAssignReferrer() {
+        const referralIds = getSelectedReferralIds();
+        if (referralIds.length === 0) return;
+        
+        const newReferrerId = prompt('Enter new referrer ID:');
+        if (!newReferrerId) return;
+        
+        fetch('/api/referrals/bulk/assign-referrer/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                referral_ids: referralIds,
+                new_referrer_id: parseInt(newReferrerId)
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Successfully assigned ${data.updated_count} referrals`);
+                location.reload();
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while assigning referrals');
+        });
+    }
+    
+    function bulkExport() {
+        const referralIds = getSelectedReferralIds();
+        if (referralIds.length === 0) return;
+        
+        const format = prompt('Export format (csv, json, xlsx):', 'csv');
+        if (!format) return;
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/api/referrals/bulk/export/';
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = 'csrfmiddlewaretoken';
+        csrfToken.value = getCookie('csrftoken');
+        form.appendChild(csrfToken);
+        
+        const referralIdsInput = document.createElement('input');
+        referralIdsInput.type = 'hidden';
+        referralIdsInput.name = 'referral_ids';
+        referralIdsInput.value = JSON.stringify(referralIds);
+        form.appendChild(referralIdsInput);
+        
+        const formatInput = document.createElement('input');
+        formatInput.type = 'hidden';
+        formatInput.name = 'format';
+        formatInput.value = format;
+        form.appendChild(formatInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

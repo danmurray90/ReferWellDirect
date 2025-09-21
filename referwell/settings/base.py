@@ -73,6 +73,8 @@ THIRD_PARTY_APPS = [
     'django_extensions',
     'django_celery_beat',
     'django_celery_results',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
 ]
 
 LOCAL_APPS = [
@@ -188,6 +190,75 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# API Documentation
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'ReferWell Direct API',
+    'DESCRIPTION': 'API for ReferWell Direct - Mental Health Referral Management System',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'SERVERS': [
+        {'url': 'http://localhost:8000', 'description': 'Development server'},
+        {'url': 'https://api.referwell.direct', 'description': 'Production server'},
+    ],
+    'TAGS': [
+        {'name': 'Authentication', 'description': 'User authentication and authorization'},
+        {'name': 'Referrals', 'description': 'Referral management and tracking'},
+        {'name': 'Appointments', 'description': 'Appointment scheduling and management'},
+        {'name': 'Candidates', 'description': 'Psychologist candidate matching'},
+        {'name': 'Analytics', 'description': 'Analytics and reporting'},
+        {'name': 'Bulk Operations', 'description': 'Bulk operations for referrals and appointments'},
+        {'name': 'Search', 'description': 'Advanced search and filtering'},
+    ],
+    'EXTENSIONS_INFO': {
+        'x-logo': {
+            'url': '/static/images/logo.png',
+            'altText': 'ReferWell Direct Logo'
+        }
+    },
+    'CONTACT': {
+        'name': 'ReferWell Direct Support',
+        'email': 'support@referwell.direct',
+        'url': 'https://referwell.direct/support'
+    },
+    'LICENSE': {
+        'name': 'MIT License',
+        'url': 'https://opensource.org/licenses/MIT'
+    },
+    'EXTERNAL_DOCS': {
+        'description': 'Find more information about ReferWell Direct',
+        'url': 'https://referwell.direct/docs'
+    },
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'filter': True,
+        'showExtensions': True,
+        'showCommonExtensions': True,
+        'tryItOutEnabled': True,
+        'supportedSubmitMethods': ['get', 'post', 'put', 'patch', 'delete'],
+        'validatorUrl': None,
+        'oauth2RedirectUrl': '/api/schema/swagger-ui/oauth2-redirect.html',
+        'preauthorizeBasic': False,
+        'preauthorizeApiKey': False,
+    },
+    'REDOC_UI_SETTINGS': {
+        'hideDownloadButton': False,
+        'hideHostname': False,
+        'hideLoading': False,
+        'nativeScrollbars': False,
+        'disableSearch': False,
+        'onlyRequiredInSamples': False,
+        'sortPropsAlphabetically': True,
+        'showExtensions': True,
+        'showCommonExtensions': True,
+    },
 }
 
 # CORS settings

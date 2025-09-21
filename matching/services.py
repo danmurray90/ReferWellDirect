@@ -9,7 +9,7 @@ from catalogue.models import Psychologist
 from referrals.models import Referral
 import logging
 import numpy as np
-from sentence_transformers import SentenceTransformer
+# Lazy import - will be imported when needed
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.calibration import CalibratedClassifierCV
@@ -235,11 +235,12 @@ class VectorEmbeddingService:
         self.model = None
         self.cache_timeout = cache_timeout
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        self._load_model()
+        # Don't load model on initialization - load lazily when needed
     
     def _load_model(self):
         """Load the Sentence-Transformers model."""
         try:
+            from sentence_transformers import SentenceTransformer
             self.model = SentenceTransformer(self.model_name)
             self.logger.info(f"Loaded embedding model: {self.model_name}")
         except Exception as e:
@@ -257,7 +258,7 @@ class VectorEmbeddingService:
             Embedding vector as numpy array
         """
         if not self.model:
-            raise RuntimeError("Model not loaded")
+            self._load_model()
         
         # Check cache first
         cache_key = f"embedding_{self.model_name}_{hash(text)}"
@@ -290,7 +291,7 @@ class VectorEmbeddingService:
             Array of embedding vectors
         """
         if not self.model:
-            raise RuntimeError("Model not loaded")
+            self._load_model()
         
         # Check cache for each text
         embeddings = []
@@ -450,12 +451,16 @@ class BM25Service:
                 return False
             
             # Build TF-IDF vectors
+            # Adjust parameters for small datasets
+            min_df = max(1, len(documents) // 10) if len(documents) > 1 else 1
+            max_df = min(0.95, max(0.5, 1 - (1 / len(documents)))) if len(documents) > 1 else 0.95
+            
             self.vectorizer = TfidfVectorizer(
                 max_features=10000,
                 stop_words='english',
                 ngram_range=(1, 2),
-                min_df=1,
-                max_df=0.95
+                min_df=min_df,
+                max_df=max_df
             )
             
             self.document_vectors = self.vectorizer.fit_transform(documents)
