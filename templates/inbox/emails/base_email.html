@@ -14,31 +14,31 @@
             margin: 0;
             padding: 0;
         }
-        
+
         .email-container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
             border: 1px solid #d0d0d0;
         }
-        
+
         .email-header {
             background: linear-gradient(135deg, #005eb8 0%, #003d82 100%);
             color: #ffffff;
             padding: 20px;
             text-align: center;
         }
-        
+
         .email-header h1 {
             margin: 0;
             font-size: 24px;
             font-weight: 600;
         }
-        
+
         .email-body {
             padding: 30px 20px;
         }
-        
+
         .email-footer {
             background-color: #f8f8f8;
             padding: 20px;
@@ -46,7 +46,7 @@
             font-size: 14px;
             color: #626a6e;
         }
-        
+
         .notification-card {
             background-color: #f8f8f8;
             border-left: 4px solid #005eb8;
@@ -54,39 +54,39 @@
             margin: 20px 0;
             border-radius: 4px;
         }
-        
+
         .notification-title {
             font-size: 18px;
             font-weight: 600;
             color: #0b0c0c;
             margin: 0 0 10px 0;
         }
-        
+
         .notification-message {
             font-size: 16px;
             color: #0b0c0c;
             margin: 0 0 15px 0;
         }
-        
+
         .notification-meta {
             font-size: 14px;
             color: #626a6e;
             margin: 0;
         }
-        
+
         .priority-high {
             border-left-color: #d4351c;
         }
-        
+
         .priority-urgent {
             border-left-color: #d4351c;
             background-color: #fef7f7;
         }
-        
+
         .priority-low {
             border-left-color: #626a6e;
         }
-        
+
         .cta-button {
             display: inline-block;
             background-color: #005eb8;
@@ -97,60 +97,60 @@
             font-weight: 600;
             margin: 20px 0;
         }
-        
+
         .cta-button:hover {
             background-color: #003d82;
         }
-        
+
         .cta-button-secondary {
             background-color: #f8f8f8;
             color: #0b0c0c;
             border: 1px solid #d0d0d0;
         }
-        
+
         .cta-button-secondary:hover {
             background-color: #e8e8e8;
         }
-        
+
         .footer-links {
             margin: 15px 0;
         }
-        
+
         .footer-links a {
             color: #005eb8;
             text-decoration: none;
             margin-right: 15px;
         }
-        
+
         .footer-links a:hover {
             text-decoration: underline;
         }
-        
+
         .unsubscribe {
             font-size: 12px;
             color: #626a6e;
             margin-top: 20px;
         }
-        
+
         .unsubscribe a {
             color: #005eb8;
             text-decoration: none;
         }
-        
+
         @media (max-width: 600px) {
             .email-container {
                 margin: 0;
                 border: none;
             }
-            
+
             .email-body {
                 padding: 20px 15px;
             }
-            
+
             .email-header {
                 padding: 15px;
             }
-            
+
             .email-header h1 {
                 font-size: 20px;
             }
@@ -162,11 +162,11 @@
         <div class="email-header">
             <h1>{% block header_title %}ReferWell Direct{% endblock %}</h1>
         </div>
-        
+
         <div class="email-body">
             {% block content %}{% endblock %}
         </div>
-        
+
         <div class="email-footer">
             <div class="footer-links">
                 <a href="{{ site_url }}/dashboard">Dashboard</a>
@@ -174,14 +174,14 @@
                 <a href="{{ site_url }}/profile">Profile</a>
                 <a href="{{ site_url }}/help">Help</a>
             </div>
-            
+
             <p>
-                This email was sent by ReferWell Direct. If you have any questions, 
+                This email was sent by ReferWell Direct. If you have any questions,
                 please contact our support team.
             </p>
-            
+
             <div class="unsubscribe">
-                <a href="{{ site_url }}/notifications/preferences">Manage notification preferences</a> | 
+                <a href="{{ site_url }}/notifications/preferences">Manage notification preferences</a> |
                 <a href="{{ site_url }}/unsubscribe?token={{ unsubscribe_token }}">Unsubscribe</a>
             </div>
         </div>

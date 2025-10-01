@@ -24,7 +24,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .queue-item::before {
         content: '';
         position: absolute;
@@ -34,24 +34,24 @@
         height: 4px;
         background: var(--color-gray-300);
     }
-    
+
     .queue-item:hover {
         box-shadow: var(--shadow-lg);
         transform: translateY(-2px);
     }
-    
+
     .queue-item--high-touch::before {
         background: var(--color-error-gradient);
     }
-    
+
     .queue-item--auto::before {
         background: var(--color-success-gradient);
     }
-    
+
     .queue-item--manual::before {
         background: var(--color-warning-gradient);
     }
-    
+
     .priority-badge {
         display: inline-flex;
         align-items: center;
@@ -62,27 +62,27 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
-    
+
     .priority-badge--urgent {
         background: var(--color-error);
         color: white;
     }
-    
+
     .priority-badge--high {
         background: var(--color-warning);
         color: var(--color-gray-800);
     }
-    
+
     .priority-badge--medium {
         background: var(--color-success);
         color: white;
     }
-    
+
     .priority-badge--low {
         background: var(--color-gray-500);
         color: white;
     }
-    
+
     .status-badge {
         display: inline-flex;
         align-items: center;
@@ -93,46 +93,46 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
-    
+
     .status-badge--high-touch {
         background: var(--color-error);
         color: white;
     }
-    
+
     .status-badge--shortlisted {
         background: var(--color-success);
         color: white;
     }
-    
+
     .status-badge--matching {
         background: var(--color-warning);
         color: var(--color-gray-800);
     }
-    
+
     .status-badge--submitted {
         background: var(--color-gray-500);
         color: white;
     }
-    
+
     .action-buttons {
         display: flex;
         gap: var(--space-3);
         margin-top: var(--space-4);
         flex-wrap: wrap;
     }
-    
+
     .empty-state {
         text-align: center;
         padding: var(--space-16) var(--space-4);
         color: var(--color-gray-500);
     }
-    
+
     .empty-state-icon {
         font-size: 4rem;
         margin-bottom: var(--space-6);
         opacity: 0.6;
     }
-    
+
     .filter-controls {
         background: var(--color-gray-50);
         padding: var(--space-6);
@@ -140,19 +140,19 @@
         margin-bottom: var(--space-8);
         border: 1px solid var(--color-gray-200);
     }
-    
+
     .filter-row {
         display: flex;
         gap: var(--space-4);
         align-items: end;
         flex-wrap: wrap;
     }
-    
+
     .filter-group {
         flex: 1;
         min-width: 200px;
     }
-    
+
     .filter-group label {
         display: block;
         font-weight: var(--font-weight-medium);
@@ -160,7 +160,7 @@
         margin-bottom: var(--space-2);
         font-size: var(--font-size-sm);
     }
-    
+
     .filter-group select {
         width: 100%;
         padding: var(--space-3);
@@ -170,19 +170,19 @@
         font-size: var(--font-size-base);
         transition: border-color var(--transition-fast);
     }
-    
+
     .filter-group select:focus {
         outline: none;
         border-color: var(--color-primary);
         box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1);
     }
-    
+
     @media (max-width: 768px) {
         .filter-row {
             flex-direction: column;
             align-items: stretch;
         }
-        
+
         .filter-group {
             min-width: auto;
         }
@@ -266,7 +266,7 @@
 
     <!-- Referral Queues -->
     <h2 style="font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); color: var(--color-gray-800); margin: var(--space-8) 0 var(--space-6) 0;">Referral Queues</h2>
-    
+
     <!-- High-Touch Queue -->
     <div class="card card--elevated mb-8">
         <div class="card__header">
@@ -274,7 +274,7 @@
             <p class="card__subtitle">Referrals requiring manual review and expert matching</p>
         </div>
         <div class="card__content">
-                
+
             <div id="high-touch-queue-list" role="region" aria-labelledby="high-touch-queue-heading" aria-live="polite">
                 {% if high_touch_referrals %}
                     {% for referral in high_touch_referrals %}
@@ -282,7 +282,7 @@
                         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6); align-items: start;">
                             <div>
                                 <h4 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-gray-800); margin: 0 0 var(--space-2) 0;" id="referral-{{ referral.id }}-title">
-                                    <a href="{% url 'referrals:detail' referral.id %}" style="color: var(--color-primary); text-decoration: none;" 
+                                    <a href="{% url 'referrals:detail' referral.id %}" style="color: var(--color-primary); text-decoration: none;"
                                        aria-describedby="referral-{{ referral.id }}-description">
                                         {{ referral.referral_id }}
                                     </a>
@@ -298,22 +298,22 @@
                             </div>
                             <div>
                                 <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);" role="group" aria-label="Referral status indicators">
-                                    <span class="priority-badge priority-badge--{{ referral.priority }}" 
+                                    <span class="priority-badge priority-badge--{{ referral.priority }}"
                                           aria-label="Priority: {{ referral.get_priority_display }}">
                                         {{ referral.get_priority_display }}
                                     </span>
-                                    <span class="status-badge status-badge--high-touch" 
+                                    <span class="status-badge status-badge--high-touch"
                                           aria-label="Status: High-Touch queue">
                                         High-Touch
                                     </span>
                                 </div>
                                 <div class="action-buttons" role="group" aria-label="Referral actions">
-                                    <a href="{% url 'matching:find_matches' referral.id %}" 
+                                    <a href="{% url 'matching:find_matches' referral.id %}"
                                        class="btn btn--primary btn--sm"
                                        aria-describedby="find-matches-help-{{ referral.id }}">
                                         Find Matches
                                     </a>
-                                    <a href="{% url 'referrals:detail' referral.id %}" 
+                                    <a href="{% url 'referrals:detail' referral.id %}"
                                        class="btn btn--secondary btn--sm"
                                        aria-describedby="view-details-help-{{ referral.id }}">
                                         View Details
@@ -354,7 +354,7 @@
                             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6); align-items: start;">
                                 <div>
                                     <h4 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-gray-800); margin: 0 0 var(--space-2) 0;" id="referral-{{ referral.id }}-title">
-                                        <a href="{% url 'referrals:detail' referral.id %}" style="color: var(--color-primary); text-decoration: none;" 
+                                        <a href="{% url 'referrals:detail' referral.id %}" style="color: var(--color-primary); text-decoration: none;"
                                            aria-describedby="referral-{{ referral.id }}-description">
                                             {{ referral.referral_id }}
                                         </a>
@@ -370,17 +370,17 @@
                                 </div>
                                 <div>
                                     <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);" role="group" aria-label="Referral status indicators">
-                                        <span class="priority-badge priority-badge--{{ referral.priority }}" 
+                                        <span class="priority-badge priority-badge--{{ referral.priority }}"
                                               aria-label="Priority: {{ referral.get_priority_display }}">
                                             {{ referral.get_priority_display }}
                                         </span>
-                                        <span class="status-badge status-badge--shortlisted" 
+                                        <span class="status-badge status-badge--shortlisted"
                                               aria-label="Status: Auto-routed">
                                             Auto-Routed
                                         </span>
                                     </div>
                                     <div class="action-buttons" role="group" aria-label="Referral actions">
-                                        <a href="{% url 'referrals:detail' referral.id %}" 
+                                        <a href="{% url 'referrals:detail' referral.id %}"
                                            class="btn btn--primary btn--sm"
                                            aria-describedby="view-details-help-{{ referral.id }}">
                                             View Details
@@ -418,7 +418,7 @@
                             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6); align-items: start;">
                                 <div>
                                     <h4 style="font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); color: var(--color-gray-800); margin: 0 0 var(--space-2) 0;" id="referral-{{ referral.id }}-title">
-                                        <a href="{% url 'referrals:detail' referral.id %}" style="color: var(--color-primary); text-decoration: none;" 
+                                        <a href="{% url 'referrals:detail' referral.id %}" style="color: var(--color-primary); text-decoration: none;"
                                            aria-describedby="referral-{{ referral.id }}-description">
                                             {{ referral.referral_id }}
                                         </a>
@@ -434,22 +434,22 @@
                                 </div>
                                 <div>
                                     <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);" role="group" aria-label="Referral status indicators">
-                                        <span class="priority-badge priority-badge--{{ referral.priority }}" 
+                                        <span class="priority-badge priority-badge--{{ referral.priority }}"
                                               aria-label="Priority: {{ referral.get_priority_display }}">
                                             {{ referral.get_priority_display }}
                                         </span>
-                                        <span class="status-badge status-badge--matching" 
+                                        <span class="status-badge status-badge--matching"
                                               aria-label="Status: Manual review required">
                                             Manual Review
                                         </span>
                                     </div>
                                     <div class="action-buttons" role="group" aria-label="Referral actions">
-                                        <a href="{% url 'matching:find_matches' referral.id %}" 
+                                        <a href="{% url 'matching:find_matches' referral.id %}"
                                            class="btn btn--primary btn--sm"
                                            aria-describedby="find-matches-help-{{ referral.id }}">
                                             Find Matches
                                         </a>
-                                        <a href="{% url 'referrals:detail' referral.id %}" 
+                                        <a href="{% url 'referrals:detail' referral.id %}"
                                            class="btn btn--secondary btn--sm"
                                            aria-describedby="view-details-help-{{ referral.id }}">
                                             View Details
@@ -483,7 +483,7 @@
     <div class="card__content">
         <h3 class="card__title" id="quick-actions-heading">Quick Actions</h3>
         <div class="action-buttons" role="group" aria-labelledby="quick-actions-heading">
-            <a href="{% url 'referrals:create' %}" class="btn btn--primary" 
+            <a href="{% url 'referrals:create' %}" class="btn btn--primary"
                aria-describedby="create-referral-help">Create New Referral</a>
             <a href="{% url 'matching:performance_metrics' %}" class="btn btn--secondary"
                aria-describedby="performance-metrics-help">View Performance Metrics</a>
@@ -491,7 +491,7 @@
                aria-describedby="configure-thresholds-help">Configure Thresholds</a>
             <button id="refresh-data" class="btn btn--secondary"
                     aria-describedby="refresh-data-help">Refresh Data</button>
-            
+
             <div style="position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden;" id="create-referral-help">
                 Create a new referral for a patient
             </div>
@@ -520,20 +520,20 @@ document.addEventListener('DOMContentLoaded', function() {
             refreshButton.disabled = true;
             refreshButton.textContent = 'Refreshing...';
             refreshButton.setAttribute('aria-label', 'Refreshing dashboard data, please wait');
-            
+
             // Announce refresh to screen readers
             const statusAnnouncements = document.getElementById('status-announcements');
             if (statusAnnouncements) {
                 statusAnnouncements.textContent = 'Refreshing dashboard data, please wait';
             }
-            
+
             // Simulate refresh (in real implementation, this would make an API call)
             setTimeout(() => {
                 location.reload();
             }, 1000);
         });
     }
-    
+
     // Auto-refresh every 30 seconds
     setInterval(function() {
         // Only refresh if no user interaction in the last 5 minutes
@@ -541,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
             location.reload();
         }
     }, 30000);
-    
+
     // Filter form submission
     const filterForm = document.querySelector('.filter-row');
     if (filterForm) {
@@ -553,7 +553,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitButton.disabled = true;
                 submitButton.setAttribute('aria-label', 'Filtering referrals, please wait');
             }
-            
+
             // Announce filtering to screen readers
             const statusAnnouncements = document.getElementById('status-announcements');
             if (statusAnnouncements) {

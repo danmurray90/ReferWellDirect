@@ -5,6 +5,7 @@ A Django-first referral matching platform for connecting patients with mental he
 ## Overview
 
 ReferWell Direct is a local-only MVP that matches patients with appropriate psychologists based on:
+
 - NHS/private preference
 - Remote vs in-person availability
 - Geographic radius (PostGIS)
@@ -23,6 +24,7 @@ ReferWell Direct is a local-only MVP that matches patients with appropriate psyc
 ## Quick Start
 
 1. **Clone and setup**:
+
    ```bash
    git clone <repository>
    cd referwell-direct
@@ -31,6 +33,7 @@ ReferWell Direct is a local-only MVP that matches patients with appropriate psyc
    ```
 
 2. **Start services**:
+
    ```bash
    make up          # Start Postgres + Redis
    make migrate     # Run database migrations
@@ -77,6 +80,7 @@ make clean       # Clean up Docker volumes
 ## External Integrations (Stubbed)
 
 All external services are stubbed behind feature flags (OFF by default):
+
 - GOV.UK Notify (email/SMS)
 - Stripe Connect (payments)
 - NHS Login (authentication)

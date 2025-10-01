@@ -179,7 +179,7 @@
                 </ol>
             </div>
         </nav>
-        
+
         <h1 class="nhsuk-heading-xl">Performance Metrics</h1>
         <p class="nhsuk-body-l">Monitor system performance, cache efficiency, and matching statistics.</p>
     </div>
@@ -234,7 +234,7 @@
                 <p class="metric-label">Success Rate</p>
                 <p class="metric-description">Percentage of successful matches</p>
                 <div class="progress-bar">
-                    <div class="progress-fill progress-fill--{{ matching_stats.success_rate|floatformat:0|add:0|div:20|floatformat:0|add:0|default:0|lt:3|yesno:'good,warning,danger' }}" 
+                    <div class="progress-fill progress-fill--{{ matching_stats.success_rate|floatformat:0|add:0|div:20|floatformat:0|add:0|default:0|lt:3|yesno:'good,warning,danger' }}"
                          style="width: {{ matching_stats.success_rate|default:0 }}%"></div>
                 </div>
             </div>
@@ -356,23 +356,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Refresh metrics functionality
     const refreshButton = document.getElementById('refresh-metrics');
     const refreshIndicator = document.getElementById('refresh-indicator');
-    
+
     if (refreshButton) {
         refreshButton.addEventListener('click', function() {
             refreshIndicator.classList.add('active');
             refreshButton.disabled = true;
             refreshButton.textContent = 'Refreshing...';
-            
+
             // Simulate refresh (in real implementation, this would make an AJAX call)
             setTimeout(function() {
                 location.reload();
             }, 1000);
         });
     }
-    
+
     // Clear cache functionality
     const clearCacheButton = document.getElementById('clear-cache');
-    
+
     if (clearCacheButton) {
         clearCacheButton.addEventListener('click', function() {
             if (confirm('Are you sure you want to clear all caches? This may temporarily slow down the system.')) {
@@ -399,7 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Auto-refresh every 30 seconds
     setInterval(function() {
         if (document.visibilityState === 'visible') {
@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
             refreshButton.click();
         }
     }, 30000);
-    
+
     // Add CSRF token for AJAX requests
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
     if (!csrfToken) {

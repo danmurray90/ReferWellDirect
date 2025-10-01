@@ -3,17 +3,17 @@
 {% block step_content %}
 <form id="onboarding-form" method="post" action="{% url 'accounts:onboarding_complete_step' step_id=step.id %}" novalidate>
     {% csrf_token %}
-    
+
     <div class="nhsuk-form-group">
         <fieldset class="nhsuk-fieldset" aria-describedby="preferences-hint">
             <legend class="nhsuk-fieldset__legend nhsuk-fieldset__legend--l">
                 <h2 class="nhsuk-fieldset__heading">Your Preferences</h2>
             </legend>
-            
+
             <div class="nhsuk-hint" id="preferences-hint">
                 Customize your experience with these optional settings.
             </div>
-            
+
             <div class="nhsuk-form-group">
                 <label class="nhsuk-label" for="preferred_language">
                     Preferred language
@@ -24,7 +24,7 @@
                     <option value="gd" {% if form_data.preferred_language == 'gd' %}selected{% endif %}>Gàidhlig (Scottish Gaelic)</option>
                 </select>
             </div>
-            
+
             <div class="nhsuk-form-group">
                 <label class="nhsuk-label" for="timezone">
                     Timezone
@@ -36,17 +36,17 @@
                     <option value="Europe/Belfast" {% if form_data.timezone == 'Europe/Belfast' %}selected{% endif %}>Belfast (GMT/BST)</option>
                 </select>
             </div>
-            
+
             <div class="nhsuk-form-group">
                 <fieldset class="nhsuk-fieldset" aria-describedby="notification-hint">
                     <legend class="nhsuk-fieldset__legend nhsuk-fieldset__legend--m">
                         <h3 class="nhsuk-fieldset__heading">Notification preferences</h3>
                     </legend>
-                    
+
                     <div class="nhsuk-hint" id="notification-hint">
                         Choose how you'd like to receive notifications about your referrals and matches.
                     </div>
-                    
+
                     <div class="nhsuk-checkboxes">
                         <div class="nhsuk-checkboxes__item">
                             <input class="nhsuk-checkboxes__input" id="email_notifications" name="email_notifications" type="checkbox" value="true" checked>
@@ -57,7 +57,7 @@
                                 Receive important updates via email
                             </div>
                         </div>
-                        
+
                         <div class="nhsuk-checkboxes__item">
                             <input class="nhsuk-checkboxes__input" id="sms_notifications" name="sms_notifications" type="checkbox" value="true">
                             <label class="nhsuk-label nhsuk-checkboxes__label" for="sms_notifications">
@@ -67,7 +67,7 @@
                                 Receive urgent updates via text message
                             </div>
                         </div>
-                        
+
                         <div class="nhsuk-checkboxes__item">
                             <input class="nhsuk-checkboxes__input" id="in_app_notifications" name="in_app_notifications" type="checkbox" value="true" checked>
                             <label class="nhsuk-label nhsuk-checkboxes__label" for="in_app_notifications">
@@ -80,17 +80,17 @@
                     </div>
                 </fieldset>
             </div>
-            
+
             <div class="nhsuk-form-group">
                 <fieldset class="nhsuk-fieldset" aria-describedby="privacy-hint">
                     <legend class="nhsuk-fieldset__legend nhsuk-fieldset__legend--m">
                         <h3 class="nhsuk-fieldset__heading">Privacy settings</h3>
                     </legend>
-                    
+
                     <div class="nhsuk-hint" id="privacy-hint">
                         Control how your information is used for matching and communication.
                     </div>
-                    
+
                     <div class="nhsuk-radios">
                         <div class="nhsuk-radios__item">
                             <input class="nhsuk-radios__input" id="privacy_standard" name="privacy_level" type="radio" value="standard" checked>
@@ -101,7 +101,7 @@
                                 Share basic information for matching purposes
                             </div>
                         </div>
-                        
+
                         <div class="nhsuk-radios__item">
                             <input class="nhsuk-radios__input" id="privacy_enhanced" name="privacy_level" type="radio" value="enhanced">
                             <label class="nhsuk-label nhsuk-radios__label" for="privacy_enhanced">
@@ -116,7 +116,7 @@
             </div>
         </fieldset>
     </div>
-    
+
     <div class="nhsuk-inset-text">
         <span class="nhsuk-u-visually-hidden">Information: </span>
         <p>You can change these preferences at any time in your account settings.</p>

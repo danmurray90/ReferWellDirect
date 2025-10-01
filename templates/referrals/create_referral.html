@@ -21,7 +21,7 @@
                 <div class="card-body">
                     <form method="post" novalidate>
                         {% csrf_token %}
-                        
+
                         {% if form.non_field_errors %}
                             <div class="alert alert-danger">
                                 {{ form.non_field_errors }}
@@ -202,7 +202,7 @@
                         <li>Patient preferences and requirements</li>
                         <li>Geographic preferences if applicable</li>
                     </ul>
-                    
+
                     <h3>Priority Levels</h3>
                     <ul>
                         <li><strong>Low:</strong> Routine referral</li>

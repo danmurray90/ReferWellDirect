@@ -3,6 +3,7 @@
 ## High Priority (Current Sprint)
 
 ### Repository Setup
+
 - [x] Create README.md with project overview
 - [x] Create PROJECT_MILESTONES.md with roadmap
 - [x] Create OPEN_TASKS.md (this file)
@@ -16,6 +17,7 @@
 - [x] Create .gitignore file
 
 ### Django Project Structure
+
 - [x] Create Django project "referwell"
 - [x] Create app modules: accounts, referrals, catalogue, matching, inbox, payments, ops
 - [x] Configure Django settings for development/production
@@ -23,6 +25,7 @@
 - [x] Configure static files and media handling
 
 ### Database Models
+
 - [x] Create Patient model
 - [x] Create GP/Referrer model
 - [x] Create Psychologist model
@@ -36,6 +39,7 @@
 - [x] Create database migrations
 
 ### Development Environment
+
 - [x] Set up Docker services (Postgres + Redis + Mailcatcher)
 - [x] Configure Celery with beat schedule
 - [x] Create local development commands
@@ -43,6 +47,7 @@
 - [x] Configure coverage reporting
 
 ### Basic UI Pages
+
 - [x] Create home page with NHS.UK design system
 - [x] Create dashboard interface
 - [x] Create user authentication system
@@ -50,6 +55,7 @@
 - [x] Enable Django admin interface
 
 ### Cursor Rules
+
 - [x] Create .cursor/rules/ directory
 - [x] Add Django-specific rules
 - [x] Add accessibility rules
@@ -59,6 +65,7 @@
 ## Medium Priority (Next Sprint)
 
 ### Phase 4: Advanced Features
+
 - [ ] Real-time notifications system
 - [ ] Advanced search and filtering interface
 - [ ] Bulk operations for referrals and appointments
@@ -67,12 +74,14 @@
 - [ ] Data export capabilities
 
 ### User Experience Enhancements
+
 - [ ] Enhanced dashboard with real-time updates
 - [ ] Advanced user preferences management
 - [ ] Improved mobile experience
 - [ ] Accessibility improvements and testing
 
 ### Testing
+
 - [x] Write model tests
 - [x] Write service tests
 - [x] Write view tests
@@ -82,6 +91,7 @@
 ## Phase 4: Advanced Features (Current Sprint)
 
 ### Premium Design System Implementation
+
 - [x] **Comprehensive CSS Framework**: Created premium design system with custom properties, color palette, and typography
 - [x] **Modern Navigation**: Implemented sophisticated navbar with gradient branding and user interface
 - [x] **Dashboard Redesign**: Enhanced dashboard with premium stat cards, data visualization, and information architecture
@@ -92,6 +102,7 @@
 - [x] **Performance Optimization**: Efficient CSS with minimal overhead and fast loading
 
 ### Real-time Notifications
+
 - [x] WebSocket implementation for real-time updates
 - [x] Server-Sent Events (SSE) for notifications
 - [x] Notification preferences management
@@ -99,6 +110,7 @@
 - [x] Email notification templates
 
 ### Advanced Search & Filtering
+
 - [ ] Enhanced search interface for referrals
 - [ ] Advanced filtering options
 - [ ] Search result ranking and sorting
@@ -106,6 +118,7 @@
 - [ ] Search analytics and insights
 
 ### Bulk Operations
+
 - [ ] Bulk referral creation and management
 - [ ] Batch appointment scheduling
 - [ ] Mass data import/export
@@ -113,6 +126,7 @@
 - [ ] Progress tracking for bulk operations
 
 ### Reporting & Analytics
+
 - [ ] Performance metrics dashboard
 - [ ] Referral success rate analytics
 - [ ] User activity reports
@@ -120,6 +134,7 @@
 - [ ] Custom report builder
 
 ### API Documentation
+
 - [ ] Interactive API documentation (Swagger/OpenAPI)
 - [ ] API versioning strategy
 - [ ] Rate limiting and throttling
@@ -129,6 +144,7 @@
 ## Low Priority (Future Sprints)
 
 ### External Integrations (Stubbed)
+
 - [ ] GOV.UK Notify adapter
 - [ ] Stripe Connect adapter
 - [ ] NHS Login adapter
@@ -136,6 +152,7 @@
 - [ ] e-RS adapter
 
 ### Production Readiness
+
 - [ ] Security hardening
 - [ ] Performance monitoring
 - [ ] Error tracking
@@ -143,6 +160,7 @@
 - [ ] Deployment automation
 
 ## Completed Tasks
+
 - [x] Repository scaffolding and configuration files
 - [x] README.md with comprehensive setup instructions
 - [x] PROJECT_MILESTONES.md with detailed roadmap
@@ -176,6 +194,7 @@
 ## Recently Completed (Latest Sprint)
 
 ### Bug Fixes & System Improvements
+
 - [x] **Onboarding Error Fix**: Resolved AttributeError in onboarding_start when current_step is None
 - [x] **Error Handling Enhancement**: Added comprehensive error handling for missing onboarding steps
 - [x] **Default Data Setup**: Created management command to set up default onboarding steps for all user types
@@ -183,6 +202,7 @@
 - [x] **User Experience**: Improved error messages and graceful handling of edge cases in onboarding flow
 
 ### Premium Design System Implementation
+
 - [x] **Comprehensive CSS Framework**: Created premium design system with custom properties, color palette, and typography
 - [x] **Modern Navigation**: Implemented sophisticated navbar with gradient branding and user interface
 - [x] **Dashboard Redesign**: Enhanced dashboard with premium stat cards, data visualization, and information architecture
@@ -193,6 +213,7 @@
 - [x] **Performance Optimization**: Efficient CSS with minimal overhead and fast loading
 
 ### User Onboarding Flow
+
 - [x] **OnboardingStep Model**: Complete model for defining onboarding steps by user type
 - [x] **UserOnboardingProgress Model**: Track individual user progress through steps
 - [x] **OnboardingSession Model**: Manage overall onboarding sessions with progress tracking
@@ -207,6 +228,7 @@
 - [x] **Default Steps Setup**: Created 15 default onboarding steps for all user types (GP, Patient, Psychologist, Admin, High-Touch Referrer)
 
 ### Real-time Notifications System
+
 - [x] **Notification Models**: Complete data model with Notification, NotificationPreference, NotificationTemplate, and NotificationChannel
 - [x] **Multi-Channel Delivery**: In-app, email, and push notification support with user preferences
 - [x] **WebSocket Infrastructure**: Real-time bidirectional communication with Django Channels
@@ -227,6 +249,7 @@
 - [x] **Notification Types**: Referral updates, matching complete, invitations, responses, appointments, system, and reminders
 
 ### Core Matching Engine
+
 - [x] **VectorEmbeddingService**: Complete implementation with Sentence-Transformers
 - [x] **BM25Service**: TF-IDF based lexical search with configurable parameters
 - [x] **HybridRetrievalService**: Combines vector similarity and BM25 with weighted scoring
@@ -239,6 +262,7 @@
 - [x] **Documentation Updates**: Updated milestones and task tracking
 
 ### User Experience
+
 - [x] **NHS.UK Design System**: Complete integration with responsive templates
 - [x] **Accessibility Compliance**: WCAG 2.2 AA compliant with ARIA labels and screen reader support
 - [x] **Mobile-Responsive Design**: Mobile-first approach with NHS.UK patterns
@@ -246,6 +270,7 @@
 - [x] **Error Handling**: Comprehensive validation and user feedback
 
 ### Technical Improvements
+
 - [x] Fixed JSONField default values to use callables
 - [x] Updated requirements.txt with compatible dependency versions
 - [x] Added proper error handling and logging throughout
@@ -256,6 +281,7 @@
 - [x] Added accessibility features throughout all templates
 
 ## Notes
+
 - All external integrations must be stubbed behind feature flags
 - Focus on accessibility compliance (WCAG 2.2 AA)
 - Maintain comprehensive audit logging

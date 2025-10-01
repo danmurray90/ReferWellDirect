@@ -186,9 +186,9 @@
                 </ol>
             </div>
         </nav>
-        
+
         <h1 class="nhsuk-heading-xl" id="page-title">Matching Results</h1>
-        
+
         <!-- Status announcements for screen readers -->
         <div class="nhsuk-u-visually-hidden" aria-live="polite" id="status-announcements"></div>
     </div>
@@ -212,8 +212,8 @@
                 <div class="nhsuk-grid-column-one-third">
                     <div class="nhsuk-u-text-align-right">
                         <p class="nhsuk-body-s" id="confidence-label">Confidence Score</p>
-                        <span class="confidence-score confidence-score--{{ confidence_level }}" 
-                              id="confidence-score" 
+                        <span class="confidence-score confidence-score--{{ confidence_level }}"
+                              id="confidence-score"
                               aria-labelledby="confidence-label"
                               aria-label="Confidence score: {{ highest_score|floatformat:3 }}">
                             {{ highest_score|floatformat:3 }}
@@ -229,7 +229,7 @@
 {% if routing_decision %}
 <div class="nhsuk-grid-row">
     <div class="nhsuk-grid-column-full">
-        <div class="routing-decision routing-decision--{{ routing_decision.decision }}" 
+        <div class="routing-decision routing-decision--{{ routing_decision.decision }}"
              role="region" aria-labelledby="routing-decision-heading">
             <h3 class="nhsuk-heading-m" id="routing-decision-heading">Routing Decision</h3>
             <p class="nhsuk-body-m" id="routing-reason">
@@ -293,15 +293,15 @@
         {% if matches %}
             <h2 class="nhsuk-heading-l" id="matching-psychologists-heading">Matching Psychologists</h2>
             <p class="nhsuk-body" id="matches-summary">Found {{ matches|length }} potential matches, ordered by confidence score.</p>
-            
+
             {% for match in matches %}
-            <div class="match-card match-card--{{ match.card_class }}" 
-                 role="article" 
+            <div class="match-card match-card--{{ match.card_class }}"
+                 role="article"
                  aria-labelledby="psychologist-{{ forloop.counter0 }}-name">
                 <div class="nhsuk-grid-row">
                     <div class="nhsuk-grid-column-two-thirds">
                         <h3 class="nhsuk-heading-m" id="psychologist-{{ forloop.counter0 }}-name">
-                            <a href="{% url 'catalogue:psychologist_detail' match.psychologist.id %}" 
+                            <a href="{% url 'catalogue:psychologist_detail' match.psychologist.id %}"
                                class="nhsuk-link"
                                aria-describedby="psychologist-{{ forloop.counter0 }}-specialisms">
                                 {{ match.psychologist.user.get_full_name }}
@@ -329,20 +329,20 @@
                     </div>
                     <div class="nhsuk-grid-column-one-third">
                         <div class="nhsuk-u-text-align-right">
-                            <p class="match-score" id="psychologist-{{ forloop.counter0 }}-score" 
+                            <p class="match-score" id="psychologist-{{ forloop.counter0 }}-score"
                                aria-label="Confidence score: {{ match.score|floatformat:3 }}">{{ match.score|floatformat:3 }}</p>
                             <p class="nhsuk-body-s" id="psychologist-{{ forloop.counter0 }}-score-label">Confidence Score</p>
                         </div>
                         <div class="action-buttons" role="group" aria-label="Actions for {{ match.psychologist.user.get_full_name }}">
-                            <a href="{% url 'catalogue:psychologist_detail' match.psychologist.id %}" 
+                            <a href="{% url 'catalogue:psychologist_detail' match.psychologist.id %}"
                                class="nhsuk-button nhsuk-button--small"
                                aria-describedby="view-profile-help-{{ forloop.counter0 }}">View Profile</a>
-                            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small" 
+                            <button class="nhsuk-button nhsuk-button--secondary nhsuk-button--small"
                                     onclick="showExplanation('{{ forloop.counter0 }}')"
                                     aria-describedby="show-details-help-{{ forloop.counter0 }}"
                                     aria-expanded="false"
                                     aria-controls="explanation-{{ forloop.counter0 }}">Show Details</button>
-                            
+
                             <div class="nhsuk-u-visually-hidden" id="view-profile-help-{{ forloop.counter0 }}">
                                 View full profile for {{ match.psychologist.user.get_full_name }}
                             </div>
@@ -352,11 +352,11 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Match Explanation (Hidden by default) -->
-                <div class="match-explanation" id="explanation-{{ forloop.counter0 }}" 
-                     style="display: none;" 
-                     role="region" 
+                <div class="match-explanation" id="explanation-{{ forloop.counter0 }}"
+                     style="display: none;"
+                     role="region"
                      aria-labelledby="explanation-heading-{{ forloop.counter0 }}">
                     <h4 class="nhsuk-heading-s" id="explanation-heading-{{ forloop.counter0 }}">Why this match?</h4>
                     <div class="explanation-item">
@@ -425,7 +425,7 @@
                        aria-describedby="back-to-dashboard-help">Back to Dashboard</a>
                     <a href="{% url 'referrals:edit' referral.id %}" class="nhsuk-button nhsuk-button--secondary"
                        aria-describedby="edit-referral-help">Edit Referral</a>
-                    
+
                     <div class="nhsuk-u-visually-hidden" id="back-to-dashboard-help">
                         Return to the matching dashboard
                     </div>
@@ -454,7 +454,7 @@
                        aria-describedby="view-referral-help">View Referral</a>
                     <a href="{% url 'matching:dashboard' %}" class="nhsuk-button nhsuk-button--secondary"
                        aria-describedby="back-to-dashboard-help">Back to Dashboard</a>
-                    
+
                     <div class="nhsuk-u-visually-hidden" id="create-shortlist-help">
                         Create a shortlist of selected psychologists
                     </div>
@@ -482,13 +482,13 @@ document.addEventListener('DOMContentLoaded', function() {
     window.showExplanation = function(index) {
         const explanation = document.getElementById('explanation-' + index);
         const button = event.target;
-        
+
         if (explanation.style.display === 'none') {
             explanation.style.display = 'block';
             button.textContent = 'Hide Details';
             button.setAttribute('aria-expanded', 'true');
             button.setAttribute('aria-label', 'Hide detailed explanation');
-            
+
             // Announce to screen readers
             const statusAnnouncements = document.getElementById('status-announcements');
             if (statusAnnouncements) {
@@ -499,7 +499,7 @@ document.addEventListener('DOMContentLoaded', function() {
             button.textContent = 'Show Details';
             button.setAttribute('aria-expanded', 'false');
             button.setAttribute('aria-label', 'Show detailed explanation');
-            
+
             // Announce to screen readers
             const statusAnnouncements = document.getElementById('status-announcements');
             if (statusAnnouncements) {
@@ -507,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     };
-    
+
     // Auto-refresh functionality
     const refreshButton = document.querySelector('a[href*="find_matches"]');
     if (refreshButton) {
@@ -517,15 +517,15 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = this.href;
         });
     }
-    
+
     function showLoadingSpinner() {
         const spinner = document.getElementById('loading-spinner');
         const container = document.getElementById('results-container');
-        
+
         if (spinner && container) {
             spinner.style.display = 'block';
             container.style.display = 'none';
-            
+
             // Announce loading to screen readers
             const statusAnnouncements = document.getElementById('status-announcements');
             if (statusAnnouncements) {
@@ -533,7 +533,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
+
     // Keyboard navigation for explanations
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function() {
             explanations.forEach(function(explanation) {
                 explanation.style.display = 'none';
             });
-            
+
             // Reset all buttons
             const buttons = document.querySelectorAll('button[onclick*="showExplanation"]');
             buttons.forEach(function(button) {
@@ -550,7 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 button.setAttribute('aria-expanded', 'false');
                 button.setAttribute('aria-label', 'Show detailed explanation');
             });
-            
+
             // Announce to screen readers
             const statusAnnouncements = document.getElementById('status-announcements');
             if (statusAnnouncements) {

@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Pipeline
 1) Feasibility filter: NHS/private preference; remote vs in-person; radius via ST_DWithin.
-2) Retrieval: 
+2) Retrieval:
    - Lexical (optional later) OR go vector-only MVP using Sentence-Transformers embeddings + pgvector similarity.
 3) Rerank: blend structured features (specialisms, language, modality, distance band, capacity) with similarity score.
 4) Confidence: scikit-learn calibrated probability (isotonic or Platt). Threshold τ routes Auto vs High-Touch.

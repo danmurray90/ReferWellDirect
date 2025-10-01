@@ -6,11 +6,11 @@
         <legend class="nhsuk-fieldset__legend nhsuk-fieldset__legend--l">
             <h2 class="nhsuk-fieldset__heading">Verify Your Identity</h2>
         </legend>
-        
+
         <div class="nhsuk-hint" id="verification-hint">
             To ensure the security and integrity of our service, we need to verify your identity.
         </div>
-        
+
         <div class="nhsuk-grid-row">
             <div class="nhsuk-grid-column-one-half">
                 <div class="nhsuk-card">
@@ -29,7 +29,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="nhsuk-grid-column-one-half">
                 <div class="nhsuk-card">
                     <div class="nhsuk-card__content">
@@ -50,7 +50,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="nhsuk-warning-callout">
             <h3 class="nhsuk-warning-callout__label">
                 <span role="text">
@@ -60,7 +60,7 @@
             </h3>
             <p>You must complete verification to access all features of ReferWell Direct. This helps us maintain the highest standards of care and security.</p>
         </div>
-        
+
         <div class="nhsuk-form-group">
             <div class="nhsuk-checkboxes">
                 <div class="nhsuk-checkboxes__item">
@@ -69,7 +69,7 @@
                         I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
                     </label>
                 </div>
-                
+
                 <div class="nhsuk-checkboxes__item">
                     <input class="nhsuk-checkboxes__input" id="data_sharing" name="data_sharing" type="checkbox" value="true" required>
                     <label class="nhsuk-label nhsuk-checkboxes__label" for="data_sharing">
@@ -103,7 +103,7 @@ function checkVerificationStatus() {
     // For now, we'll simulate a check
     const emailVerified = document.getElementById('email_verified')?.checked || false;
     const professionalVerified = document.getElementById('professional_verified')?.checked || false;
-    
+
     if (emailVerified && professionalVerified) {
         document.getElementById('onboarding-form').style.display = 'block';
         document.querySelector('.onboarding-navigation .nhsuk-button--primary').style.display = 'block';

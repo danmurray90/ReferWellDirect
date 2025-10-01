@@ -128,12 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Django specific
-media/
-staticfiles/
-static/
-
-# IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
@@ -149,38 +144,29 @@ static/
 ehthumbs.db
 Thumbs.db
 
-# Docker
-.dockerignore
-
-# Logs
+# Project specific
 logs/
-*.log
+staticfiles/
+media/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Database
-*.db
 *.sqlite3
+*.db
 
-# Temporary files
-*.tmp
-*.temp
+# Redis dump
+dump.rdb
+
+# Bandit reports
+bandit-report.json
 
 # Coverage reports
 htmlcov/
 .coverage
 coverage.xml
 
-# Bandit security reports
-bandit-report.json
-
-# Local development
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Node modules (if any)
-node_modules/
-
-# Backup files
-*.bak
-*.backup
+# Pre-commit
+.pre-commit-cache/

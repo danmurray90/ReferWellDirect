@@ -3,24 +3,24 @@
 {% block step_content %}
 <form id="onboarding-form" method="post" action="{% url 'accounts:onboarding_complete_step' step_id=step.id %}" novalidate>
     {% csrf_token %}
-    
+
     <div class="nhsuk-form-group">
         <fieldset class="nhsuk-fieldset" aria-describedby="profile-hint">
             <legend class="nhsuk-fieldset__legend nhsuk-fieldset__legend--l">
                 <h2 class="nhsuk-fieldset__heading">Your Profile Information</h2>
             </legend>
-            
+
             <div class="nhsuk-hint" id="profile-hint">
                 Please provide your basic profile information. This helps us personalize your experience.
             </div>
-            
+
             <div class="nhsuk-grid-row">
                 <div class="nhsuk-grid-column-one-half">
                     <div class="nhsuk-form-group">
                         <label class="nhsuk-label" for="first_name">
                             First name
                         </label>
-                        <input class="nhsuk-input" id="first_name" name="first_name" type="text" 
+                        <input class="nhsuk-input" id="first_name" name="first_name" type="text"
                                value="{{ form_data.first_name|default:'' }}" required
                                aria-describedby="first_name-hint">
                         <div class="nhsuk-hint" id="first_name-hint">
@@ -28,13 +28,13 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="nhsuk-grid-column-one-half">
                     <div class="nhsuk-form-group">
                         <label class="nhsuk-label" for="last_name">
                             Last name
                         </label>
-                        <input class="nhsuk-input" id="last_name" name="last_name" type="text" 
+                        <input class="nhsuk-input" id="last_name" name="last_name" type="text"
                                value="{{ form_data.last_name|default:'' }}" required
                                aria-describedby="last_name-hint">
                         <div class="nhsuk-hint" id="last_name-hint">
@@ -43,20 +43,20 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="nhsuk-form-group">
                 <label class="nhsuk-label" for="phone">
                     Phone number
                 </label>
-                <input class="nhsuk-input" id="phone" name="phone" type="tel" 
-                       value="{{ form_data.phone|default:'' }}" 
+                <input class="nhsuk-input" id="phone" name="phone" type="tel"
+                       value="{{ form_data.phone|default:'' }}"
                        pattern="^(\+44|0)[0-9]{10,11}$"
                        aria-describedby="phone-hint">
                 <div class="nhsuk-hint" id="phone-hint">
                     Include country code (e.g., +44 7700 900000)
                 </div>
             </div>
-            
+
             <div class="nhsuk-form-group">
                 <label class="nhsuk-label" for="date_of_birth">
                     Date of birth
@@ -70,8 +70,8 @@
                             <label class="nhsuk-label nhsuk-date-input__label" for="date_of_birth_day">
                                 Day
                             </label>
-                            <input class="nhsuk-input nhsuk-date-input__input nhsuk-input--width-2" 
-                                   id="date_of_birth_day" name="date_of_birth_day" type="number" 
+                            <input class="nhsuk-input nhsuk-date-input__input nhsuk-input--width-2"
+                                   id="date_of_birth_day" name="date_of_birth_day" type="number"
                                    pattern="[0-9]*" inputmode="numeric" min="1" max="31">
                         </div>
                     </div>
@@ -102,8 +102,8 @@
                             <label class="nhsuk-label nhsuk-date-input__label" for="date_of_birth_year">
                                 Year
                             </label>
-                            <input class="nhsuk-input nhsuk-date-input__input nhsuk-input--width-4" 
-                                   id="date_of_birth_year" name="date_of_birth_year" type="number" 
+                            <input class="nhsuk-input nhsuk-date-input__input nhsuk-input--width-4"
+                                   id="date_of_birth_year" name="date_of_birth_year" type="number"
                                    pattern="[0-9]*" inputmode="numeric" min="1900" max="2024">
                         </div>
                     </div>
@@ -111,7 +111,7 @@
             </div>
         </fieldset>
     </div>
-    
+
     <div class="nhsuk-inset-text">
         <span class="nhsuk-u-visually-hidden">Information: </span>
         <p>This information will be used to personalize your experience and help match you with appropriate services.</p>

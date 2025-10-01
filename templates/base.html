@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ReferWell Direct{% endblock %}</title>
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Premium Design System CSS -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/premium-design-system.css' %}">
-    
+
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -23,7 +23,7 @@
             <a href="{% url 'accounts:home' %}" class="navbar__brand">
                 <span style="background: var(--color-primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">ReferWell</span> Direct
             </a>
-            
+
             <div class="navbar__nav">
                 <a href="{% url 'accounts:home' %}" class="navbar__link {% if request.resolver_match.url_name == 'home' %}navbar__link--active{% endif %}">
                     Home
@@ -65,10 +65,10 @@
                 {% endfor %}
             </div>
         {% endif %}
-        
+
         <!-- Page Header -->
         {% block page_header %}{% endblock %}
-        
+
         <!-- Main Content -->
         <main class="main-content__body" id="maincontent" role="main">
             {% block content %}{% endblock %}
@@ -135,7 +135,7 @@
                     }
                 });
             });
-            
+
             // Add loading states to buttons
             document.querySelectorAll('.btn').forEach(button => {
                 button.addEventListener('click', function() {
@@ -149,7 +149,7 @@
             });
         });
     </script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

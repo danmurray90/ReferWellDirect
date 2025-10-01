@@ -8,7 +8,7 @@
 <body>
     <h1>Psychologist Dashboard</h1>
     <p>Welcome, {{ psychologist.title }} {{ psychologist.user.first_name }} {{ psychologist.user.last_name }}!</p>
-    
+
     <h2>Upcoming Appointments</h2>
     {% if upcoming_appointments %}
         <ul>
@@ -19,7 +19,7 @@
     {% else %}
         <p>No upcoming appointments.</p>
     {% endif %}
-    
+
     <h2>Profile Information</h2>
     <p>Service Type: {{ psychologist.get_service_type_display }}</p>
     <p>Modality: {{ psychologist.get_modality_display }}</p>
