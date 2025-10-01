@@ -1,24 +1,372 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psychologists - ReferWell Direct</title>
-</head>
-<body>
-    <h1>Available Psychologists</h1>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Browse Psychologists - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+.psychologist-card {
+    background: white;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.psychologist-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--color-primary);
+}
+
+.psychologist-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+
+.psychologist-info h3 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-800);
+    margin: 0 0 var(--space-1) 0;
+}
+
+.psychologist-title {
+    font-size: var(--font-size-base);
+    color: var(--color-gray-600);
+    margin: 0 0 var(--space-2) 0;
+}
+
+.psychologist-specialisms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.specialism-tag {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.psychologist-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.detail-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--color-gray-500);
+}
+
+.detail-label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-700);
+    font-size: var(--font-size-sm);
+}
+
+.detail-value {
+    color: var(--color-gray-600);
+    font-size: var(--font-size-sm);
+}
+
+.psychologist-actions {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+}
+
+.availability-badge {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.availability-badge--available {
+    background: var(--color-success-light);
+    color: var(--color-success);
+}
+
+.availability-badge--limited {
+    background: var(--color-warning-light);
+    color: var(--color-warning);
+}
+
+.availability-badge--unavailable {
+    background: var(--color-error-light);
+    color: var(--color-error);
+}
+
+.search-filters {
+    background: white;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    margin-bottom: var(--space-8);
+    box-shadow: var(--shadow-sm);
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-4);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.filter-group label {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-700);
+    font-size: var(--font-size-sm);
+}
+
+.filter-group select,
+.filter-group input {
+    padding: var(--space-3);
+    border: 2px solid var(--color-gray-300);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    transition: all var(--transition-fast);
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-12) var(--space-6);
+    background: white;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-gray-800);
+    margin: 0 0 var(--space-2) 0;
+}
+
+.empty-state p {
+    color: var(--color-gray-600);
+    margin: 0 0 var(--space-6) 0;
+}
+
+@media (max-width: 768px) {
+    .psychologist-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .psychologist-details {
+        grid-template-columns: 1fr;
+    }
+
+    .psychologist-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Browse Psychologists</h1>
+        <p class="page-description">
+            Find qualified mental health professionals who can help with your specific needs.
+        </p>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-filters">
+        <h2 class="card-title" style="margin-bottom: var(--space-4);">Search & Filter</h2>
+        <form method="get" class="filter-form">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="service_type">Service Type</label>
+                    <select name="service_type" id="service_type">
+                        <option value="">All Services</option>
+                        <option value="nhs" {% if request.GET.service_type == 'nhs' %}selected{% endif %}>NHS</option>
+                        <option value="private" {% if request.GET.service_type == 'private' %}selected{% endif %}>Private</option>
+                        <option value="mixed" {% if request.GET.service_type == 'mixed' %}selected{% endif %}>Mixed</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="modality">Modality</label>
+                    <select name="modality" id="modality">
+                        <option value="">All Modalities</option>
+                        <option value="in_person" {% if request.GET.modality == 'in_person' %}selected{% endif %}>In-Person</option>
+                        <option value="online" {% if request.GET.modality == 'online' %}selected{% endif %}>Online</option>
+                        <option value="mixed" {% if request.GET.modality == 'mixed' %}selected{% endif %}>Mixed</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="specialism">Specialism</label>
+                    <select name="specialism" id="specialism">
+                        <option value="">All Specialisms</option>
+                        <option value="anxiety" {% if request.GET.specialism == 'anxiety' %}selected{% endif %}>Anxiety</option>
+                        <option value="depression" {% if request.GET.specialism == 'depression' %}selected{% endif %}>Depression</option>
+                        <option value="trauma" {% if request.GET.specialism == 'trauma' %}selected{% endif %}>Trauma</option>
+                        <option value="cbt" {% if request.GET.specialism == 'cbt' %}selected{% endif %}>CBT</option>
+                        <option value="psychotherapy" {% if request.GET.specialism == 'psychotherapy' %}selected{% endif %}>Psychotherapy</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="language">Language</label>
+                    <select name="language" id="language">
+                        <option value="">All Languages</option>
+                        <option value="en" {% if request.GET.language == 'en' %}selected{% endif %}>English</option>
+                        <option value="es" {% if request.GET.language == 'es' %}selected{% endif %}>Spanish</option>
+                        <option value="fr" {% if request.GET.language == 'fr' %}selected{% endif %}>French</option>
+                        <option value="de" {% if request.GET.language == 'de' %}selected{% endif %}>German</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: var(--space-6);">
+                <button type="submit" class="btn btn--primary">Apply Filters</button>
+                <a href="{% url 'catalogue:psychologist_list' %}" class="btn btn--secondary">Clear Filters</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results -->
     {% if psychologists %}
-        <ul>
+        <div class="results-header">
+            <h2 class="card-title">Available Psychologists ({{ psychologists|length }})</h2>
+        </div>
+
+        <div class="psychologist-list">
             {% for psychologist in psychologists %}
-                <li>
-                    <a href="{% url 'catalogue:psychologist_detail' psychologist.pk %}">
-                        {{ psychologist.title }} {{ psychologist.user.first_name }} {{ psychologist.user.last_name }}
-                    </a>
-                </li>
+            <div class="psychologist-card">
+                <div class="psychologist-header">
+                    <div class="psychologist-info">
+                        <h3>{{ psychologist.title }} {{ psychologist.user.first_name }} {{ psychologist.user.last_name }}</h3>
+                        <p class="psychologist-title">{{ psychologist.get_service_type_display }} • {{ psychologist.get_modality_display }}</p>
+
+                        {% if psychologist.specialisms %}
+                        <div class="psychologist-specialisms">
+                            {% for specialism in psychologist.specialisms %}
+                            <span class="specialism-tag">{{ specialism|title }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="psychologist-actions">
+                        <span class="availability-badge availability-badge--{% if psychologist.availability_status == 'available' %}available{% elif psychologist.availability_status == 'limited' %}limited{% else %}unavailable{% endif %}">
+                            {{ psychologist.get_availability_status_display }}
+                        </span>
+                        <a href="{% url 'catalogue:psychologist_detail' psychologist.pk %}" class="btn btn--primary">
+                            View Profile
+                        </a>
+                    </div>
+                </div>
+
+                <div class="psychologist-details">
+                    {% if psychologist.years_experience %}
+                    <div class="detail-item">
+                        <svg class="detail-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <div class="detail-label">Experience</div>
+                            <div class="detail-value">{{ psychologist.years_experience }} years</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if psychologist.registration_number %}
+                    <div class="detail-item">
+                        <svg class="detail-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <div class="detail-label">Registration</div>
+                            <div class="detail-value">{{ psychologist.registration_number }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if psychologist.languages %}
+                    <div class="detail-item">
+                        <svg class="detail-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7 2a1 1 0 011 1v1h3a1 1 0 110 2H9.578a18.87 18.87 0 01-1.724 4.78c.29.354.596.696.914 1.026a1 1 0 11-1.44 1.389c-.188-.196-.373-.396-.554-.6a19.098 19.098 0 01-3.107 3.567 1 1 0 01-1.334-1.49 17.087 17.087 0 003.13-3.733 18.992 18.992 0 01-1.487-2.494 1 1 0 111.79-.89c.234.47.489.928.764 1.372.417-.934.752-1.913.997-2.927H3a1 1 0 110-2h3V3a1 1 0 011-1zm6 6a1 1 0 01.894.553l2.991 5.982a.869.869 0 01.02.037l.99 1.98a1 1 0 11-1.79.895L15.383 16h-4.764l-.724 1.447a1 1 0 11-1.788-.894l.99-1.98.019-.038 2.99-5.982A1 1 0 0113 8zm-1.382 6h2.764L13 11.236 11.618 14z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <div class="detail-label">Languages</div>
+                            <div class="detail-value">{{ psychologist.languages|join:", "|title }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if psychologist.hourly_rate %}
+                    <div class="detail-item">
+                        <svg class="detail-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <div class="detail-label">Rate</div>
+                            <div class="detail-value">£{{ psychologist.hourly_rate }}/hour</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
             {% endfor %}
-        </ul>
+        </div>
     {% else %}
-        <p>No psychologists available.</p>
+        <div class="empty-state">
+            <div class="empty-state-icon">👩‍⚕️</div>
+            <h3>No Psychologists Found</h3>
+            <p>We couldn't find any psychologists matching your criteria. Try adjusting your filters or check back later.</p>
+            <a href="{% url 'catalogue:psychologist_list' %}" class="btn btn--primary">View All Psychologists</a>
+        </div>
     {% endif %}
-</body>
-</html>
+</div>
+{% endblock %}
