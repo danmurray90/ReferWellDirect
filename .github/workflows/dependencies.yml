@@ -1,0 +1,60 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Run every Monday at 9 AM
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-tools
+
+      - name: Update requirements
+        run: |
+          pip-compile --upgrade requirements.in
+          pip-compile --upgrade requirements-minimal.in
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(deps): update dependencies"
+          title: "chore(deps): update dependencies"
+          body: |
+            This PR updates the project dependencies to their latest versions.
+
+            ## Changes
+            - Updated Python package dependencies
+            - Updated minimal requirements
+
+            ## Testing
+            - [ ] All tests pass
+            - [ ] No breaking changes detected
+            - [ ] Security scan passes
+
+            Please review the changes and merge if everything looks good.
+          branch: update-dependencies
+          delete-branch: true

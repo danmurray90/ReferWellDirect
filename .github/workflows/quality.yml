@@ -1,0 +1,105 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install coverage pytest-cov
+
+      - name: Run tests with coverage
+        run: |
+          coverage run --source='.' manage.py test --settings=referwell.settings.development
+          coverage xml
+          coverage html
+        env:
+          SECRET_KEY: test-secret-key
+          DEBUG: "False"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-reports
+          path: |
+            coverage.xml
+            htmlcov/
+
+  lint-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install linting tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort mypy pylint
+
+      - name: Run Black check
+        run: black --check --diff .
+
+      - name: Run isort check
+        run: isort --check-only --diff .
+
+      - name: Run flake8
+        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Run mypy
+        run: mypy . --ignore-missing-imports --no-strict-optional
+
+      - name: Run pylint
+        run: pylint --rcfile=.pylintrc . || true
+
+  complexity-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Install complexity tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install radon xenon
+
+      - name: Run radon complexity check
+        run: |
+          radon cc . --min B
+          radon mi . --min B
+
+      - name: Run xenon complexity check
+        run: xenon --max-absolute B --max-modules A --max-average A .
