@@ -1,9 +1,8 @@
 """
 Notification services for ReferWell Direct.
 """
-import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 from celery import shared_task
 
@@ -11,7 +10,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.mail import send_mail
-from django.db import transaction
 from django.template import Context, Template
 from django.utils import timezone
 

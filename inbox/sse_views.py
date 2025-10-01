@@ -5,7 +5,6 @@ import json
 import time
 from typing import Any
 
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.http import JsonResponse, StreamingHttpResponse

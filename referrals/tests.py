@@ -12,7 +12,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Appointment, Candidate, Message, Referral, Task
+from .models import Appointment, Candidate, Referral
 
 User = get_user_model()
 

@@ -1,17 +1,13 @@
 """
 Tests for catalogue app.
 """
-import json
-
-from rest_framework import status
 from rest_framework.test import APITestCase
 
 from django.contrib.auth import get_user_model
-from django.contrib.gis.geos import Point
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from .models import Availability, Psychologist, Qualification, Review, Specialism
+from .models import Availability, Psychologist, Review, Specialism
 
 User = get_user_model()
 

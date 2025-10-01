@@ -1,6 +1,8 @@
 """
 Development settings for ReferWell Direct project.
 """
+import os
+
 from .base import *
 
 # Override base settings for development
@@ -85,6 +87,4 @@ LOGGING["handlers"]["file"] = {  # type: ignore[index]
 LOGGING["loggers"]["referwell"]["handlers"] = ["console", "file"]  # type: ignore[index]
 
 # Create logs directory if it doesn't exist
-import os
-
 os.makedirs(BASE_DIR / "logs", exist_ok=True)

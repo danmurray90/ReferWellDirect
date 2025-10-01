@@ -1,7 +1,6 @@
 """
 Serializers for ReferWell Direct inbox app.
 """
-from typing import Any
 
 from rest_framework import serializers
 

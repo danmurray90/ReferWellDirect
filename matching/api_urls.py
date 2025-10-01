@@ -3,9 +3,7 @@ API URL patterns for matching app.
 """
 from typing import List
 
-from django.urls import URLPattern, path
-
-from . import views
+from django.urls import URLPattern
 
 app_name = "matching_api"
 

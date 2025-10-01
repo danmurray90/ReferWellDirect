@@ -5,7 +5,6 @@ import uuid
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.contrib.gis.db import models as gis_models
-from django.contrib.gis.geos import Point
 from django.core.validators import RegexValidator
 from django.db import models
 

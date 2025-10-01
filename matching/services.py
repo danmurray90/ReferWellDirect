@@ -1,10 +1,9 @@
 """
 Matching services for ReferWell Direct.
 """
-import json
 import logging
 import pickle
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 import numpy as np
 from sklearn.calibration import CalibratedClassifierCV

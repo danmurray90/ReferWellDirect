@@ -9,7 +9,6 @@ from .models import (
     OnboardingSession,
     OnboardingStep,
     Organisation,
-    User,
     UserOnboardingProgress,
     UserOrganisation,
 )

@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from accounts.models import User
 from inbox.models import Notification, NotificationPreference
 from inbox.services import NotificationService
 from referrals.models import Referral

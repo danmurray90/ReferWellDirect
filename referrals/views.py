@@ -14,31 +14,22 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_http_methods
-from django.views.generic import DetailView, ListView, TemplateView, UpdateView
+from django.views.generic import DetailView, TemplateView, UpdateView
 
 from .bulk_operations_service import (
     AppointmentBulkOperationsService,
     TaskBulkOperationsService,
 )
 from .forms import ReferralForm
-from .models import Appointment, Candidate, Message, Referral, Task
+from .models import Appointment, Candidate, Referral
 from .search_service import AdvancedSearchService, BulkOperationsService
-from .serializers import (
-    AppointmentSerializer,
-    CandidateSerializer,
-    MessageSerializer,
-    ReferralSerializer,
-    TaskSerializer,
-)
+from .serializers import CandidateSerializer, ReferralSerializer
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):

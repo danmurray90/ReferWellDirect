@@ -1,8 +1,7 @@
 """
 Tests for the notification system.
 """
-import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from freezegun import freeze_time
 from rest_framework import status
@@ -14,7 +13,6 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from accounts.models import User
 from inbox.models import (
     Notification,
     NotificationChannel,
@@ -218,7 +216,7 @@ class NotificationServiceTests(TestCase):
 
     def test_create_notification_from_template(self):
         """Test creating notification from template."""
-        template = NotificationTemplate.objects.create(
+        NotificationTemplate.objects.create(
             name="test_template",
             notification_type="referral_update",
             title_template="Hello {{ user.first_name }}",
@@ -590,7 +588,7 @@ class NotificationCacheTests(TestCase):
     def test_user_preferences_caching(self):
         """Test that user preferences are cached."""
         # Create preferences
-        preferences = NotificationPreference.objects.create(
+        NotificationPreference.objects.create(
             user=self.user, referral_update_method="email"
         )
 

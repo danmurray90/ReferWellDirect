@@ -90,12 +90,12 @@ class Command(BaseCommand):
 
         # First call (should be slow - no cache)
         start_time = time.time()
-        embedding1 = vector_service.generate_embedding(test_text)
+        vector_service.generate_embedding(test_text)
         first_call_time = time.time() - start_time
 
         # Second call (should be fast - from cache)
         start_time = time.time()
-        embedding2 = vector_service.generate_embedding(test_text)
+        vector_service.generate_embedding(test_text)
         second_call_time = time.time() - start_time
 
         self.stdout.write(f"First embedding call: {first_call_time:.4f}s")
@@ -115,12 +115,12 @@ class Command(BaseCommand):
 
             # First call
             start_time = time.time()
-            results1 = bm25_service.search(test_query, top_k=3)
+            bm25_service.search(test_query, top_k=3)
             first_call_time = time.time() - start_time
 
             # Second call
             start_time = time.time()
-            results2 = bm25_service.search(test_query, top_k=3)
+            bm25_service.search(test_query, top_k=3)
             second_call_time = time.time() - start_time
 
             self.stdout.write(f"First BM25 call: {first_call_time:.4f}s")
@@ -146,13 +146,13 @@ class Command(BaseCommand):
 
         # Test single embedding
         start_time = time.time()
-        single_embedding = vector_service.generate_embedding(test_texts[0])
+        vector_service.generate_embedding(test_texts[0])
         single_time = time.time() - start_time
         self.stdout.write(f"Single embedding: {single_time:.4f}s")
 
         # Test batch embeddings
         start_time = time.time()
-        batch_embeddings = vector_service.generate_embeddings_batch(test_texts)
+        vector_service.generate_embeddings_batch(test_texts)
         batch_time = time.time() - start_time
         self.stdout.write(
             f"Batch embeddings ({len(test_texts)} texts): {batch_time:.4f}s"
@@ -161,7 +161,7 @@ class Command(BaseCommand):
 
         # Test cached embeddings
         start_time = time.time()
-        cached_embeddings = vector_service.generate_embeddings_batch(test_texts)
+        vector_service.generate_embeddings_batch(test_texts)
         cached_time = time.time() - start_time
         self.stdout.write(f"Cached batch embeddings: {cached_time:.4f}s")
         self.stdout.write(f"Cache speed improvement: {batch_time/cached_time:.2f}x")
@@ -254,7 +254,7 @@ class Command(BaseCommand):
 
         # Show cache statistics
         cache_stats = self.get_cache_stats()
-        self.stdout.write(f"\nCache statistics:")
+        self.stdout.write("\nCache statistics:")
         self.stdout.write(f"Total cache keys: {cache_stats['total_keys']}")
         self.stdout.write(f"Embedding caches: {cache_stats['embedding_keys']}")
         self.stdout.write(f"BM25 caches: {cache_stats['bm25_keys']}")
