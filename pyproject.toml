@@ -130,8 +130,20 @@ module = [
     "geopy.*",
     "factory.*",
     "freezegun.*",
+    "celery.*",
+    "environ.*",
+    "debug_toolbar.*",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "*.models",
+    "*.migrations.*",
+]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "referwell.settings.development"

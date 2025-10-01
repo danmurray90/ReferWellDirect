@@ -1,6 +1,8 @@
 """
 Management command to set up default notification templates.
 """
+from typing import Any
+
 from django.core.management.base import BaseCommand
 from django.template.loader import get_template
 
@@ -10,7 +12,7 @@ from inbox.models import NotificationTemplate
 class Command(BaseCommand):
     help = "Set up default notification templates"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         """Create default notification templates."""
 
         templates = [

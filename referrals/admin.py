@@ -1,6 +1,8 @@
 """
 Admin configuration for referrals app.
 """
+from typing import Any
+
 from django.contrib import admin
 from django.utils.html import format_html
 
@@ -71,7 +73,7 @@ class ReferralAdmin(admin.ModelAdmin):
         "completed_at",
     )
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: Any) -> Any:
         return (
             super()
             .get_queryset(request)
@@ -124,7 +126,7 @@ class CandidateAdmin(admin.ModelAdmin):
 
     readonly_fields = ("created_at", "updated_at")
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: Any) -> Any:
         return super().get_queryset(request).select_related("referral", "psychologist")
 
 
@@ -167,7 +169,7 @@ class AppointmentAdmin(admin.ModelAdmin):
 
     readonly_fields = ("created_at", "updated_at", "confirmed_at", "completed_at")
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: Any) -> Any:
         return (
             super()
             .get_queryset(request)
@@ -209,7 +211,7 @@ class MessageAdmin(admin.ModelAdmin):
 
     readonly_fields = ("created_at", "read_at")
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: Any) -> Any:
         return (
             super()
             .get_queryset(request)
@@ -248,7 +250,7 @@ class TaskAdmin(admin.ModelAdmin):
 
     readonly_fields = ("created_at", "updated_at", "completed_at")
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: Any) -> Any:
         return (
             super()
             .get_queryset(request)

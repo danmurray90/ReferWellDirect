@@ -1,6 +1,8 @@
 """
 Serializers for ReferWell Direct inbox app.
 """
+from typing import Any
+
 from rest_framework import serializers
 
 from django.contrib.auth import get_user_model
@@ -50,7 +52,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "read_at"]
 
-    def validate_notification_type(self, value):
+    def validate_notification_type(self, value: str) -> str:
         """Validate notification type."""
         valid_types = [choice[0] for choice in Notification.NotificationType.choices]
         if value not in valid_types:

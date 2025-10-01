@@ -2,6 +2,7 @@
 Tests for referrals app.
 """
 import json
+from typing import Any
 
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -21,23 +22,23 @@ class ReferralModelTest(TestCase):
     Test cases for Referral model.
     """
 
-    def setUp(self):
-        self.referrer = User.objects.create_user(
+    def setUp(self) -> None:
+        self.referrer = User.objects.create_user(  # type: ignore[attr-defined]  # type: ignore[attr-defined]
             email="referrer@example.com",
             first_name="Dr. John",
             last_name="Smith",
-            user_type=User.UserType.GP,
+            user_type="gp",  # type: ignore[attr-defined]
             password="testpass123",
         )
-        self.patient = User.objects.create_user(
+        self.patient = User.objects.create_user(  # type: ignore[attr-defined]  # type: ignore[attr-defined]
             email="patient@example.com",
             first_name="Jane",
             last_name="Doe",
-            user_type=User.UserType.PATIENT,
+            user_type="patient",  # type: ignore[attr-defined]
             password="testpass123",
         )
 
-    def test_create_referral(self):
+    def test_create_referral(self) -> None:
         """Test creating a referral."""
         referral = Referral.objects.create(
             referrer=self.referrer,
@@ -58,7 +59,7 @@ class ReferralModelTest(TestCase):
         self.assertEqual(referral.status, Referral.Status.DRAFT)
         self.assertTrue(referral.referral_id)
 
-    def test_referral_str_representation(self):
+    def test_referral_str_representation(self) -> None:
         """Test referral string representation."""
         referral = Referral.objects.create(
             referrer=self.referrer,
@@ -69,7 +70,7 @@ class ReferralModelTest(TestCase):
         expected = f"Referral {referral.referral_id} - {self.patient.get_full_name()}"
         self.assertEqual(str(referral), expected)
 
-    def test_referral_status_properties(self):
+    def test_referral_status_properties(self) -> None:
         """Test referral status properties."""
         referral = Referral.objects.create(
             referrer=self.referrer,
@@ -95,26 +96,26 @@ class CandidateModelTest(TestCase):
     Test cases for Candidate model.
     """
 
-    def setUp(self):
-        self.referrer = User.objects.create_user(
+    def setUp(self) -> None:
+        self.referrer = User.objects.create_user(  # type: ignore[attr-defined]
             email="referrer@example.com",
             first_name="Dr. John",
             last_name="Smith",
-            user_type=User.UserType.GP,
+            user_type="gp",  # type: ignore[attr-defined]
             password="testpass123",
         )
-        self.patient = User.objects.create_user(
+        self.patient = User.objects.create_user(  # type: ignore[attr-defined]
             email="patient@example.com",
             first_name="Jane",
             last_name="Doe",
-            user_type=User.UserType.PATIENT,
+            user_type="patient",  # type: ignore[attr-defined]
             password="testpass123",
         )
-        self.psychologist = User.objects.create_user(
+        self.psychologist = User.objects.create_user(  # type: ignore[attr-defined]
             email="psychologist@example.com",
             first_name="Dr. Sarah",
             last_name="Johnson",
-            user_type=User.UserType.PSYCHOLOGIST,
+            user_type="psychologist",  # type: ignore[attr-defined]
             password="testpass123",
         )
         self.referral = Referral.objects.create(
@@ -124,7 +125,7 @@ class CandidateModelTest(TestCase):
             created_by=self.referrer,
         )
 
-    def test_create_candidate(self):
+    def test_create_candidate(self) -> None:
         """Test creating a candidate."""
         candidate = Candidate.objects.create(
             referral=self.referral,
@@ -140,7 +141,7 @@ class CandidateModelTest(TestCase):
         self.assertEqual(candidate.similarity_score, 0.85)
         self.assertEqual(candidate.status, Candidate.Status.PENDING)
 
-    def test_candidate_str_representation(self):
+    def test_candidate_str_representation(self) -> None:
         """Test candidate string representation."""
         candidate = Candidate.objects.create(
             referral=self.referral, psychologist=self.psychologist
@@ -154,30 +155,30 @@ class ReferralViewsTest(TestCase):
     Test cases for referral views.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.client = Client()
-        self.referrer = User.objects.create_user(
+        self.referrer = User.objects.create_user(  # type: ignore[attr-defined]
             email="referrer@example.com",
             first_name="Dr. John",
             last_name="Smith",
-            user_type=User.UserType.GP,
+            user_type="gp",  # type: ignore[attr-defined]
             password="testpass123",
         )
-        self.patient = User.objects.create_user(
+        self.patient = User.objects.create_user(  # type: ignore[attr-defined]
             email="patient@example.com",
             first_name="Jane",
             last_name="Doe",
-            user_type=User.UserType.PATIENT,
+            user_type="patient",  # type: ignore[attr-defined]
             password="testpass123",
         )
 
-    def test_dashboard_view_authenticated(self):
+    def test_dashboard_view_authenticated(self) -> None:
         """Test dashboard view for authenticated user."""
         self.client.login(email="referrer@example.com", password="testpass123")
         response = self.client.get(reverse("referrals:dashboard"))
         self.assertEqual(response.status_code, 200)
 
-    def test_dashboard_view_unauthenticated(self):
+    def test_dashboard_view_unauthenticated(self) -> None:
         """Test dashboard view for unauthenticated user."""
         response = self.client.get(reverse("referrals:dashboard"))
         self.assertRedirects(
@@ -185,22 +186,22 @@ class ReferralViewsTest(TestCase):
             f"{reverse('accounts:signin')}?next={reverse('referrals:dashboard')}",
         )
 
-    def test_create_referral_view_get(self):
+    def test_create_referral_view_get(self) -> None:
         """Test create referral view GET request."""
         self.client.login(email="referrer@example.com", password="testpass123")
         response = self.client.get(reverse("referrals:create"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Create Referral")
 
-    def test_create_referral_view_post(self):
+    def test_create_referral_view_post(self) -> None:
         """Test create referral view POST request."""
         # Create a patient for the referral
-        patient = User.objects.create_user(
+        patient = User.objects.create_user(  # type: ignore[attr-defined]
             email="patient@example.com",
             password="testpass123",
             first_name="Patient",
             last_name="User",
-            user_type=User.UserType.PATIENT,
+            user_type="patient",  # type: ignore[attr-defined]
         )
 
         self.client.login(email="referrer@example.com", password="testpass123")
@@ -220,9 +221,11 @@ class ReferralViewsTest(TestCase):
         self.assertEqual(Referral.objects.count(), 1)
         referral = Referral.objects.first()
         self.assertIsNotNone(referral)
-        self.assertRedirects(
-            response, reverse("referrals:referral_detail", kwargs={"pk": referral.pk})
-        )
+        if referral is not None:  # Type guard for mypy
+            self.assertRedirects(
+                response,
+                reverse("referrals:referral_detail", kwargs={"pk": referral.pk}),
+            )
 
 
 class ReferralAPITest(APITestCase):
@@ -230,19 +233,19 @@ class ReferralAPITest(APITestCase):
     Test cases for referral API views.
     """
 
-    def setUp(self):
-        self.referrer = User.objects.create_user(
+    def setUp(self) -> None:
+        self.referrer = User.objects.create_user(  # type: ignore[attr-defined]
             email="referrer@example.com",
             first_name="Dr. John",
             last_name="Smith",
-            user_type=User.UserType.GP,
+            user_type="gp",  # type: ignore[attr-defined]
             password="testpass123",
         )
-        self.patient = User.objects.create_user(
+        self.patient = User.objects.create_user(  # type: ignore[attr-defined]
             email="patient@example.com",
             first_name="Jane",
             last_name="Doe",
-            user_type=User.UserType.PATIENT,
+            user_type="patient",  # type: ignore[attr-defined]
             password="testpass123",
         )
         self.referral = Referral.objects.create(
@@ -252,19 +255,19 @@ class ReferralAPITest(APITestCase):
             created_by=self.referrer,
         )
 
-    def test_referral_list_api_authenticated(self):
+    def test_referral_list_api_authenticated(self) -> None:
         """Test referral list API for authenticated user."""
         self.client.force_authenticate(user=self.referrer)
         response = self.client.get(reverse("referrals_api:referral-list"))
         self.assertEqual(response.status_code, 200)
         self.assertGreaterEqual(len(response.data), 1)
 
-    def test_referral_list_api_unauthenticated(self):
+    def test_referral_list_api_unauthenticated(self) -> None:
         """Test referral list API for unauthenticated user."""
         response = self.client.get(reverse("referrals_api:referral-list"))
         self.assertEqual(response.status_code, 403)
 
-    def test_referral_detail_api(self):
+    def test_referral_detail_api(self) -> None:
         """Test referral detail API."""
         self.client.force_authenticate(user=self.referrer)
         response = self.client.get(
@@ -273,7 +276,7 @@ class ReferralAPITest(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["referral_id"], self.referral.referral_id)
 
-    def test_submit_referral_api(self):
+    def test_submit_referral_api(self) -> None:
         """Test submit referral API."""
         self.client.force_authenticate(user=self.referrer)
         response = self.client.post(
@@ -286,7 +289,7 @@ class ReferralAPITest(APITestCase):
         self.referral.refresh_from_db()
         self.assertEqual(self.referral.status, Referral.Status.SUBMITTED)
 
-    def test_submit_referral_api_invalid_status(self):
+    def test_submit_referral_api_invalid_status(self) -> None:
         """Test submit referral API with invalid status."""
         self.referral.status = Referral.Status.SUBMITTED
         self.referral.save()

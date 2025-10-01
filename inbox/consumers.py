@@ -3,9 +3,10 @@ WebSocket consumers for real-time notifications.
 """
 import json
 import logging
+from typing import Any
 
-from channels.db import database_sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async  # type: ignore[import]
+from channels.generic.websocket import AsyncWebsocketConsumer  # type: ignore[import]
 
 from django.contrib.auth import get_user_model
 
@@ -20,10 +21,10 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     WebSocket consumer for real-time notifications.
     """
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Handle WebSocket connection."""
         self.user = self.scope["user"]
-        self.channel_name = f"user_{self.user.id}_{self.channel_name}"
+        self.channel_name = f"user_{self.user.id}_{self.channel_name}"  # type: ignore[has-type]
 
         if not self.user.is_authenticated:
             await self.close()
@@ -41,7 +42,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
         logger.info(f"WebSocket connected for user {self.user.id}")
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, close_code: int) -> None:
         """Handle WebSocket disconnection."""
         if hasattr(self, "user") and self.user.is_authenticated:
             # Leave user's notification group
@@ -54,7 +55,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
             logger.info(f"WebSocket disconnected for user {self.user.id}")
 
-    async def receive(self, text_data):
+    async def receive(self, text_data: str) -> None:
         """Handle WebSocket message."""
         try:
             data = json.loads(text_data)
@@ -92,7 +93,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error processing WebSocket message: {str(e)}")
 
-    async def notification_message(self, event):
+    async def notification_message(self, event: dict[str, Any]) -> None:
         """Handle notification message from group."""
         await self.send(
             text_data=json.dumps(
@@ -100,7 +101,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             )
         )
 
-    async def notification_read(self, event):
+    async def notification_read(self, event: dict[str, Any]) -> None:
         """Handle notification read status update."""
         await self.send(
             text_data=json.dumps(
@@ -112,8 +113,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             )
         )
 
-    @database_sync_to_async
-    def create_notification_channel(self):
+    @database_sync_to_async  # type: ignore[misc]
+    def create_notification_channel(self) -> None:
         """Create or update notification channel in database."""
         try:
             channel, created = NotificationChannel.objects.get_or_create(
@@ -132,8 +133,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Failed to create notification channel: {str(e)}")
 
-    @database_sync_to_async
-    def deactivate_notification_channel(self):
+    @database_sync_to_async  # type: ignore[misc]
+    def deactivate_notification_channel(self) -> None:
         """Deactivate notification channel in database."""
         try:
             NotificationChannel.objects.filter(channel_name=self.channel_name).update(
@@ -145,8 +146,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Failed to deactivate notification channel: {str(e)}")
 
-    @database_sync_to_async
-    def mark_notification_read(self, notification_id):
+    @database_sync_to_async  # type: ignore[misc]
+    def mark_notification_read(self, notification_id: str) -> bool:
         """Mark notification as read."""
         try:
             from .services import NotificationService
@@ -157,8 +158,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             logger.error(f"Failed to mark notification as read: {str(e)}")
             return False
 
-    @database_sync_to_async
-    def get_notification_stats(self):
+    @database_sync_to_async  # type: ignore[misc]
+    def get_notification_stats(self) -> dict[str, int]:
         """Get notification statistics for user."""
         try:
             from .services import NotificationService
@@ -175,7 +176,7 @@ class NotificationGroupConsumer(AsyncWebsocketConsumer):
     WebSocket consumer for group notifications (admin, system-wide).
     """
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Handle WebSocket connection."""
         self.user = self.scope["user"]
         self.group_name = self.scope["url_route"]["kwargs"]["group_name"]
@@ -200,7 +201,7 @@ class NotificationGroupConsumer(AsyncWebsocketConsumer):
             f"WebSocket connected to group {self.group_name} for user {self.user.id}"
         )
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, close_code: int) -> None:
         """Handle WebSocket disconnection."""
         if hasattr(self, "user") and self.user.is_authenticated:
             # Leave group
@@ -212,7 +213,7 @@ class NotificationGroupConsumer(AsyncWebsocketConsumer):
                 f"WebSocket disconnected from group {self.group_name} for user {self.user.id}"
             )
 
-    async def receive(self, text_data):
+    async def receive(self, text_data: str) -> None:
         """Handle WebSocket message."""
         try:
             data = json.loads(text_data)
@@ -230,14 +231,14 @@ class NotificationGroupConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error processing WebSocket message: {str(e)}")
 
-    async def group_message(self, event):
+    async def group_message(self, event: dict[str, Any]) -> None:
         """Handle group message."""
         await self.send(
             text_data=json.dumps({"type": "group_message", "message": event["message"]})
         )
 
-    @database_sync_to_async
-    def has_group_permission(self):
+    @database_sync_to_async  # type: ignore[misc]
+    def has_group_permission(self) -> bool:
         """Check if user has permission to join this group."""
         # Implement group permission logic here
         # For now, allow all authenticated users

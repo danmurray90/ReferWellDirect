@@ -1,6 +1,8 @@
 """
 Serializers for referrals app.
 """
+from typing import Any
+
 from rest_framework import serializers
 
 from django.contrib.auth import get_user_model
@@ -70,7 +72,7 @@ class ReferralSerializer(serializers.ModelSerializer):
             "completed_at",
         ]
 
-    def validate_presenting_problem(self, value):
+    def validate_presenting_problem(self, value: str) -> str:
         """
         Validate presenting problem is not empty.
         """
@@ -78,7 +80,7 @@ class ReferralSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Presenting problem is required.")
         return value
 
-    def validate_max_distance_km(self, value):
+    def validate_max_distance_km(self, value: int) -> int:
         """
         Validate maximum distance is reasonable.
         """
@@ -126,7 +128,7 @@ class CandidateSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
-    def validate_confidence_score(self, value):
+    def validate_confidence_score(self, value: float | None) -> float | None:
         """
         Validate confidence score is between 0 and 1.
         """
@@ -182,7 +184,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "completed_at",
         ]
 
-    def validate_scheduled_at(self, value):
+    def validate_scheduled_at(self, value: Any) -> Any:
         """
         Validate scheduled time is in the future.
         """
@@ -192,7 +194,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Scheduled time must be in the future.")
         return value
 
-    def validate_duration_minutes(self, value):
+    def validate_duration_minutes(self, value: int) -> int:
         """
         Validate duration is reasonable.
         """
@@ -236,7 +238,7 @@ class MessageSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "read_at"]
 
-    def validate_subject(self, value):
+    def validate_subject(self, value: str) -> str:
         """
         Validate subject is not empty.
         """
@@ -244,7 +246,7 @@ class MessageSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Subject is required.")
         return value
 
-    def validate_content(self, value):
+    def validate_content(self, value: str) -> str:
         """
         Validate content is not empty.
         """
@@ -295,7 +297,7 @@ class TaskSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "updated_at", "completed_at"]
 
-    def validate_title(self, value):
+    def validate_title(self, value: str) -> str:
         """
         Validate title is not empty.
         """
@@ -327,7 +329,7 @@ class ReferralCreateSerializer(serializers.ModelSerializer):
             "required_specialisms",
         ]
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict[str, Any]) -> Any:
         """
         Create a new referral.
         """
@@ -344,7 +346,7 @@ class CandidateResponseSerializer(serializers.Serializer):
     response = serializers.ChoiceField(choices=["accepted", "declined"])
     notes = serializers.CharField(required=False, allow_blank=True)
 
-    def validate_response(self, value):
+    def validate_response(self, value: str) -> str:
         """
         Validate response choice.
         """

@@ -152,16 +152,16 @@ class Referral(models.Model):
             models.Index(fields=["created_at"]),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Referral {self.referral_id} - {self.patient.get_full_name()}"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if not self.referral_id:
             # Generate human-readable referral ID
             self.referral_id = self._generate_referral_id()
         super().save(*args, **kwargs)
 
-    def _generate_referral_id(self):
+    def _generate_referral_id(self) -> str:
         """Generate a human-readable referral ID."""
         import datetime
         import random
@@ -173,24 +173,24 @@ class Referral(models.Model):
         return f"REF{now.strftime('%Y%m%d')}{now.strftime('%H%M%S')}{microsecond:06d}{random_component}"
 
     @property
-    def is_draft(self):
-        return self.status == self.Status.DRAFT
+    def is_draft(self) -> bool:
+        return bool(self.status == self.Status.DRAFT)
 
     @property
-    def is_submitted(self):
-        return self.status == self.Status.SUBMITTED
+    def is_submitted(self) -> bool:
+        return bool(self.status == self.Status.SUBMITTED)
 
     @property
-    def is_matching(self):
-        return self.status == self.Status.MATCHING
+    def is_matching(self) -> bool:
+        return bool(self.status == self.Status.MATCHING)
 
     @property
-    def is_high_touch_queue(self):
-        return self.status == self.Status.HIGH_TOUCH_QUEUE
+    def is_high_touch_queue(self) -> bool:
+        return bool(self.status == self.Status.HIGH_TOUCH_QUEUE)
 
     @property
-    def is_completed(self):
-        return self.status == self.Status.COMPLETED
+    def is_completed(self) -> bool:
+        return bool(self.status == self.Status.COMPLETED)
 
 
 class Candidate(models.Model):
@@ -269,32 +269,32 @@ class Candidate(models.Model):
             models.Index(fields=["confidence_score"]),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Candidate {self.psychologist.get_full_name()} for {self.referral.referral_id}"
 
     @property
-    def is_pending(self):
-        return self.status == self.Status.PENDING
+    def is_pending(self) -> bool:
+        return bool(self.status == self.Status.PENDING)
 
     @property
-    def is_shortlisted(self):
-        return self.status == self.Status.SHORTLISTED
+    def is_shortlisted(self) -> bool:
+        return bool(self.status == self.Status.SHORTLISTED)
 
     @property
-    def is_invited(self):
-        return self.status == self.Status.INVITED
+    def is_invited(self) -> bool:
+        return bool(self.status == self.Status.INVITED)
 
     @property
-    def is_accepted(self):
-        return self.status == self.Status.ACCEPTED
+    def is_accepted(self) -> bool:
+        return bool(self.status == self.Status.ACCEPTED)
 
     @property
-    def is_declined(self):
-        return self.status == self.Status.DECLINED
+    def is_declined(self) -> bool:
+        return bool(self.status == self.Status.DECLINED)
 
     @property
-    def is_expired(self):
-        return self.status == self.Status.EXPIRED
+    def is_expired(self) -> bool:
+        return bool(self.status == self.Status.EXPIRED)
 
 
 class Appointment(models.Model):
@@ -365,24 +365,24 @@ class Appointment(models.Model):
             models.Index(fields=["scheduled_at"]),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Appointment {self.id} - {self.patient.get_full_name()} with {self.psychologist.get_full_name()}"
 
     @property
-    def is_scheduled(self):
-        return self.status == self.Status.SCHEDULED
+    def is_scheduled(self) -> bool:
+        return bool(self.status == self.Status.SCHEDULED)
 
     @property
-    def is_confirmed(self):
-        return self.status == self.Status.CONFIRMED
+    def is_confirmed(self) -> bool:
+        return bool(self.status == self.Status.CONFIRMED)
 
     @property
-    def is_completed(self):
-        return self.status == self.Status.COMPLETED
+    def is_completed(self) -> bool:
+        return bool(self.status == self.Status.COMPLETED)
 
     @property
-    def is_cancelled(self):
-        return self.status == self.Status.CANCELLED
+    def is_cancelled(self) -> bool:
+        return bool(self.status == self.Status.CANCELLED)
 
 
 class Message(models.Model):
@@ -442,10 +442,10 @@ class Message(models.Model):
             models.Index(fields=["message_type"]),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Message from {self.sender.get_full_name()} to {self.recipient.get_full_name()}"
 
-    def mark_as_read(self):
+    def mark_as_read(self) -> None:
         """Mark message as read."""
         if not self.is_read:
             self.is_read = True
@@ -517,10 +517,10 @@ class Task(models.Model):
             models.Index(fields=["due_at"]),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Task: {self.title} (assigned to {self.assigned_to.get_full_name()})"
 
-    def mark_completed(self):
+    def mark_completed(self) -> None:
         """Mark task as completed."""
         if not self.is_completed:
             self.is_completed = True

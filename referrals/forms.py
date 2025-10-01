@@ -52,16 +52,14 @@ class ReferralForm(forms.ModelForm):
             "preferred_language": forms.Select(attrs={"class": "form-control"}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
 
         # Filter patients based on user type
         if user and user.is_gp:
             # GPs can refer any patient
-            self.fields["patient"].queryset = User.objects.filter(
-                user_type=User.UserType.PATIENT
-            )
+            self.fields["patient"].queryset = User.objects.filter(user_type="patient")
         elif user and user.is_patient:
             # Patients can only refer themselves
             self.fields["patient"].queryset = User.objects.filter(id=user.id)

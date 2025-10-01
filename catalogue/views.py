@@ -9,8 +9,7 @@ from rest_framework.response import Response
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-# from django.contrib.gis.geos import Point  # Temporarily disabled - requires GDAL
+from django.contrib.gis.geos import Point
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render

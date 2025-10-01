@@ -3,11 +3,12 @@ Server-Sent Events (SSE) views for real-time notifications.
 """
 import json
 import time
+from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
-from django.http import StreamingHttpResponse
+from django.http import JsonResponse, StreamingHttpResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -23,10 +24,10 @@ class NotificationSSEView(View):
 
     @method_decorator(login_required)
     @method_decorator(require_http_methods(["GET"]))
-    def get(self, request):
+    def get(self, request: Any) -> StreamingHttpResponse:
         """Stream notifications via SSE."""
 
-        def event_stream():
+        def event_stream() -> Any:
             """Generate SSE event stream."""
             user_id = request.user.id
             last_notification_id = request.GET.get("last_id", 0)
@@ -82,12 +83,12 @@ class NotificationSSEView(View):
 
 @login_required
 @require_http_methods(["GET"])
-def notification_sse(request):
+def notification_sse(request: Any) -> StreamingHttpResponse:
     """
     Simple SSE endpoint for notifications.
     """
 
-    def event_stream():
+    def event_stream() -> Any:
         """Generate SSE event stream."""
         user_id = request.user.id
         service = NotificationService()
@@ -128,7 +129,7 @@ def notification_sse(request):
 @login_required
 @require_http_methods(["POST"])
 @csrf_exempt
-def notification_sse_test(request):
+def notification_sse_test(request: Any) -> JsonResponse:
     """
     Test endpoint to trigger SSE notifications.
     """

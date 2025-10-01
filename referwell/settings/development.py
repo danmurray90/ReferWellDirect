@@ -25,8 +25,8 @@ CORS_ALLOW_CREDENTIALS = True
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Development logging
-LOGGING["loggers"]["django"]["level"] = "DEBUG"
-LOGGING["loggers"]["referwell"]["level"] = "DEBUG"
+LOGGING["loggers"]["django"]["level"] = "DEBUG"  # type: ignore[index]
+LOGGING["loggers"]["referwell"]["level"] = "DEBUG"  # type: ignore[index]
 
 # Development-specific settings
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
@@ -76,13 +76,13 @@ MATCHING_THRESHOLD_AUTO = 0.5
 MATCHING_THRESHOLD_HIGH_TOUCH = 0.3
 
 # Development logging configuration
-LOGGING["handlers"]["file"] = {
+LOGGING["handlers"]["file"] = {  # type: ignore[index]
     "class": "logging.FileHandler",
     "filename": BASE_DIR / "logs" / "development.log",
     "formatter": "verbose",
 }
 
-LOGGING["loggers"]["referwell"]["handlers"] = ["console", "file"]
+LOGGING["loggers"]["referwell"]["handlers"] = ["console", "file"]  # type: ignore[index]
 
 # Create logs directory if it doesn't exist
 import os

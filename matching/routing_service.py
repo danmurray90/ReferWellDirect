@@ -19,7 +19,7 @@ class ReferralRoutingService:
     Service for routing referrals based on matching confidence scores.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
     def route_referral(
@@ -96,9 +96,11 @@ class ReferralRoutingService:
         Returns:
             List of referrals in high-touch queue
         """
-        return Referral.objects.filter(
-            status=Referral.Status.HIGH_TOUCH_QUEUE
-        ).order_by("created_at")[:limit]
+        return list(
+            Referral.objects.filter(status=Referral.Status.HIGH_TOUCH_QUEUE).order_by(
+                "created_at"
+            )[:limit]
+        )
 
     def get_routing_statistics(self) -> dict[str, Any]:
         """
@@ -181,7 +183,7 @@ class ReferralRoutingService:
             self.logger.error(f"Failed to create default thresholds: {e}")
             return False
 
-    def invalidate_threshold_cache(self, user_type: str = None):
+    def invalidate_threshold_cache(self, user_type: str | None = None) -> None:
         """
         Invalidate threshold configuration cache.
 
@@ -202,19 +204,19 @@ class ReferralRoutingService:
                 cache.delete(cache_key)
             self.logger.info("Invalidated all threshold caches")
 
-    def clear_all_caches(self):
+    def clear_all_caches(self) -> None:
         """
         Clear all matching-related caches.
         """
         from django.core.cache import cache
 
         # Clear embedding caches
-        cache.delete_many(cache.keys("embedding_*"))
+        cache.delete_many(cache.keys("embedding_*"))  # type: ignore[attr-defined]
 
         # Clear BM25 caches
-        cache.delete_many(cache.keys("bm25_*"))
+        cache.delete_many(cache.keys("bm25_*"))  # type: ignore[attr-defined]
 
         # Clear threshold caches
-        cache.delete_many(cache.keys("threshold_config_*"))
+        cache.delete_many(cache.keys("threshold_config_*"))  # type: ignore[attr-defined]
 
         self.logger.info("Cleared all matching-related caches")

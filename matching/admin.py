@@ -1,6 +1,8 @@
 """
 Admin configuration for matching app.
 """
+from typing import Any
+
 from django.contrib import admin
 
 from .models import CalibrationModel, MatchingAlgorithm, MatchingRun, MatchingThreshold
@@ -44,7 +46,7 @@ class MatchingRunAdmin(admin.ModelAdmin):
 
     readonly_fields = ("created_at", "updated_at")
 
-    def get_queryset(self, request):
+    def get_queryset(self, request: Any) -> Any:
         return super().get_queryset(request).select_related("referral")
 
 

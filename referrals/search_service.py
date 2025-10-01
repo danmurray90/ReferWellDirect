@@ -1,6 +1,7 @@
 """
 Advanced search and filtering service for referrals.
 """
+import io
 import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple

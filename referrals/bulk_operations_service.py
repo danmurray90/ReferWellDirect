@@ -1,6 +1,7 @@
 """
 Bulk operations service for referrals and appointments.
 """
+import io
 import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
@@ -111,9 +112,9 @@ class AppointmentBulkOperationsService:
         """
         try:
             # Parse new datetime
-            new_dt = timezone.datetime.fromisoformat(
-                new_datetime.replace("Z", "+00:00")
-            )
+            from datetime import datetime
+
+            new_dt = datetime.fromisoformat(new_datetime.replace("Z", "+00:00"))
 
             # Get appointments that user has permission to update
             queryset = self._get_editable_queryset(user)

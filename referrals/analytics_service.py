@@ -17,10 +17,12 @@ class AnalyticsService:
     Service for generating analytics and reports.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
-    def get_dashboard_metrics(self, user, date_range: str = "30d") -> dict[str, Any]:
+    def get_dashboard_metrics(
+        self, user: Any, date_range: str = "30d"
+    ) -> dict[str, Any]:
         """
         Get key metrics for the dashboard.
 
@@ -84,7 +86,7 @@ class AnalyticsService:
             return {}
 
     def get_referral_analytics(
-        self, user, filters: dict[str, Any] = None
+        self, user: Any, filters: Optional[dict[str, Any]] = None
     ) -> dict[str, Any]:
         """
         Get detailed referral analytics.
@@ -201,7 +203,7 @@ class AnalyticsService:
             return {}
 
     def get_appointment_analytics(
-        self, user, filters: dict[str, Any] = None
+        self, user: Any, filters: Optional[dict[str, Any]] = None
     ) -> dict[str, Any]:
         """
         Get detailed appointment analytics.
@@ -300,7 +302,7 @@ class AnalyticsService:
             return {}
 
     def get_performance_metrics(
-        self, user, filters: dict[str, Any] = None
+        self, user: Any, filters: Optional[dict[str, Any]] = None
     ) -> dict[str, Any]:
         """
         Get performance metrics and KPIs.
@@ -431,9 +433,9 @@ class AnalyticsService:
 
     def generate_report(
         self,
-        user,
+        user: Any,
         report_type: str,
-        filters: dict[str, Any] = None,
+        filters: Optional[dict[str, Any]] = None,
         format: str = "json",
     ) -> dict[str, Any]:
         """
@@ -483,7 +485,7 @@ class AnalyticsService:
             self.logger.error(f"Failed to generate report: {e}")
             return {"error": str(e)}
 
-    def _get_start_date(self, end_date, date_range):
+    def _get_start_date(self, end_date: Any, date_range: str) -> Any:
         """Get start date based on date range."""
         if date_range == "7d":
             return end_date - timedelta(days=7)
@@ -496,7 +498,9 @@ class AnalyticsService:
         else:
             return end_date - timedelta(days=30)
 
-    def _get_referrals_queryset(self, user, start_date=None, end_date=None):
+    def _get_referrals_queryset(
+        self, user: Any, start_date: Any = None, end_date: Any = None
+    ) -> Any:
         """Get referrals queryset based on user permissions."""
         queryset = Referral.objects.all()
 
@@ -514,7 +518,9 @@ class AnalyticsService:
 
         return queryset
 
-    def _get_appointments_queryset(self, user, start_date=None, end_date=None):
+    def _get_appointments_queryset(
+        self, user: Any, start_date: Any = None, end_date: Any = None
+    ) -> Any:
         """Get appointments queryset based on user permissions."""
         queryset = Appointment.objects.all()
 
@@ -534,7 +540,9 @@ class AnalyticsService:
 
         return queryset
 
-    def _get_candidates_queryset(self, user, start_date=None, end_date=None):
+    def _get_candidates_queryset(
+        self, user: Any, start_date: Any = None, end_date: Any = None
+    ) -> Any:
         """Get candidates queryset based on user permissions."""
         queryset = Candidate.objects.all()
 
@@ -554,7 +562,7 @@ class AnalyticsService:
 
         return queryset
 
-    def _apply_filters(self, queryset, filters):
+    def _apply_filters(self, queryset: Any, filters: dict[str, Any]) -> Any:
         """Apply filters to referrals queryset."""
         if filters.get("status"):
             queryset = queryset.filter(status=filters["status"])
@@ -571,7 +579,7 @@ class AnalyticsService:
 
         return queryset
 
-    def _apply_appointment_filters(self, queryset, filters):
+    def _apply_appointment_filters(self, queryset: Any, filters: dict[str, Any]) -> Any:
         """Apply filters to appointments queryset."""
         if filters.get("status"):
             queryset = queryset.filter(status=filters["status"])
@@ -584,7 +592,7 @@ class AnalyticsService:
 
         return queryset
 
-    def _apply_candidate_filters(self, queryset, filters):
+    def _apply_candidate_filters(self, queryset: Any, filters: dict[str, Any]) -> Any:
         """Apply filters to candidates queryset."""
         if filters.get("status"):
             queryset = queryset.filter(status=filters["status"])
@@ -595,7 +603,7 @@ class AnalyticsService:
 
         return queryset
 
-    def _get_referral_metrics(self, queryset):
+    def _get_referral_metrics(self, queryset: Any) -> Any:
         """Get referral-specific metrics."""
         return queryset.aggregate(
             total=Count("id"),
@@ -616,7 +624,7 @@ class AnalyticsService:
             rejected=Count("id", filter=Q(status=Referral.Status.REJECTED)),
         )
 
-    def _get_appointment_metrics(self, queryset):
+    def _get_appointment_metrics(self, queryset: Any) -> Any:
         """Get appointment-specific metrics."""
         return queryset.aggregate(
             total=Count("id"),
@@ -627,7 +635,7 @@ class AnalyticsService:
             no_show=Count("id", filter=Q(status=Appointment.Status.NO_SHOW)),
         )
 
-    def _get_candidate_metrics(self, queryset):
+    def _get_candidate_metrics(self, queryset: Any) -> Any:
         """Get candidate-specific metrics."""
         return queryset.aggregate(
             total=Count("id"),
@@ -639,7 +647,7 @@ class AnalyticsService:
             expired=Count("id", filter=Q(status=Candidate.Status.EXPIRED)),
         )
 
-    def _get_performance_metrics(self, referrals_qs, appointments_qs):
+    def _get_performance_metrics(self, referrals_qs: Any, appointments_qs: Any) -> Any:
         """Get performance metrics."""
         return {
             "avg_processing_time": referrals_qs.filter(
@@ -653,7 +661,7 @@ class AnalyticsService:
             "total_revenue": 0,  # Placeholder for future revenue tracking
         }
 
-    def _get_trends(self, user, start_date, end_date):
+    def _get_trends(self, user: Any, start_date: Any, end_date: Any) -> Any:
         """Get trend data."""
         # Daily referral trends
         daily_referrals = (
@@ -678,7 +686,7 @@ class AnalyticsService:
             "daily_appointments": list(daily_appointments),
         }
 
-    def _export_csv(self, data, report_type):
+    def _export_csv(self, data: Any, report_type: str) -> Any:
         """Export data as CSV."""
         import csv
         import io
@@ -707,11 +715,11 @@ class AnalyticsService:
             "filename": f'{report_type}_report_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv',
         }
 
-    def _export_xlsx(self, data, report_type):
+    def _export_xlsx(self, data: Any, report_type: str) -> Any:
         """Export data as XLSX."""
         try:
-            import openpyxl
-            from openpyxl.styles import Alignment, Font
+            import openpyxl  # type: ignore[import]
+            from openpyxl.styles import Alignment, Font  # type: ignore[import]
 
             workbook = openpyxl.Workbook()
             worksheet = workbook.active
@@ -736,6 +744,8 @@ class AnalyticsService:
                     row += 1
 
             # Save to bytes
+            import io
+
             output = io.BytesIO()
             workbook.save(output)
             output.seek(0)

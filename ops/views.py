@@ -1,6 +1,8 @@
 """
 Views for ops app.
 """
+from typing import Any
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
@@ -16,7 +18,7 @@ class OpsDashboardView(LoginRequiredMixin, TemplateView):
 
     template_name = "ops/dashboard.html"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
         # Get recent audit events
@@ -47,7 +49,7 @@ class AuditEventListView(LoginRequiredMixin, ListView):
     context_object_name = "audit_events"
     paginate_by = 50
 
-    def get_queryset(self):
+    def get_queryset(self) -> Any:
         return AuditEvent.objects.all().order_by("-created_at")
 
 
@@ -58,7 +60,7 @@ class MetricsView(LoginRequiredMixin, TemplateView):
 
     template_name = "ops/metrics.html"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["metrics"] = Metric.objects.all().order_by("name")
         return context
@@ -74,5 +76,5 @@ class SystemLogListView(LoginRequiredMixin, ListView):
     context_object_name = "system_logs"
     paginate_by = 100
 
-    def get_queryset(self):
+    def get_queryset(self) -> Any:
         return SystemLog.objects.all().order_by("-created_at")

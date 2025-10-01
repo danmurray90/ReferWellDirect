@@ -3,7 +3,7 @@ Notification services for ReferWell Direct.
 """
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from celery import shared_task
 
@@ -22,6 +22,9 @@ from .models import (
     NotificationTemplate,
 )
 
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AbstractBaseUser
+
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
@@ -31,21 +34,21 @@ class NotificationService:
     Service for managing notifications and delivery.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.cache_timeout = getattr(settings, "NOTIFICATION_CACHE_TIMEOUT", 300)
 
     def create_notification(
         self,
-        user: User,
+        user: "AbstractBaseUser",
         notification_type: str,
         title: str,
         message: str,
         priority: str = "medium",
         is_important: bool = False,
-        referral=None,
-        candidate=None,
-        appointment=None,
-        **kwargs,
+        referral: Any = None,
+        candidate: Any = None,
+        appointment: Any = None,
+        **kwargs: Any,
     ) -> Notification:
         """
         Create a new notification for a user.
@@ -66,20 +69,20 @@ class NotificationService:
             # Send notification via appropriate channels
             self._send_notification(notification)
 
-            logger.info(f"Created notification {notification.id} for user {user.id}")
+            logger.info(f"Created notification {notification.id} for user {user.id}")  # type: ignore[attr-defined]
             return notification
 
         except Exception as e:
-            logger.error(f"Failed to create notification for user {user.id}: {str(e)}")
+            logger.error(f"Failed to create notification for user {user.id}: {str(e)}")  # type: ignore[attr-defined]
             raise
 
     def create_notification_from_template(
         self,
-        user: User,
+        user: "AbstractBaseUser",
         template_name: str,
         context: dict[str, Any],
-        notification_type: str = None,
-        **kwargs,
+        notification_type: str | None = None,
+        **kwargs: Any,
     ) -> Notification | None:
         """
         Create a notification from a template.
@@ -114,7 +117,7 @@ class NotificationService:
             )
             return None
 
-    def _send_notification(self, notification: Notification):
+    def _send_notification(self, notification: Notification) -> None:
         """
         Send notification via appropriate channels based on user preferences.
         """
@@ -157,11 +160,13 @@ class NotificationService:
         except Exception as e:
             logger.error(f"Failed to send notification {notification.id}: {str(e)}")
 
-    def _get_user_preferences(self, user: User) -> NotificationPreference | None:
+    def _get_user_preferences(
+        self, user: "AbstractBaseUser"
+    ) -> NotificationPreference | None:
         """
         Get user notification preferences with caching.
         """
-        cache_key = f"notification_preferences_{user.id}"
+        cache_key = f"notification_preferences_{user.id}"  # type: ignore[attr-defined]
         preferences = cache.get(cache_key)
 
         if preferences is None:
@@ -172,7 +177,7 @@ class NotificationService:
 
         return preferences
 
-    def _send_in_app_notification(self, notification: Notification):
+    def _send_in_app_notification(self, notification: Notification) -> None:
         """
         Send in-app notification via WebSocket.
         """
@@ -206,7 +211,7 @@ class NotificationService:
 
     def _send_email_notification(
         self, notification: Notification, preferences: NotificationPreference
-    ):
+    ) -> None:
         """
         Send email notification.
         """
@@ -258,7 +263,7 @@ class NotificationService:
                 f"Failed to send email notification {notification.id}: {str(e)}"
             )
 
-    def _send_push_notification(self, notification: Notification):
+    def _send_push_notification(self, notification: Notification) -> None:
         """
         Send push notification (stubbed for now).
         """
@@ -274,7 +279,9 @@ class NotificationService:
                 f"Failed to send push notification {notification.id}: {str(e)}"
             )
 
-    def _send_websocket_message(self, channel_name: str, message: dict[str, Any]):
+    def _send_websocket_message(
+        self, channel_name: str, message: dict[str, Any]
+    ) -> None:
         """
         Send message via WebSocket (stubbed for now).
         """
@@ -290,7 +297,7 @@ class NotificationService:
                 f"Failed to send WebSocket message to {channel_name}: {str(e)}"
             )
 
-    def mark_as_read(self, notification_id: str, user: User) -> bool:
+    def mark_as_read(self, notification_id: str, user: "AbstractBaseUser") -> bool:
         """
         Mark a notification as read.
         """
@@ -305,7 +312,7 @@ class NotificationService:
 
         except Notification.DoesNotExist:
             logger.warning(
-                f"Notification {notification_id} not found for user {user.id}"
+                f"Notification {notification_id} not found for user {user.id}"  # type: ignore[attr-defined]
             )
             return False
         except Exception as e:
@@ -314,7 +321,7 @@ class NotificationService:
             )
             return False
 
-    def _send_read_status(self, notification: Notification):
+    def _send_read_status(self, notification: Notification) -> None:
         """
         Send read status via WebSocket.
         """
@@ -342,9 +349,9 @@ class NotificationService:
 
     def get_user_notifications(
         self,
-        user: User,
+        user: "AbstractBaseUser",
         unread_only: bool = False,
-        notification_type: str = None,
+        notification_type: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> list[Notification]:
@@ -363,10 +370,10 @@ class NotificationService:
             return list(queryset.order_by("-created_at")[offset : offset + limit])
 
         except Exception as e:
-            logger.error(f"Failed to get notifications for user {user.id}: {str(e)}")
+            logger.error(f"Failed to get notifications for user {user.id}: {str(e)}")  # type: ignore[attr-defined]
             return []
 
-    def get_notification_stats(self, user: User) -> dict[str, int]:
+    def get_notification_stats(self, user: "AbstractBaseUser") -> dict[str, int]:
         """
         Get notification statistics for a user.
         """
@@ -389,7 +396,7 @@ class NotificationService:
 
         except Exception as e:
             logger.error(
-                f"Failed to get notification stats for user {user.id}: {str(e)}"
+                f"Failed to get notification stats for user {user.id}: {str(e)}"  # type: ignore[attr-defined]
             )
             return {}
 
@@ -400,19 +407,19 @@ class NotificationChannelService:
     """
 
     def create_channel(
-        self, user: User, channel_name: str = None
+        self, user: "AbstractBaseUser", channel_name: str | None = None
     ) -> NotificationChannel:
         """
         Create a new notification channel for a user.
         """
         if not channel_name:
-            channel_name = f"user_{user.id}_{timezone.now().timestamp()}"
+            channel_name = f"user_{user.id}_{timezone.now().timestamp()}"  # type: ignore[attr-defined]
 
         channel = NotificationChannel.objects.create(
             user=user, channel_name=channel_name
         )
 
-        logger.info(f"Created notification channel {channel_name} for user {user.id}")
+        logger.info(f"Created notification channel {channel_name} for user {user.id}")  # type: ignore[attr-defined]
         return channel
 
     def deactivate_channel(self, channel_name: str) -> bool:
@@ -436,8 +443,8 @@ class NotificationChannelService:
 
 
 # Celery tasks for background notification processing
-@shared_task
-def send_notification_async(notification_id: str):
+@shared_task  # type: ignore[misc]
+def send_notification_async(notification_id: str) -> None:
     """
     Async task to send a notification.
     """
@@ -452,8 +459,8 @@ def send_notification_async(notification_id: str):
         logger.error(f"Failed to send notification {notification_id} async: {str(e)}")
 
 
-@shared_task
-def cleanup_old_notifications():
+@shared_task  # type: ignore[misc]
+def cleanup_old_notifications() -> None:
     """
     Clean up old notifications (older than 30 days).
     """
@@ -475,8 +482,8 @@ def cleanup_old_notifications():
         logger.error(f"Failed to cleanup old notifications: {str(e)}")
 
 
-@shared_task
-def send_digest_notifications():
+@shared_task  # type: ignore[misc]
+def send_digest_notifications() -> None:
     """
     Send daily digest notifications to users.
     """

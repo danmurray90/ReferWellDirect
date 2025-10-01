@@ -2,6 +2,7 @@
 Celery configuration for ReferWell Direct project.
 """
 import os
+from typing import Any
 
 from celery import Celery
 
@@ -41,6 +42,6 @@ app.conf.beat_schedule = {
 app.conf.timezone = "Europe/London"
 
 
-@app.task(bind=True)
-def debug_task(self):
+@app.task(bind=True)  # type: ignore[misc]
+def debug_task(self: Any) -> None:
     print(f"Request: {self.request!r}")
