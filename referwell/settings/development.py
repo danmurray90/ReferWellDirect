@@ -31,7 +31,13 @@ LOGGING["loggers"]["django"]["level"] = "DEBUG"  # type: ignore[index]
 LOGGING["loggers"]["referwell"]["level"] = "DEBUG"  # type: ignore[index]
 
 # Development-specific settings
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+    "192.168.50.148",  # Your primary LAN IP
+    "192.168.50.4",  # Your secondary LAN IP
+]
 
 # Disable SSL redirects in development
 SECURE_SSL_REDIRECT = False
