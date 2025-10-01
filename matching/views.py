@@ -25,9 +25,8 @@ from catalogue.models import Psychologist
 from referrals.models import Referral
 
 from .models import CalibrationModel, MatchingAlgorithm, MatchingRun, MatchingThreshold
-
-# Lazy import - will be imported when needed
 from .routing_service import ReferralRoutingService
+from .services import MatchingService
 
 
 def api_auth_required(view_func):
@@ -153,8 +152,6 @@ class MatchingResultsView(LoginRequiredMixin, TemplateView):
 
             # Run matching
             start_time = time.time()
-            from .services import MatchingService
-
             matching_service = MatchingService()
             matches, routing_decision = matching_service.find_matches(
                 referral, limit=10

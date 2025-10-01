@@ -8,6 +8,7 @@ from rest_framework.response import Response
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.gis.geos import Point
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView, TemplateView
 
 from .models import Availability, Psychologist, Qualification, Review, Specialism

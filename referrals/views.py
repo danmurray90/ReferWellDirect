@@ -27,7 +27,7 @@ from .bulk_operations_service import (
     TaskBulkOperationsService,
 )
 from .forms import ReferralForm
-from .models import Appointment, Candidate, Referral
+from .models import Appointment, Candidate, Referral, Task
 from .search_service import AdvancedSearchService, BulkOperationsService
 from .serializers import CandidateSerializer, ReferralSerializer
 
