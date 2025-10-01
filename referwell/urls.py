@@ -38,6 +38,10 @@ urlpatterns = [
     path("inbox/", include("inbox.urls")),
     path("payments/", include("payments.urls")),
     path("ops/", include("ops.urls")),
+    # Common redirects
+    path(
+        "dashboard/", RedirectView.as_view(url="/accounts/dashboard/", permanent=False)
+    ),
     # Root redirect to accounts home
     path("", RedirectView.as_view(url="/accounts/", permanent=False)),
 ]
