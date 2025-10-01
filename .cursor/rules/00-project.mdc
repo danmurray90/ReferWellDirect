@@ -1,0 +1,25 @@
+---
+description: Core project context, roles, and working agreements for ReferWell Direct.
+alwaysApply: true
+---
+
+# ReferWell Direct — Core Context
+
+- Tech: Django + DRF; Postgres + PostGIS + pgvector; Redis; Celery; server-rendered templates (NHS.UK styling later).
+- Local-only MVP; all external services are STUBBED behind feature flags.
+- Users: GP, Patient, Psychologist, High-Touch Referrer (admin).
+- Non-negotiables: accessibility (WCAG 2.2 AA minded), auditability, privacy by default, no PHI in emails; notifications are in-app with email nudges only at later milestone.
+
+# Working agreements for the Agent
+- Always operate in PLAN → ACT cycles. Keep PROJECT_MILESTONES.md and OPEN_TASKS.md updated on every step.
+- Decompose work into small PR-sized commits (use Conventional Commits).
+- Write tests for core domain logic before or alongside code; maintain fast feedback.
+- Never call real external APIs; implement adapters with feature flags OFF and deterministic fakes for tests.
+
+# Git Best Practices
+- Use conventional commit messages: `type(scope): description`
+- Run pre-commit hooks before every commit
+- Create feature branches for all changes
+- Use pull requests for code review
+- Never commit secrets or sensitive data
+- Follow the comprehensive git guidelines in `.cursor/rules/git_best_practices.md`
