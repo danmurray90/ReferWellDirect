@@ -308,7 +308,7 @@
                                     </span>
                                 </div>
                                 <div class="action-buttons" role="group" aria-label="Referral actions">
-                                    <a href="{% url 'matching:find_matches' referral.id %}"
+                                    <a href="{% url 'matching:results' referral.id %}"
                                        class="btn btn--primary btn--sm"
                                        aria-describedby="find-matches-help-{{ referral.id }}">
                                         Find Matches
@@ -444,7 +444,7 @@
                                         </span>
                                     </div>
                                     <div class="action-buttons" role="group" aria-label="Referral actions">
-                                        <a href="{% url 'matching:find_matches' referral.id %}"
+                                        <a href="{% url 'matching:results' referral.id %}"
                                            class="btn btn--primary btn--sm"
                                            aria-describedby="find-matches-help-{{ referral.id }}">
                                             Find Matches
@@ -487,7 +487,7 @@
                aria-describedby="create-referral-help">Create New Referral</a>
             <a href="{% url 'matching:performance_metrics' %}" class="btn btn--secondary"
                aria-describedby="performance-metrics-help">View Performance Metrics</a>
-            <a href="{% url 'matching:threshold_config' %}" class="btn btn--secondary"
+            <a href="{% url 'matching:calibration' %}" class="btn btn--secondary"
                aria-describedby="configure-thresholds-help">Configure Thresholds</a>
             <button id="refresh-data" class="btn btn--secondary"
                     aria-describedby="refresh-data-help">Refresh Data</button>
