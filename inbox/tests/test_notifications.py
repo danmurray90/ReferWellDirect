@@ -144,11 +144,8 @@ class NotificationModelTests(TestCase):
         self.assertEqual(preferences.get_delivery_method("referral_update"), "email")
         self.assertEqual(preferences.get_delivery_method("matching_complete"), "in_app")
 
-    @patch("transformers.utils.import_utils._get_module")
-    def test_notification_preference_quiet_hours(self, mock_get_module):
+    def test_notification_preference_quiet_hours(self):
         """Test quiet hours functionality."""
-        # Mock the transformers import to avoid freezegun compatibility issues
-        mock_get_module.return_value = None
 
         preferences = NotificationPreference.objects.create(
             user=self.user,
@@ -273,6 +270,7 @@ class NotificationServiceTests(TestCase):
             notification_type="referral_update",
             title="Notification 1",
             message="Message 1",
+            is_important=True,
         )
 
         Notification.objects.create(
@@ -487,19 +485,22 @@ class NotificationAPITests(APITestCase):
 
     def test_notification_preferences(self):
         """Test notification preferences API."""
-        url = reverse("inbox_api:notification-preference-list")
-
         # Test getting preferences (should create if not exist)
+        url = reverse("inbox_api:notification-preference-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # Test updating preferences
+        # Test updating preferences using the detail endpoint
+        preference_id = response.data["id"]
+        detail_url = reverse(
+            "inbox_api:notification-preference-detail", args=[preference_id]
+        )
         data = {
             "referral_update_method": "email",
             "matching_complete_method": "in_app",
             "email_notifications_enabled": True,
         }
-        response = self.client.patch(url, data)
+        response = self.client.patch(detail_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["referral_update_method"], "email")
 
@@ -528,7 +529,10 @@ class NotificationTemplateAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Check that our template is in the results
-        template_names = [template["name"] for template in response.data]
+        if isinstance(response.data, list):
+            template_names = [template["name"] for template in response.data]
+        else:
+            template_names = [template["name"] for template in response.data["results"]]
         self.assertIn("test_template", template_names)
 
     def test_get_template_detail(self):

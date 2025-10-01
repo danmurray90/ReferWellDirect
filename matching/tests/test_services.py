@@ -1,10 +1,9 @@
 """
 Tests for matching services.
 """
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import numpy as np
-import pytest
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
@@ -35,7 +34,7 @@ class TestVectorEmbeddingService(TestCase):
     def tearDown(self):
         cache.clear()
 
-    @patch("matching.services.SentenceTransformer")
+    @patch("sentence_transformers.SentenceTransformer")
     def test_initialization(self, mock_transformer):
         """Test service initialization."""
         mock_model = Mock()
@@ -47,7 +46,7 @@ class TestVectorEmbeddingService(TestCase):
         self.assertEqual(service.cache_timeout, 3600)
         mock_transformer.assert_called_once_with("test-model")
 
-    @patch("matching.services.SentenceTransformer")
+    @patch("sentence_transformers.SentenceTransformer")
     def test_generate_embedding_caching(self, mock_transformer):
         """Test embedding generation with caching."""
         mock_model = Mock()
@@ -73,7 +72,7 @@ class TestVectorEmbeddingService(TestCase):
         np.testing.assert_array_equal(result1, result2)
         np.testing.assert_array_equal(result1, mock_embedding)
 
-    @patch("matching.services.SentenceTransformer")
+    @patch("sentence_transformers.SentenceTransformer")
     def test_generate_embeddings_batch_caching(self, mock_transformer):
         """Test batch embedding generation with caching."""
         mock_model = Mock()

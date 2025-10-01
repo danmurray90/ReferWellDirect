@@ -7,7 +7,6 @@ from django.contrib.auth import get_user_model
 
 # from django.contrib.gis.db import models as gis_models
 # from django.contrib.gis.geos import Point
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 User = get_user_model()

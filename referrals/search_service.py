@@ -3,15 +3,14 @@ Advanced search and filtering service for referrals.
 """
 import io
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import timedelta
+from typing import Any
 
-from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-from django.db.models import Avg, Count, F, Max, Min, Q
+from django.db.models import Avg, Count, F, Max
 from django.utils import timezone
 
-from .models import Appointment, Candidate, Message, Referral, Task
+from .models import Referral
 
 
 class AdvancedSearchService:
@@ -928,7 +927,7 @@ class BulkOperationsService:
                     try:
                         if len(str(cell.value)) > max_length:
                             max_length = len(str(cell.value))
-                    except:
+                    except Exception:
                         pass
                 adjusted_width = min(max_length + 2, 50)
                 worksheet.column_dimensions[column_letter].width = adjusted_width

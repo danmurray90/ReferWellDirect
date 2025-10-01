@@ -1,17 +1,14 @@
 """
 Tests for accounts app.
 """
-import json
 
-from rest_framework import status
 from rest_framework.test import APITestCase
 
 from django.contrib.auth import get_user_model
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from .models import Organisation, User, UserOrganisation
+from .models import Organisation, UserOrganisation
 
 User = get_user_model()
 

@@ -3,10 +3,9 @@ Matching services for ReferWell Direct.
 """
 import logging
 import pickle
-from typing import Any, Optional, Tuple
+from typing import Any
 
 import numpy as np
-from sklearn.calibration import CalibratedClassifierCV
 
 # Lazy import - will be imported when needed
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -14,11 +13,9 @@ from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics.pairwise import cosine_similarity
 
-from django.conf import settings
 from django.contrib.gis.db.models import Q
 from django.contrib.gis.geos import Point
 from django.core.cache import cache
-from django.core.cache.utils import make_template_fragment_key
 from django.db.models import F, QuerySet
 
 from catalogue.models import Psychologist

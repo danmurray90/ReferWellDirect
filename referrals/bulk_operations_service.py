@@ -3,13 +3,11 @@ Bulk operations service for referrals and appointments.
 """
 import io
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from django.db.models import F, Q
 from django.utils import timezone
 
-from .models import Appointment, Candidate, Message, Referral, Task
+from .models import Appointment, Task
 
 
 class AppointmentBulkOperationsService:
@@ -484,7 +482,7 @@ class AppointmentBulkOperationsService:
                     try:
                         if len(str(cell.value)) > max_length:
                             max_length = len(str(cell.value))
-                    except:
+                    except Exception:
                         pass
                 adjusted_width = min(max_length + 2, 50)
                 worksheet.column_dimensions[column_letter].width = adjusted_width

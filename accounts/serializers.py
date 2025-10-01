@@ -300,7 +300,7 @@ class UserOnboardingProgressSerializer(serializers.ModelSerializer):
         Validate that the step exists and is active.
         """
         try:
-            step = OnboardingStep.objects.get(id=value, is_active=True)
+            OnboardingStep.objects.get(id=value, is_active=True)
         except OnboardingStep.DoesNotExist:
             raise serializers.ValidationError("Invalid or inactive step.")
         return value
@@ -399,7 +399,7 @@ class OnboardingProgressUpdateSerializer(serializers.Serializer):
         Validate that the step exists and is active.
         """
         try:
-            step = OnboardingStep.objects.get(id=value, is_active=True)
+            OnboardingStep.objects.get(id=value, is_active=True)
         except OnboardingStep.DoesNotExist:
             raise serializers.ValidationError("Invalid or inactive step.")
         return value

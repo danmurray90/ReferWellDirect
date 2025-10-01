@@ -3,8 +3,6 @@ Tests for matching views.
 """
 import json
 
-import pytest
-
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.test import Client, TestCase

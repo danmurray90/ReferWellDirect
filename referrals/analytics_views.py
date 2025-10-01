@@ -6,9 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
-from django.views.decorators.http import require_http_methods
+from django.http import HttpResponse
 from django.views.generic import TemplateView
 
 from .analytics_service import AnalyticsService

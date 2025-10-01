@@ -1,18 +1,14 @@
 """
 Tests for referrals app.
 """
-import json
-from typing import Any
 
-from rest_framework import status
 from rest_framework.test import APITestCase
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
-from django.utils import timezone
 
-from .models import Appointment, Candidate, Referral
+from .models import Candidate, Referral
 
 User = get_user_model()
 
@@ -197,10 +193,10 @@ class ReferralViewsTest(TestCase):
         """Test create referral view POST request."""
         # Create a patient for the referral
         patient = User.objects.create_user(  # type: ignore[attr-defined]
-            email="patient@example.com",
+            email="testpatient@example.com",
             password="testpass123",
-            first_name="Patient",
-            last_name="User",
+            first_name="Test",
+            last_name="Patient",
             user_type="patient",  # type: ignore[attr-defined]
         )
 

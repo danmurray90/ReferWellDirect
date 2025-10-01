@@ -2,17 +2,15 @@
 Views for the accounts app.
 """
 from rest_framework import status, viewsets
-from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.db import models, transaction
+from django.db import models
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 
@@ -264,6 +262,13 @@ def onboarding_step(request, step_id):
     if progress.status == UserOnboardingProgress.Status.PENDING:
         progress.mark_started()
 
+    # For completion steps, automatically mark as completed when viewed
+    if (
+        step.step_type == OnboardingStep.StepType.COMPLETION
+        and progress.status == UserOnboardingProgress.Status.IN_PROGRESS
+    ):
+        progress.mark_completed()
+
     # Get all steps for this user type for progress indicator
     all_steps = OnboardingStep.objects.filter(
         user_type=user.user_type, is_active=True
@@ -272,6 +277,16 @@ def onboarding_step(request, step_id):
     # Get next step
     session = user.onboarding_session
     next_step = session.get_next_step()
+
+    # Get previous step
+    previous_step = None
+    if step.order > 1:
+        try:
+            previous_step = (
+                all_steps.filter(order__lt=step.order).order_by("-order").first()
+            )
+        except OnboardingStep.DoesNotExist:
+            previous_step = None
 
     # Calculate progress percentage
     total_steps = all_steps.count()
@@ -282,14 +297,39 @@ def onboarding_step(request, step_id):
         int((completed_steps / total_steps) * 100) if total_steps > 0 else 100
     )
 
+    # Get progress records for all steps
+    progress_records = user.onboarding_progress.filter(step__in=all_steps)
+    progress_by_step = {p.step_id: p for p in progress_records}
+
+    # Create enhanced steps list with status information
+    enhanced_steps = []
+    for step_obj in all_steps:
+        step_progress = progress_by_step.get(step_obj.id)
+        if step_progress:
+            step_status = step_progress.status
+        else:
+            step_status = UserOnboardingProgress.Status.PENDING
+
+        enhanced_steps.append(
+            {
+                "step": step_obj,
+                "is_current": step_obj.id == step.id,
+                "status": step_status,
+                "order": step_obj.order,
+                "name": step_obj.name,
+            }
+        )
+
     context = {
         "title": f"Onboarding - {step.name}",
         "step": step,
         "progress": progress,
         "user": user,
-        "all_steps": all_steps,
+        "all_steps": enhanced_steps,
         "next_step": next_step,
+        "previous_step": previous_step,
         "progress_percentage": progress_percentage,
+        "total_steps": total_steps,
     }
 
     # Add step-specific context
@@ -407,7 +447,8 @@ def onboarding_complete_step(request, step_id):
     next_step = session.get_next_step()
 
     if next_step:
-        # Redirect to next step
+        # Update current step and redirect to next step
+        session.update_current_step()
         return redirect("accounts:onboarding_step", step_id=next_step.id)
     else:
         # Complete onboarding
@@ -453,7 +494,8 @@ def onboarding_skip_step(request, step_id):
     next_step = session.get_next_step()
 
     if next_step:
-        # Redirect to next step
+        # Update current step and redirect to next step
+        session.update_current_step()
         return redirect("accounts:onboarding_step", step_id=next_step.id)
     else:
         # Complete onboarding

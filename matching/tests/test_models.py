@@ -1,9 +1,7 @@
 """
 Tests for matching models.
 """
-import pytest
 
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 from matching.models import (

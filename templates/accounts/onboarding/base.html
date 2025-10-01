@@ -255,12 +255,12 @@
 
     <!-- Step Indicator -->
     <div class="step-indicator" aria-label="Onboarding progress">
-        {% for step in all_steps %}
-            <div class="step-indicator__item {% if step.is_current %}step-indicator__item--current{% elif step.status == 'completed' %}step-indicator__item--completed{% endif %}">
-                <div class="step-indicator__number" aria-label="Step {{ step.order }}: {{ step.name }}">
-                    {% if step.status == 'completed' %}✓{% else %}{{ step.order }}{% endif %}
+        {% for step_data in all_steps %}
+            <div class="step-indicator__item {% if step_data.is_current %}step-indicator__item--current{% elif step_data.status == 'completed' %}step-indicator__item--completed{% endif %}">
+                <div class="step-indicator__number" aria-label="Step {{ step_data.order }}: {{ step_data.name }}">
+                    {% if step_data.status == 'completed' %}✓{% else %}{{ step_data.order }}{% endif %}
                 </div>
-                <div class="step-indicator__label">{{ step.name }}</div>
+                <div class="step-indicator__label">{{ step_data.name }}</div>
                 {% if not forloop.last %}
                     <div class="step-indicator__connector" aria-hidden="true"></div>
                 {% endif %}
@@ -285,7 +285,7 @@
 
     <!-- Navigation -->
     <div class="onboarding-navigation">
-        {% if step.order > 1 %}
+        {% if step.order > 1 and previous_step %}
             <a href="{% url 'accounts:onboarding_step' step_id=previous_step.id %}" class="btn btn--secondary">
                 ← Previous
             </a>
@@ -299,6 +299,7 @@
             <div style="font-size: var(--font-size-xs); color: var(--color-gray-500);">Step {{ step.order }} of {{ total_steps|default:5 }}</div>
         </div>
 
+        {% if step.step_type != 'completion' %}
         <div class="btn-group">
             {% if not step.is_required %}
                 <form method="post" action="{% url 'accounts:onboarding_skip_step' step_id=step.id %}" style="display: inline;">
@@ -313,6 +314,7 @@
                 {% if next_step %}Continue →{% else %}Complete Setup{% endif %}
             </button>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

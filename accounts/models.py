@@ -477,6 +477,13 @@ class OnboardingSession(models.Model):
         self.current_step = self.get_next_step()
         self.save(update_fields=["status", "started_at", "current_step"])
 
+    def update_current_step(self):
+        """Update the current step based on progress."""
+        next_step = self.get_next_step()
+        if next_step:
+            self.current_step = next_step
+            self.save(update_fields=["current_step"])
+
     def complete(self):
         """Complete the onboarding session."""
         self.status = self.Status.COMPLETED

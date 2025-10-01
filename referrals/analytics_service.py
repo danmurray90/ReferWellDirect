@@ -2,14 +2,14 @@
 Analytics and reporting service for referrals and appointments.
 """
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import timedelta
+from typing import Any, Optional
 
-from django.db.models import Avg, Count, F, Max, Min, Q, Sum
-from django.db.models.functions import TruncDate, TruncMonth, TruncYear
+from django.db.models import Avg, Count, F, Max, Min, Q
+from django.db.models.functions import TruncDate, TruncMonth
 from django.utils import timezone
 
-from .models import Appointment, Candidate, Message, Referral, Task
+from .models import Appointment, Candidate, Referral
 
 
 class AnalyticsService:
@@ -719,7 +719,7 @@ class AnalyticsService:
         """Export data as XLSX."""
         try:
             import openpyxl  # type: ignore[import]
-            from openpyxl.styles import Alignment, Font  # type: ignore[import]
+            from openpyxl.styles import Font  # type: ignore[import]
 
             workbook = openpyxl.Workbook()
             worksheet = workbook.active
