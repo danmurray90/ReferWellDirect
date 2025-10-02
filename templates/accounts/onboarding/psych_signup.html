@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Psychologist Registration - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+}
+
+.form-section h2 {
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-group .help-text {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.25rem;
+}
+
+.required {
+    color: var(--color-danger);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkbox-item input {
+    width: auto;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .checkbox-group {
+        grid-template-columns: 1fr;
+    }
+}
+
+.submit-button {
+    background: var(--color-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.submit-button:hover {
+    background: var(--color-primary-dark);
+}
+
+.back-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="{% url 'public:for_psychologists' %}" class="back-link">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        Back to Psychologist Information
+    </a>
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="color: var(--color-text-primary); margin-bottom: 1rem;">Psychologist Registration</h1>
+        <p style="color: var(--color-text-secondary);">Join our network of verified mental health professionals</p>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Personal Information -->
+        <div class="form-section">
+            <h2>Personal Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">First Name <span class="required">*</span></label>
+                    <input type="text" id="first_name" name="first_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name <span class="required">*</span></label>
+                    <input type="text" id="last_name" name="last_name" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+                <div class="help-text">This will be your login username</div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+        </div>
+
+        <!-- Professional Information -->
+        <div class="form-section">
+            <h2>Professional Information</h2>
+
+            <div class="form-group">
+                <label for="bio">Professional Bio</label>
+                <textarea id="bio" name="bio" rows="4" placeholder="Tell us about your professional background, qualifications, and approach to therapy..."></textarea>
+                <div class="help-text">This will help patients understand your expertise and approach</div>
+            </div>
+
+            <div class="form-group">
+                <label>Specialisms</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="specialism_anxiety" name="specialisms" value="anxiety">
+                        <label for="specialism_anxiety">Anxiety Disorders</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="specialism_depression" name="specialisms" value="depression">
+                        <label for="specialism_depression">Depression</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="specialism_trauma" name="specialisms" value="trauma">
+                        <label for="specialism_trauma">Trauma & PTSD</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="specialism_ocd" name="specialisms" value="ocd">
+                        <label for="specialism_ocd">OCD</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="specialism_eating" name="specialisms" value="eating">
+                        <label for="specialism_eating">Eating Disorders</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="specialism_bipolar" name="specialisms" value="bipolar">
+                        <label for="specialism_bipolar">Bipolar Disorder</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="specialism_addiction" name="specialisms" value="addiction">
+                        <label for="specialism_addiction">Addiction</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="specialism_relationships" name="specialisms" value="relationships">
+                        <label for="specialism_relationships">Relationship Issues</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Therapeutic Modalities</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="modality_cbt" name="modalities" value="cbt">
+                        <label for="modality_cbt">Cognitive Behavioural Therapy (CBT)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="modality_dbt" name="modalities" value="dbt">
+                        <label for="modality_dbt">Dialectical Behaviour Therapy (DBT)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="modality_psychodynamic" name="modalities" value="psychodynamic">
+                        <label for="modality_psychodynamic">Psychodynamic Therapy</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="modality_humanistic" name="modalities" value="humanistic">
+                        <label for="modality_humanistic">Humanistic Therapy</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="modality_emdr" name="modalities" value="emdr">
+                        <label for="modality_emdr">EMDR</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="modality_mindfulness" name="modalities" value="mindfulness">
+                        <label for="modality_mindfulness">Mindfulness-Based Therapy</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Languages Spoken</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lang_english" name="languages" value="en" checked>
+                        <label for="lang_english">English</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lang_spanish" name="languages" value="es">
+                        <label for="lang_spanish">Spanish</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lang_french" name="languages" value="fr">
+                        <label for="lang_french">French</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lang_german" name="languages" value="de">
+                        <label for="lang_german">German</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lang_italian" name="languages" value="it">
+                        <label for="lang_italian">Italian</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="lang_portuguese" name="languages" value="pt">
+                        <label for="lang_portuguese">Portuguese</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Preferences -->
+        <div class="form-section">
+            <h2>Service Preferences</h2>
+
+            <div class="form-group">
+                <label>Service Types</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="nhs_provider" name="nhs_provider">
+                        <label for="nhs_provider">NHS Provider</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="private_provider" name="private_provider">
+                        <label for="private_provider">Private Provider</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Information -->
+        <div class="form-section">
+            <h2>Location Information</h2>
+
+            <div class="form-group">
+                <label for="address_line_1">Address Line 1</label>
+                <input type="text" id="address_line_1" name="address_line_1">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" name="city">
+                </div>
+
+                <div class="form-group">
+                    <label for="postcode">Postcode</label>
+                    <input type="text" id="postcode" name="postcode">
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Security -->
+        <div class="form-section">
+            <h2>Account Security</h2>
+
+            <div class="form-group">
+                <label for="password">Password <span class="required">*</span></label>
+                <input type="password" id="password" name="password" required>
+                <div class="help-text">Minimum 8 characters with letters and numbers</div>
+            </div>
+        </div>
+
+        <!-- Terms and Conditions -->
+        <div class="form-section">
+            <div class="form-group">
+                <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" required style="width: auto; margin-top: 0.25rem;">
+                    <span>I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a> <span class="required">*</span></span>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-button">
+            Join Our Network
+        </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 2rem; color: var(--color-text-secondary);">
+        <p>Already have an account? <a href="{% url 'accounts:signin' %}">Sign in here</a></p>
+    </div>
+</div>
+{% endblock %}

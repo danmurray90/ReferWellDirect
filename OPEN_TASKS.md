@@ -1,6 +1,26 @@
 # ReferWell Direct - Open Tasks
 
-## High Priority (Current Sprint)
+## Completed Tasks (Latest Sprint - Public Landing Page & Onboarding)
+
+### Public Landing Page & Role-Based Onboarding System
+
+- [x] **Public Landing Page**: Created comprehensive landing page with role-specific sections
+- [x] **Public App**: New Django app for public-facing pages with proper URL routing
+- [x] **Role-Specific Pages**: Dedicated pages for GPs, Psychologists, and Patients
+- [x] **GP Onboarding**: Complete registration flow with verification system
+- [x] **Psychologist Onboarding**: Comprehensive signup with specialisms and modalities
+- [x] **Patient Profile Management**: GPs can create patient profiles without patient accounts
+- [x] **Secure Invite System**: Cryptographically secure tokens for patient claiming
+- [x] **Patient Claim Flow**: Patients can create accounts and link to existing profiles
+- [x] **Patient Self-Referral**: Self-referral with optional account creation
+- [x] **Admin Verification**: Admin interface for verifying healthcare professionals
+- [x] **Template System**: 8 new templates with NHS.UK styling and accessibility
+- [x] **Data Models**: VerificationStatus, PatientProfile, PatientClaimInvite models
+- [x] **Database Migrations**: Non-breaking migrations with proper indexes
+- [x] **URL Structure**: Clean RESTful URLs for all new flows
+- [x] **Documentation**: Updated README, milestones, and user guides
+
+## High Priority (Next Sprint)
 
 ### Repository Setup
 

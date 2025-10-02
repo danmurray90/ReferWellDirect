@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}GP Registration - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+}
+
+.form-section h2 {
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-group .help-text {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.25rem;
+}
+
+.required {
+    color: var(--color-danger);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.submit-button {
+    background: var(--color-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.submit-button:hover {
+    background: var(--color-primary-dark);
+}
+
+.back-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="{% url 'public:for_gps' %}" class="back-link">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        Back to GP Information
+    </a>
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="color: var(--color-text-primary); margin-bottom: 1rem;">GP Registration</h1>
+        <p style="color: var(--color-text-secondary);">Join ReferWell Direct to streamline your mental health referrals</p>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Personal Information -->
+        <div class="form-section">
+            <h2>Personal Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">First Name <span class="required">*</span></label>
+                    <input type="text" id="first_name" name="first_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name <span class="required">*</span></label>
+                    <input type="text" id="last_name" name="last_name" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+                <div class="help-text">This will be your login username</div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+        </div>
+
+        <!-- Professional Information -->
+        <div class="form-section">
+            <h2>Professional Information</h2>
+
+            <div class="form-group">
+                <label for="gmc_number">GMC Number</label>
+                <input type="text" id="gmc_number" name="gmc_number">
+                <div class="help-text">Your General Medical Council registration number</div>
+            </div>
+        </div>
+
+        <!-- Organisation Information -->
+        <div class="form-section">
+            <h2>Organisation Information</h2>
+
+            <div class="form-group">
+                <label for="org_name">Practice/Organisation Name</label>
+                <input type="text" id="org_name" name="org_name">
+            </div>
+
+            <div class="form-group">
+                <label for="org_type">Organisation Type</label>
+                <select id="org_type" name="org_type">
+                    <option value="">Select type...</option>
+                    <option value="gp_practice">GP Practice</option>
+                    <option value="clinic">Clinic</option>
+                    <option value="hospital">Hospital</option>
+                    <option value="mental_health_service">Mental Health Service</option>
+                    <option value="private_practice">Private Practice</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="org_email">Organisation Email</label>
+                <input type="email" id="org_email" name="org_email">
+            </div>
+
+            <div class="form-group">
+                <label for="org_phone">Organisation Phone</label>
+                <input type="tel" id="org_phone" name="org_phone">
+            </div>
+
+            <div class="form-group">
+                <label for="org_address">Address Line 1</label>
+                <input type="text" id="org_address" name="org_address">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="org_city">City</label>
+                    <input type="text" id="org_city" name="org_city">
+                </div>
+
+                <div class="form-group">
+                    <label for="org_postcode">Postcode</label>
+                    <input type="text" id="org_postcode" name="org_postcode">
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Security -->
+        <div class="form-section">
+            <h2>Account Security</h2>
+
+            <div class="form-group">
+                <label for="password">Password <span class="required">*</span></label>
+                <input type="password" id="password" name="password" required>
+                <div class="help-text">Minimum 8 characters with letters and numbers</div>
+            </div>
+        </div>
+
+        <!-- Terms and Conditions -->
+        <div class="form-section">
+            <div class="form-group">
+                <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" required style="width: auto; margin-top: 0.25rem;">
+                    <span>I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a> <span class="required">*</span></span>
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-button">
+            Create GP Account
+        </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 2rem; color: var(--color-text-secondary);">
+        <p>Already have an account? <a href="{% url 'accounts:signin' %}">Sign in here</a></p>
+    </div>
+</div>
+{% endblock %}

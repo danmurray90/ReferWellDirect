@@ -4,12 +4,129 @@ Referral models for ReferWell Direct.
 import uuid
 
 from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator
 
 # from django.contrib.gis.db import models as gis_models
 # from django.contrib.gis.geos import Point
 from django.db import models
 
 User = get_user_model()
+
+
+class PatientProfile(models.Model):
+    """
+    Patient profile model - distinct from auth User, can be linked later.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="patient_profiles",
+        help_text="Optional link to authenticated user account",
+    )
+
+    # Basic information
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+    email = models.EmailField(blank=True)
+    phone = models.CharField(
+        max_length=20,
+        validators=[
+            RegexValidator(
+                regex=r"^\+?1?\d{9,15}$",
+                message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed.",
+            )
+        ],
+        blank=True,
+    )
+    date_of_birth = models.DateField(null=True, blank=True)
+
+    # Address information
+    address_line_1 = models.CharField(max_length=100, blank=True)
+    address_line_2 = models.CharField(max_length=100, blank=True)
+    city = models.CharField(max_length=50, blank=True)
+    postcode = models.CharField(max_length=10, blank=True)
+    country = models.CharField(max_length=50, default="United Kingdom")
+
+    # Geographic location (temporarily disabled - requires PostGIS/GDAL)
+    # location = gis_models.PointField(null=True, blank=True, srid=4326)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
+    # NHS specific fields
+    nhs_number = models.CharField(
+        max_length=10, blank=True, help_text="NHS number (if available)"
+    )
+
+    # Status
+    is_active = models.BooleanField(default=True)
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Audit fields
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_patient_profiles",
+    )
+
+    class Meta:
+        db_table = "referrals_patient_profile"
+        verbose_name = "Patient Profile"
+        verbose_name_plural = "Patient Profiles"
+        indexes = [
+            models.Index(fields=["email"]),
+            models.Index(fields=["nhs_number"]),
+            models.Index(fields=["is_active"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.get_full_name()} (Profile)"
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()
+
+    def get_short_name(self):
+        return self.first_name
+
+    @property
+    def is_linked_to_user(self):
+        """Check if this profile is linked to an authenticated user."""
+        return self.user is not None
+
+    @property
+    def age(self):
+        """Calculate age from date of birth."""
+        if not self.date_of_birth:
+            return None
+
+        from datetime import date
+
+        today = date.today()
+        return (
+            today.year
+            - self.date_of_birth.year
+            - (
+                (today.month, today.day)
+                < (self.date_of_birth.month, self.date_of_birth.day)
+            )
+        )
+
+    def link_to_user(self, user):
+        """Link this profile to an authenticated user."""
+        if self.user is not None:
+            raise ValueError("Profile is already linked to a user")
+
+        self.user = user
+        self.save(update_fields=["user"])
 
 
 class Referral(models.Model):
@@ -57,7 +174,18 @@ class Referral(models.Model):
         User, on_delete=models.CASCADE, related_name="referrals_made"
     )
     patient = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="referrals_received"
+        User,
+        on_delete=models.CASCADE,
+        related_name="referrals_received",
+        null=True,
+        blank=True,
+    )
+    patient_profile = models.ForeignKey(
+        PatientProfile,
+        on_delete=models.CASCADE,
+        related_name="referrals",
+        null=True,
+        blank=True,
     )
 
     # Status and priority
@@ -152,7 +280,23 @@ class Referral(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"Referral {self.referral_id} - {self.patient.get_full_name()}"
+        return f"Referral {self.referral_id} - {self.get_patient_name()}"
+
+    def get_patient_name(self):
+        """Get the patient name from either User or PatientProfile."""
+        if self.patient:
+            return self.patient.get_full_name()
+        elif self.patient_profile:
+            return self.patient_profile.get_full_name()
+        return "Unknown Patient"
+
+    def get_patient(self):
+        """Get the patient object (User or PatientProfile)."""
+        if self.patient:
+            return self.patient
+        elif self.patient_profile:
+            return self.patient_profile
+        return None
 
     def save(self, *args, **kwargs) -> None:
         if not self.referral_id:

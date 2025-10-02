@@ -5,7 +5,7 @@ from typing import Any
 
 from django.contrib import admin
 
-from .models import Appointment, Candidate, Message, Referral, Task
+from .models import Appointment, Candidate, Message, PatientProfile, Referral, Task
 
 
 @admin.register(Referral)
@@ -255,3 +255,55 @@ class TaskAdmin(admin.ModelAdmin):
             .get_queryset(request)
             .select_related("referral", "assigned_to", "created_by")
         )
+
+
+@admin.register(PatientProfile)
+class PatientProfileAdmin(admin.ModelAdmin):
+    """
+    Patient profile admin for managing patient profiles.
+    """
+
+    list_display = (
+        "get_full_name",
+        "email",
+        "phone",
+        "is_linked_to_user",
+        "is_active",
+        "created_at",
+    )
+    list_filter = ("is_active", "created_at")
+    search_fields = ("first_name", "last_name", "email", "phone", "nhs_number")
+    ordering = ("-created_at",)
+
+    fieldsets = (
+        ("Basic Info", {"fields": ("first_name", "last_name", "email", "phone")}),
+        ("Personal Details", {"fields": ("date_of_birth", "nhs_number")}),
+        (
+            "Address",
+            {
+                "fields": (
+                    "address_line_1",
+                    "address_line_2",
+                    "city",
+                    "postcode",
+                    "country",
+                )
+            },
+        ),
+        ("Location", {"fields": ("latitude", "longitude")}),
+        ("Status", {"fields": ("is_active", "user")}),
+        ("Timestamps", {"fields": ("created_at", "updated_at")}),
+        ("Audit", {"fields": ("created_by",)}),
+    )
+
+    readonly_fields = ("created_at", "updated_at")
+
+    def is_linked_to_user(self, obj):
+        """Check if profile is linked to user."""
+        return obj.is_linked_to_user
+
+    is_linked_to_user.boolean = True
+    is_linked_to_user.short_description = "Linked to User"
+
+    def get_queryset(self, request: Any) -> Any:
+        return super().get_queryset(request).select_related("user", "created_by")

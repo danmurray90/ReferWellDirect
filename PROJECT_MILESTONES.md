@@ -255,6 +255,99 @@
 - ✅ **User Experience**: Improved error messages and graceful handling of edge cases in onboarding flow
 - ✅ **Database Population**: Successfully created onboarding steps for GP, Patient, Psychologist, Admin, and High-Touch Referrer user types
 
+## Phase 5: Public Landing Page & Role-Based Onboarding (Latest)
+
+- [x] Public landing page with role-specific sections
+- [x] GP onboarding flow with verification system
+- [x] Psychologist onboarding flow with verification system
+- [x] Patient profile management for GPs
+- [x] Secure patient invite system with tokens
+- [x] Patient claim flow for profile linking
+- [x] Patient self-referral with optional account creation
+- [x] Admin verification interface for healthcare professionals
+- [x] Comprehensive template system for all new flows
+- [x] Updated documentation and user guides
+
+## Latest Achievements (Phase 5 - Public Landing Page & Onboarding)
+
+### Public Landing Page Implementation
+
+- ✅ **Professional Landing Page**: Created comprehensive landing page with hero section, role cards, and features overview
+- ✅ **Role-Specific Pages**: Dedicated pages for GPs, Psychologists, and Patients with benefits and CTAs
+- ✅ **Responsive Design**: Mobile-first design with NHS.UK styling and accessibility compliance
+- ✅ **Public App Structure**: New Django app for public-facing pages with proper URL routing
+- ✅ **Caching Strategy**: 15-minute cache for public pages to improve performance
+- ✅ **SEO Optimization**: Proper meta tags, structured content, and semantic HTML
+
+### GP Onboarding System
+
+- ✅ **GP Registration Flow**: Complete signup form with personal, professional, and organisation details
+- ✅ **Verification System**: Admin-managed verification with PENDING → VERIFIED/REJECTED workflow
+- ✅ **Organisation Management**: GP can create and link to their practice/organisation
+- ✅ **Professional Details**: GMC number capture and professional information collection
+- ✅ **Verification Pending Page**: Clear status communication for unverified users
+- ✅ **Admin Interface**: Bulk verification actions and detailed verification management
+
+### Psychologist Onboarding System
+
+- ✅ **Psychologist Registration**: Comprehensive signup with specialisms, modalities, and languages
+- ✅ **Professional Profile**: Bio, specialisms, therapeutic modalities, and service preferences
+- ✅ **Location Information**: Address capture for geographic matching
+- ✅ **Verification Workflow**: Same admin verification system as GPs
+- ✅ **Service Preferences**: NHS/private provider options and service type preferences
+
+### Patient Management System
+
+- ✅ **Patient Profile Model**: Distinct from User model, can be linked later
+- ✅ **GP Patient Creation**: GPs can create patient profiles without patient accounts
+- ✅ **Secure Invite System**: Cryptographically secure tokens with 7-day expiration
+- ✅ **Patient Claim Flow**: Patients can create accounts and link to existing profiles
+- ✅ **One-Time Use Tokens**: Secure token system with usage tracking
+- ✅ **No PHI Exposure**: No sensitive data in URLs or public pages
+
+### Patient Self-Referral System
+
+- ✅ **Self-Referral Flow**: Patients can refer themselves with optional account creation
+- ✅ **Flexible Account Creation**: Can create account during referral or remain as guest
+- ✅ **Referral Information**: Comprehensive form for presenting problems and preferences
+- ✅ **Service Preferences**: NHS/private and modality preferences
+- ✅ **Success Flow**: Clear next steps and referral tracking
+
+### Admin Verification Interface
+
+- ✅ **Verification Management**: Admin can verify/reject GP and Psychologist accounts
+- ✅ **Bulk Actions**: Verify or reject multiple users at once
+- ✅ **Verification Tracking**: Complete audit trail of verification decisions
+- ✅ **Patient Profile Management**: View and manage patient profiles
+- ✅ **Invite Monitoring**: Track patient claim invites and usage
+
+### Template System
+
+- ✅ **Comprehensive Templates**: 8 new templates for all onboarding and management flows
+- ✅ **NHS.UK Styling**: Consistent design following NHS.UK design patterns
+- ✅ **Accessibility Compliance**: WCAG 2.2 AA compliant with proper ARIA labels
+- ✅ **Mobile Responsive**: Touch-friendly design with responsive layouts
+- ✅ **Form Validation**: Client-side and server-side validation with error handling
+- ✅ **Progressive Enhancement**: Works without JavaScript, enhanced with JavaScript
+
+### Data Model Enhancements
+
+- ✅ **VerificationStatus Model**: Tracks verification status for healthcare professionals
+- ✅ **PatientProfile Model**: Distinct patient model with optional user linking
+- ✅ **PatientClaimInvite Model**: Secure token-based invite system
+- ✅ **Referral Model Updates**: Support for both User and PatientProfile patients
+- ✅ **Database Migrations**: Non-breaking migrations with proper indexes
+- ✅ **Admin Integration**: Full admin interface for all new models
+
+### URL Structure & Routing
+
+- ✅ **Public Routes**: `/`, `/for-gps/`, `/for-psychologists/`, `/for-patients/`
+- ✅ **Onboarding Routes**: `/onboarding/gp/start/`, `/onboarding/psych/start/`
+- ✅ **Patient Management**: `/gp/patients/new/`, `/gp/patients/<id>/invite/`
+- ✅ **Patient Claim**: `/claim/<token>/` for secure profile claiming
+- ✅ **Self-Referral**: `/self-referral/start/` for patient self-referral
+- ✅ **Clean URL Structure**: RESTful URLs with proper naming conventions
+
 ## Next Actions
 
 1. ✅ Implement user onboarding flow - COMPLETED
@@ -266,5 +359,6 @@
 7. ✅ Implement API documentation - COMPLETED
 8. ✅ Add data export capabilities - COMPLETED
 9. ✅ Fix onboarding system errors - COMPLETED
-10. Begin Phase 5: External Integrations (Stubbed)
-11. Set up production configuration
+10. ✅ Implement public landing page and role-based onboarding - COMPLETED
+11. Begin Phase 6: External Integrations (Stubbed)
+12. Set up production configuration

@@ -30,6 +30,8 @@ urlpatterns = [
     ),
     # API endpoints
     path("api/v1/", include("referwell.api_urls")),
+    # Public pages (no auth required)
+    path("", include("public.urls")),
     # App-specific URLs
     path("accounts/", include("accounts.urls")),
     path("referrals/", include("referrals.urls")),
@@ -42,8 +44,6 @@ urlpatterns = [
     path(
         "dashboard/", RedirectView.as_view(url="/accounts/dashboard/", permanent=False)
     ),
-    # Root redirect to accounts home
-    path("", RedirectView.as_view(url="/accounts/", permanent=False)),
 ]
 
 # Serve media files in development

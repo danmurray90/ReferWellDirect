@@ -28,6 +28,12 @@ urlpatterns = [
     path("profile/", views.profile, name="profile"),
     # Onboarding views
     path("onboarding/start/", views.onboarding_start, name="onboarding_start"),
+    path("onboarding/gp/start/", views.gp_onboarding_start, name="gp_onboarding_start"),
+    path(
+        "onboarding/psych/start/",
+        views.psych_onboarding_start,
+        name="psych_onboarding_start",
+    ),
     path(
         "onboarding/step/<uuid:step_id>/", views.onboarding_step, name="onboarding_step"
     ),
@@ -42,6 +48,15 @@ urlpatterns = [
         name="onboarding_skip_step",
     ),
     path("onboarding/progress/", views.onboarding_progress, name="onboarding_progress"),
+    # Patient management views
+    path("gp/patients/new/", views.gp_create_patient, name="gp_create_patient"),
+    path(
+        "gp/patients/<uuid:patient_id>/invite/",
+        views.gp_invite_patient,
+        name="gp_invite_patient",
+    ),
+    # Patient claim views
+    path("claim/<str:token>/", views.patient_claim, name="patient_claim"),
     # API views
     path("api/", include(router.urls)),
 ]

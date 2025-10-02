@@ -3,8 +3,15 @@ Admin configuration for accounts app.
 """
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils import timezone
 
-from .models import Organisation, User, UserOrganisation
+from .models import (
+    Organisation,
+    PatientClaimInvite,
+    User,
+    UserOrganisation,
+    VerificationStatus,
+)
 
 
 @admin.register(User)
@@ -155,4 +162,104 @@ class UserOrganisationAdmin(admin.ModelAdmin):
             super()
             .get_queryset(request)
             .select_related("user", "organisation", "created_by")
+        )
+
+
+@admin.register(VerificationStatus)
+class VerificationStatusAdmin(admin.ModelAdmin):
+    """
+    Verification status admin for GP and Psychologist verification.
+    """
+
+    list_display = ("user", "status", "vetted_at", "vetted_by", "created_at")
+    list_filter = ("status", "vetted_at", "created_at")
+    search_fields = (
+        "user__email",
+        "user__first_name",
+        "user__last_name",
+        "vetted_by__email",
+    )
+    ordering = ("-created_at",)
+
+    fieldsets = (
+        ("User", {"fields": ("user",)}),
+        ("Verification", {"fields": ("status", "notes")}),
+        ("Vetting", {"fields": ("vetted_by", "vetted_at")}),
+        ("Timestamps", {"fields": ("created_at", "updated_at")}),
+    )
+
+    readonly_fields = ("created_at", "updated_at", "vetted_at")
+
+    actions = ["verify_users", "reject_users"]
+
+    def verify_users(self, request, queryset):
+        """Bulk verify selected users."""
+        updated = queryset.filter(status=VerificationStatus.Status.PENDING).update(
+            status=VerificationStatus.Status.VERIFIED,
+            vetted_by=request.user,
+            vetted_at=timezone.now(),
+        )
+        self.message_user(request, f"{updated} users verified successfully.")
+
+    verify_users.short_description = "Verify selected users"
+
+    def reject_users(self, request, queryset):
+        """Bulk reject selected users."""
+        updated = queryset.filter(status=VerificationStatus.Status.PENDING).update(
+            status=VerificationStatus.Status.REJECTED,
+            vetted_by=request.user,
+            vetted_at=timezone.now(),
+        )
+        self.message_user(request, f"{updated} users rejected successfully.")
+
+    reject_users.short_description = "Reject selected users"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("user", "vetted_by")
+
+
+@admin.register(PatientClaimInvite)
+class PatientClaimInviteAdmin(admin.ModelAdmin):
+    """
+    Patient claim invite admin.
+    """
+
+    list_display = (
+        "patient_profile",
+        "email",
+        "expires_at",
+        "used_at",
+        "is_valid",
+        "created_at",
+    )
+    list_filter = ("expires_at", "used_at", "created_at")
+    search_fields = (
+        "email",
+        "patient_profile__first_name",
+        "patient_profile__last_name",
+        "token",
+    )
+    ordering = ("-created_at",)
+
+    fieldsets = (
+        ("Invite Details", {"fields": ("patient_profile", "email", "token")}),
+        ("Status", {"fields": ("expires_at", "used_at")}),
+        ("Timestamps", {"fields": ("created_at",)}),
+        ("Audit", {"fields": ("created_by",)}),
+    )
+
+    readonly_fields = ("created_at", "token")
+
+    def is_valid(self, obj):
+        """Check if invite is valid."""
+        return obj.is_valid
+
+    is_valid.boolean = True
+    is_valid.short_description = "Valid"
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("patient_profile", "created_by")
         )

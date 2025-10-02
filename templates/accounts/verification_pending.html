@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Verification Pending - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+.status-card {
+    background: white;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+    text-align: center;
+}
+
+.status-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--color-warning);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    color: white;
+}
+
+.status-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+}
+
+.status-description {
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.info-section {
+    background: var(--color-background-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.info-section h3 {
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.info-section p {
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.info-section strong {
+    color: var(--color-text-primary);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn--primary {
+    background: var(--color-primary);
+    color: white;
+}
+
+.btn--primary:hover {
+    background: var(--color-primary-dark);
+    color: white;
+    text-decoration: none;
+}
+
+.btn--secondary {
+    background: var(--color-background-light);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+.btn--secondary:hover {
+    background: var(--color-border);
+    color: var(--color-text-primary);
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="status-card">
+        <div class="status-icon">
+            <i class="fas fa-clock" aria-hidden="true"></i>
+        </div>
+
+        <h1 class="status-title">Verification Pending</h1>
+
+        <p class="status-description">
+            Thank you for registering with ReferWell Direct! Your account is currently pending verification.
+            Our admin team will review your application and notify you once verification is complete.
+        </p>
+
+        {% if verification_status %}
+        <div class="info-section">
+            <h3>Verification Details</h3>
+            <p><strong>Status:</strong> {{ verification_status.get_status_display }}</p>
+            <p><strong>Submitted:</strong> {{ verification_status.created_at|date:"F j, Y" }}</p>
+            {% if verification_status.notes %}
+            <p><strong>Notes:</strong> {{ verification_status.notes }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="info-section">
+            <h3>What happens next?</h3>
+            <p>• Our admin team will review your professional credentials</p>
+            <p>• You'll receive an email notification once verification is complete</p>
+            <p>• Once verified, you'll have full access to all platform features</p>
+            <p>• This process typically takes 1-2 business days</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'accounts:dashboard' %}" class="btn btn--primary">
+                Go to Dashboard
+            </a>
+            <a href="{% url 'public:landing' %}" class="btn btn--secondary">
+                Return to Home
+            </a>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem; color: var(--color-text-secondary);">
+        <p>Need help? <a href="mailto:support@referwelldirect.com">Contact Support</a></p>
+    </div>
+</div>
+{% endblock %}

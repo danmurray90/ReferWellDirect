@@ -79,6 +79,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    "public",
     "accounts",
     "referrals",
     "catalogue",

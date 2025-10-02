@@ -752,3 +752,386 @@ class OnboardingSessionViewSet(viewsets.ReadOnlyModelViewSet):
                 {"error": "No onboarding session found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+
+# New role-based onboarding views
+
+
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def gp_onboarding_start(request):
+    """
+    GP onboarding start view with verification status.
+    """
+    if request.user.is_authenticated:
+        return redirect("accounts:dashboard")
+
+    if request.method == "POST":
+        # Handle GP signup form
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        phone = request.POST.get("phone")
+
+        # Organisation details
+        org_name = request.POST.get("org_name")
+        org_type = request.POST.get("org_type")
+        org_email = request.POST.get("org_email")
+        org_phone = request.POST.get("org_phone")
+        org_address = request.POST.get("org_address")
+        org_city = request.POST.get("org_city")
+        org_postcode = request.POST.get("org_postcode")
+
+        # Professional details
+        gmc_number = request.POST.get("gmc_number")
+
+        if email and password and first_name and last_name:
+            try:
+                # Create user
+                user = User.objects.create_user(
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    phone=phone,
+                    user_type=User.UserType.GP,
+                    is_verified=False,  # Will be verified by admin
+                )
+
+                # Create organisation if provided
+                if org_name:
+                    organisation = Organisation.objects.create(
+                        name=org_name,
+                        organisation_type=org_type
+                        or Organisation.OrganisationType.GP_PRACTICE,
+                        email=org_email,
+                        phone=org_phone,
+                        address_line_1=org_address,
+                        city=org_city,
+                        postcode=org_postcode,
+                        created_by=user,
+                    )
+
+                    # Link user to organisation
+                    UserOrganisation.objects.create(
+                        user=user,
+                        organisation=organisation,
+                        role=UserOrganisation.Role.OWNER,
+                        created_by=user,
+                    )
+
+                # Create verification status
+                from .models import VerificationStatus
+
+                VerificationStatus.objects.create(
+                    user=user,
+                    status=VerificationStatus.Status.PENDING,
+                    notes=f"GMC Number: {gmc_number}" if gmc_number else "",
+                )
+
+                # Authenticate and login user
+                user = authenticate(request, username=email, password=password)
+                if user:
+                    login(request, user)
+                    messages.success(
+                        request,
+                        "Account created successfully! Your account is pending verification. "
+                        "You'll be notified once verified.",
+                    )
+                    return redirect("accounts:verification_pending")
+
+            except Exception as e:
+                messages.error(request, f"Error creating account: {str(e)}")
+        else:
+            messages.error(request, "Please fill in all required fields.")
+
+    return render(request, "accounts/onboarding/gp_signup.html")
+
+
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def psych_onboarding_start(request):
+    """
+    Psychologist onboarding start view with verification status.
+    """
+    if request.user.is_authenticated:
+        return redirect("accounts:dashboard")
+
+    if request.method == "POST":
+        # Handle Psychologist signup form
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        phone = request.POST.get("phone")
+
+        # Professional details
+        bio = request.POST.get("bio")
+        specialisms = request.POST.getlist("specialisms")
+        modalities = request.POST.getlist("modalities")
+        languages = request.POST.getlist("languages")
+
+        # Service preferences
+        nhs_provider = request.POST.get("nhs_provider") == "on"
+        private_provider = request.POST.get("private_provider") == "on"
+
+        # Location
+        address_line_1 = request.POST.get("address_line_1")
+        city = request.POST.get("city")
+        postcode = request.POST.get("postcode")
+
+        if email and password and first_name and last_name:
+            try:
+                # Create user
+                user = User.objects.create_user(
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    phone=phone,
+                    user_type=User.UserType.PSYCHOLOGIST,
+                    is_verified=False,  # Will be verified by admin
+                )
+
+                # Create verification status
+                from .models import VerificationStatus
+
+                VerificationStatus.objects.create(
+                    user=user,
+                    status=VerificationStatus.Status.PENDING,
+                    notes=f"Bio: {bio}\nSpecialisms: {', '.join(specialisms)}\nModalities: {', '.join(modalities)}",
+                )
+
+                # Authenticate and login user
+                user = authenticate(request, username=email, password=password)
+                if user:
+                    login(request, user)
+                    messages.success(
+                        request,
+                        "Account created successfully! Your account is pending verification. "
+                        "You'll be notified once verified.",
+                    )
+                    return redirect("accounts:verification_pending")
+
+            except Exception as e:
+                messages.error(request, f"Error creating account: {str(e)}")
+        else:
+            messages.error(request, "Please fill in all required fields.")
+
+    return render(request, "accounts/onboarding/psych_signup.html")
+
+
+@login_required
+def verification_pending(request):
+    """
+    Show verification pending page for unverified users.
+    """
+    user = request.user
+
+    # Check if user needs verification
+    if user.user_type in [User.UserType.GP, User.UserType.PSYCHOLOGIST]:
+        try:
+            verification_status = user.verification_status
+            if verification_status.is_pending:
+                context = {
+                    "title": "Verification Pending",
+                    "user": user,
+                    "verification_status": verification_status,
+                }
+                return render(request, "accounts/verification_pending.html", context)
+        except:
+            pass
+
+    # If verified or doesn't need verification, redirect to dashboard
+    return redirect("accounts:dashboard")
+
+
+@login_required
+def gp_create_patient(request):
+    """
+    GP creates a new patient profile.
+    """
+    if not request.user.is_gp:
+        messages.error(request, "Access denied. This page is for GPs only.")
+        return redirect("accounts:dashboard")
+
+    # Check if GP is verified
+    try:
+        if request.user.verification_status.is_pending:
+            messages.error(
+                request,
+                "Your account is pending verification. Please wait for admin approval.",
+            )
+            return redirect("accounts:verification_pending")
+    except:
+        pass
+
+    if request.method == "POST":
+        # Handle patient creation form
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        date_of_birth = request.POST.get("date_of_birth")
+        nhs_number = request.POST.get("nhs_number")
+
+        if first_name and last_name:
+            try:
+                from referrals.models import PatientProfile
+
+                patient_profile = PatientProfile.objects.create(
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                    phone=phone,
+                    date_of_birth=date_of_birth if date_of_birth else None,
+                    nhs_number=nhs_number,
+                    created_by=request.user,
+                )
+
+                messages.success(
+                    request,
+                    f"Patient profile created for {patient_profile.get_full_name()}",
+                )
+                return redirect("referrals:create")
+
+            except Exception as e:
+                messages.error(request, f"Error creating patient profile: {str(e)}")
+        else:
+            messages.error(request, "Please provide at least first name and last name.")
+
+    return render(request, "accounts/gp_create_patient.html")
+
+
+@login_required
+def gp_invite_patient(request, patient_id):
+    """
+    GP generates invite link for patient to claim their profile.
+    """
+    if not request.user.is_gp:
+        messages.error(request, "Access denied. This page is for GPs only.")
+        return redirect("accounts:dashboard")
+
+    try:
+        import secrets
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from referrals.models import PatientProfile
+
+        from .models import PatientClaimInvite
+
+        patient_profile = PatientProfile.objects.get(
+            id=patient_id, created_by=request.user
+        )
+
+        if request.method == "POST":
+            email = request.POST.get("email")
+            if email:
+                # Generate secure token
+                token = secrets.token_urlsafe(32)
+
+                # Create invite (expires in 7 days)
+                invite = PatientClaimInvite.objects.create(
+                    token=token,
+                    patient_profile=patient_profile,
+                    email=email,
+                    expires_at=timezone.now() + timedelta(days=7),
+                    created_by=request.user,
+                )
+
+                # Generate claim URL
+                claim_url = request.build_absolute_uri(f"/claim/{token}/")
+
+                messages.success(request, f"Invite created for {email}")
+                context = {
+                    "title": "Patient Invite Created",
+                    "patient_profile": patient_profile,
+                    "invite": invite,
+                    "claim_url": claim_url,
+                }
+                return render(request, "accounts/gp_invite_success.html", context)
+            else:
+                messages.error(request, "Please provide an email address.")
+
+        context = {
+            "title": "Invite Patient",
+            "patient_profile": patient_profile,
+        }
+        return render(request, "accounts/gp_invite_patient.html", context)
+
+    except PatientProfile.DoesNotExist:
+        messages.error(request, "Patient profile not found.")
+        return redirect("accounts:dashboard")
+
+
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def patient_claim(request, token):
+    """
+    Patient claims their profile using secure token.
+    """
+    try:
+        from referrals.models import PatientProfile
+
+        from .models import PatientClaimInvite
+
+        invite = PatientClaimInvite.objects.get(token=token)
+
+        if not invite.is_valid:
+            messages.error(
+                request, "This invite link has expired or has already been used."
+            )
+            return redirect("public:landing")
+
+        if request.method == "POST":
+            # Handle account creation/linking
+            email = request.POST.get("email")
+            password = request.POST.get("password")
+            first_name = request.POST.get("first_name")
+            last_name = request.POST.get("last_name")
+
+            if email and password and first_name and last_name:
+                try:
+                    # Create user account
+                    user = User.objects.create_user(
+                        email=email,
+                        password=password,
+                        first_name=first_name,
+                        last_name=last_name,
+                        user_type=User.UserType.PATIENT,
+                        is_verified=True,  # Patients don't need verification
+                    )
+
+                    # Link patient profile to user
+                    invite.patient_profile.link_to_user(user)
+
+                    # Mark invite as used
+                    invite.mark_used()
+
+                    # Authenticate and login user
+                    user = authenticate(request, username=email, password=password)
+                    if user:
+                        login(request, user)
+                        messages.success(
+                            request, "Account created and linked successfully!"
+                        )
+                        return redirect("accounts:dashboard")
+
+                except Exception as e:
+                    messages.error(request, f"Error creating account: {str(e)}")
+            else:
+                messages.error(request, "Please fill in all required fields.")
+
+        context = {
+            "title": "Claim Your Profile",
+            "invite": invite,
+            "patient_profile": invite.patient_profile,
+        }
+        return render(request, "accounts/patient_claim.html", context)
+
+    except PatientClaimInvite.DoesNotExist:
+        messages.error(request, "Invalid invite link.")
+        return redirect("public:landing")

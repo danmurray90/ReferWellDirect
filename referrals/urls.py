@@ -17,6 +17,8 @@ urlpatterns = [
     path(
         "<uuid:referral_id>/shortlist/", views.ShortlistView.as_view(), name="shortlist"
     ),
+    # Self-referral views
+    path("self-referral/start/", views.self_referral_start, name="self_referral_start"),
     # Analytics
     path("analytics/", include("referrals.analytics_urls")),
     # API

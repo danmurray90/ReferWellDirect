@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.role-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 4rem 0;
+}
+
+.role-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--color-border);
+}
+
+.role-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.role-card-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--color-primary-gradient);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.role-card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--color-text-primary);
+}
+
+.role-card-description {
+    color: var(--color-text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.role-card-cta {
+    background: var(--color-primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.role-card-cta:hover {
+    background: var(--color-primary-dark);
+    color: white;
+    text-decoration: none;
+}
+
+.features-section {
+    background: var(--color-background-light);
+    padding: 4rem 0;
+    margin: 4rem 0;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.feature-item {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.feature-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--color-accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+}
+
+.feature-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+}
+
+.feature-description {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .role-cards {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .role-card {
+        padding: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">ReferWell Direct</h1>
+        <p class="hero-subtitle">{{ description }}</p>
+        <p class="hero-subtitle">Connecting patients with the right mental health professionals through intelligent matching</p>
+    </div>
+</section>
+
+<!-- Role Cards Section -->
+<section class="container">
+    <div class="role-cards">
+        <!-- GP Card -->
+        <div class="role-card">
+            <div class="role-card-icon">
+                <i class="fas fa-user-md" aria-hidden="true"></i>
+            </div>
+            <h2 class="role-card-title">For GPs</h2>
+            <p class="role-card-description">
+                Streamline your mental health referrals with intelligent matching.
+                Reduce referral time and connect patients with verified psychologists.
+            </p>
+            <a href="{% url 'public:for_gps' %}" class="role-card-cta">
+                Learn More
+            </a>
+        </div>
+
+        <!-- Psychologist Card -->
+        <div class="role-card">
+            <div class="role-card-icon">
+                <i class="fas fa-brain" aria-hidden="true"></i>
+            </div>
+            <h2 class="role-card-title">For Psychologists</h2>
+            <p class="role-card-description">
+                Connect with patients who need your expertise. Receive referrals
+                matched to your specialisms and manage your practice efficiently.
+            </p>
+            <a href="{% url 'public:for_psychologists' %}" class="role-card-cta">
+                Join Our Network
+            </a>
+        </div>
+
+        <!-- Patient Card -->
+        <div class="role-card">
+            <div class="role-card-icon">
+                <i class="fas fa-heart" aria-hidden="true"></i>
+            </div>
+            <h2 class="role-card-title">For Patients</h2>
+            <p class="role-card-description">
+                Find the right mental health support for you. Quick access to
+                verified professionals matched to your specific needs.
+            </p>
+            <a href="{% url 'public:for_patients' %}" class="role-card-cta">
+                Start Your Journey
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 1rem; color: var(--color-text-primary);">
+            Why Choose ReferWell Direct?
+        </h2>
+        <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: 2rem;">
+            Our intelligent matching system ensures the best connections between patients and mental health professionals
+        </p>
+
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                </div>
+                <h3 class="feature-title">Intelligent Matching</h3>
+                <p class="feature-description">
+                    Advanced algorithms match patients with psychologists based on specialisms,
+                    preferences, and availability.
+                </p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                </div>
+                <h3 class="feature-title">Verified Professionals</h3>
+                <p class="feature-description">
+                    All psychologists are verified and qualified, ensuring patients receive
+                    care from trusted professionals.
+                </p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                </div>
+                <h3 class="feature-title">Real-time Availability</h3>
+                <p class="feature-description">
+                    Live capacity tracking ensures patients are matched with psychologists
+                    who have immediate availability.
+                </p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt" aria-hidden="true"></i>
+                </div>
+                <h3 class="feature-title">Flexible Options</h3>
+                <p class="feature-description">
+                    Support for both in-person and remote appointments, with flexible
+                    scheduling options.
+                </p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line" aria-hidden="true"></i>
+                </div>
+                <h3 class="feature-title">Transparent Process</h3>
+                <p class="feature-description">
+                    Clear communication throughout the referral process with real-time
+                    updates and progress tracking.
+                </p>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-lock" aria-hidden="true"></i>
+                </div>
+                <h3 class="feature-title">Privacy First</h3>
+                <p class="feature-description">
+                    Comprehensive data protection and privacy measures ensure patient
+                    information is secure and confidential.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="container" style="text-align: center; padding: 4rem 0;">
+    <h2 style="margin-bottom: 1rem; color: var(--color-text-primary);">
+        Ready to Get Started?
+    </h2>
+    <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">
+        Join thousands of healthcare professionals and patients who trust ReferWell Direct
+    </p>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{% url 'public:for_gps' %}" class="btn btn--primary">
+            For GPs
+        </a>
+        <a href="{% url 'public:for_psychologists' %}" class="btn btn--secondary">
+            For Psychologists
+        </a>
+        <a href="{% url 'public:for_patients' %}" class="btn btn--accent">
+            For Patients
+        </a>
+    </div>
+</section>
+{% endblock %}

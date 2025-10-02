@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: white;
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.benefits-section {
+    padding: 4rem 0;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+}
+
+.benefit-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--color-accent);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.benefit-text {
+    color: var(--color-text-primary);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.cta-section {
+    background: var(--color-background-light);
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.cta-button {
+    background: var(--color-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.125rem;
+    display: inline-block;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.cta-button:hover {
+    background: var(--color-primary-dark);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.back-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.role-specific-info {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+}
+
+.role-specific-info h3 {
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+}
+
+.role-specific-info p {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .benefits-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .benefit-item {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Back Link -->
+<div class="container">
+    <a href="{% url 'public:landing' %}" class="back-link">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        Back to Home
+    </a>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">{{ title }}</h1>
+        <p class="hero-subtitle">{{ description }}</p>
+    </div>
+</section>
+
+<!-- Role-Specific Information -->
+<div class="container">
+    <div class="role-specific-info">
+        {% if role == 'gp' %}
+            <h3>Streamline Your Mental Health Referrals</h3>
+            <p>
+                ReferWell Direct helps GPs quickly and efficiently refer patients to mental health professionals.
+                Our intelligent matching system considers patient needs, psychologist specialisms, availability,
+                and preferences to ensure the best possible match.
+            </p>
+            <p>
+                Reduce referral time from weeks to days, improve patient outcomes, and maintain comprehensive
+                audit trails for compliance requirements.
+            </p>
+        {% elif role == 'psychologist' %}
+            <h3>Connect with Patients Who Need Your Expertise</h3>
+            <p>
+                Join our network of verified psychologists and receive referrals matched to your specialisms
+                and availability. Manage your practice efficiently with our integrated scheduling and
+                communication tools.
+            </p>
+            <p>
+                Grow your practice with qualified referrals, maintain professional relationships with referring
+                GPs, and focus on what you do best - providing excellent mental health care.
+            </p>
+        {% elif role == 'patient' %}
+            <h3>Find the Right Mental Health Support</h3>
+            <p>
+                Access verified mental health professionals quickly and easily. Our matching system considers
+                your specific needs, preferences, and circumstances to connect you with the right psychologist.
+            </p>
+            <p>
+                Whether you prefer in-person or remote appointments, need specific specialisms, or have
+                particular scheduling requirements, we'll help you find the perfect match.
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Benefits Section -->
+<section class="benefits-section">
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 1rem; color: var(--color-text-primary);">
+            Key Benefits
+        </h2>
+        <p style="text-align: center; color: var(--color-text-secondary); margin-bottom: 2rem;">
+            {% if role == 'gp' %}
+                Why GPs choose ReferWell Direct for their mental health referrals
+            {% elif role == 'psychologist' %}
+                Why psychologists join our network
+            {% elif role == 'patient' %}
+                Why patients trust ReferWell Direct
+            {% endif %}
+        </p>
+
+        <div class="benefits-grid">
+            {% for benefit in benefits %}
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <i class="fas fa-check" aria-hidden="true"></i>
+                </div>
+                <div class="benefit-text">{{ benefit }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2 style="margin-bottom: 1rem; color: var(--color-text-primary);">
+            Ready to Get Started?
+        </h2>
+        <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">
+            {% if role == 'gp' %}
+                Join thousands of GPs who trust ReferWell Direct for their mental health referrals
+            {% elif role == 'psychologist' %}
+                Join our network of verified psychologists today
+            {% elif role == 'patient' %}
+                Start your mental health journey with ReferWell Direct
+            {% endif %}
+        </p>
+        <a href="{{ cta_url }}" class="cta-button">
+            {{ cta_text }}
+        </a>
+    </div>
+</section>
+
+<!-- Additional Information -->
+<div class="container" style="padding: 2rem 0;">
+    <div class="role-specific-info">
+        {% if role == 'gp' %}
+            <h3>How It Works for GPs</h3>
+            <ol style="color: var(--color-text-secondary); line-height: 1.6;">
+                <li><strong>Sign Up:</strong> Create your account and verify your credentials</li>
+                <li><strong>Create Patient Profile:</strong> Add patient details (no account required for patients)</li>
+                <li><strong>Submit Referral:</strong> Provide clinical information and preferences</li>
+                <li><strong>Intelligent Matching:</strong> Our system finds the best psychologist matches</li>
+                <li><strong>Track Progress:</strong> Monitor referral status and appointment scheduling</li>
+            </ol>
+        {% elif role == 'psychologist' %}
+            <h3>How It Works for Psychologists</h3>
+            <ol style="color: var(--color-text-secondary); line-height: 1.6;">
+                <li><strong>Join Our Network:</strong> Complete verification and profile setup</li>
+                <li><strong>Set Availability:</strong> Update your schedule and capacity</li>
+                <li><strong>Receive Matches:</strong> Get notified of relevant referrals</li>
+                <li><strong>Review & Accept:</strong> Evaluate referrals and accept suitable matches</li>
+                <li><strong>Provide Care:</strong> Schedule appointments and deliver excellent care</li>
+            </ol>
+        {% elif role == 'patient' %}
+            <h3>How It Works for Patients</h3>
+            <ol style="color: var(--color-text-secondary); line-height: 1.6;">
+                <li><strong>Self-Refer or Get Referred:</strong> Start your journey independently or through your GP</li>
+                <li><strong>Share Your Needs:</strong> Tell us about your preferences and requirements</li>
+                <li><strong>Get Matched:</strong> Receive recommendations for suitable psychologists</li>
+                <li><strong>Choose Your Provider:</strong> Review profiles and select your preferred match</li>
+                <li><strong>Start Your Journey:</strong> Schedule appointments and begin your mental health journey</li>
+            </ol>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -500,3 +500,150 @@ class OnboardingSession(models.Model):
 
         self.completed_at = timezone.now()
         self.save(update_fields=["status", "completed_at"])
+
+
+class VerificationStatus(models.Model):
+    """
+    Model to track verification status for GP and Psychologist users.
+    """
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        VERIFIED = "verified", "Verified"
+        REJECTED = "rejected", "Rejected"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="verification_status",
+        limit_choices_to={
+            "user_type__in": [User.UserType.GP, User.UserType.PSYCHOLOGIST]
+        },
+    )
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.PENDING
+    )
+    vetted_at = models.DateTimeField(null=True, blank=True)
+    vetted_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="verified_users",
+        limit_choices_to={"user_type": User.UserType.ADMIN},
+    )
+    notes = models.TextField(blank=True, help_text="Notes about verification decision")
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "accounts_verification_status"
+        verbose_name = "Verification Status"
+        verbose_name_plural = "Verification Statuses"
+        indexes = [
+            models.Index(fields=["status"]),
+            models.Index(fields=["vetted_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.get_status_display()}"
+
+    @property
+    def is_pending(self):
+        return self.status == self.Status.PENDING
+
+    @property
+    def is_verified(self):
+        return self.status == self.Status.VERIFIED
+
+    @property
+    def is_rejected(self):
+        return self.status == self.Status.REJECTED
+
+    def verify(self, vetted_by, notes=""):
+        """Mark user as verified."""
+        self.status = self.Status.VERIFIED
+        self.vetted_by = vetted_by
+        self.notes = notes
+        from django.utils import timezone
+
+        self.vetted_at = timezone.now()
+        self.save(update_fields=["status", "vetted_by", "notes", "vetted_at"])
+
+    def reject(self, vetted_by, notes=""):
+        """Mark user as rejected."""
+        self.status = self.Status.REJECTED
+        self.vetted_by = vetted_by
+        self.notes = notes
+        from django.utils import timezone
+
+        self.vetted_at = timezone.now()
+        self.save(update_fields=["status", "vetted_by", "notes", "vetted_at"])
+
+
+class PatientClaimInvite(models.Model):
+    """
+    Model for secure patient claim invites with tokens.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    token = models.CharField(
+        max_length=64, unique=True, help_text="Hashed secure token for patient claim"
+    )
+    patient_profile = models.ForeignKey(
+        "referrals.PatientProfile",
+        on_delete=models.CASCADE,
+        related_name="claim_invites",
+    )
+    email = models.EmailField(help_text="Email address to send invite to")
+    expires_at = models.DateTimeField(help_text="Token expiration time")
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_patient_invites",
+    )
+
+    class Meta:
+        db_table = "accounts_patient_claim_invite"
+        verbose_name = "Patient Claim Invite"
+        verbose_name_plural = "Patient Claim Invites"
+        indexes = [
+            models.Index(fields=["token"]),
+            models.Index(fields=["email"]),
+            models.Index(fields=["expires_at"]),
+            models.Index(fields=["used_at"]),
+        ]
+
+    def __str__(self):
+        return f"Invite for {self.email} - {self.patient_profile.get_full_name()}"
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+
+        return timezone.now() > self.expires_at
+
+    @property
+    def is_used(self):
+        return self.used_at is not None
+
+    @property
+    def is_valid(self):
+        return not self.is_expired and not self.is_used
+
+    def mark_used(self):
+        """Mark invite as used."""
+        if not self.is_used:
+            from django.utils import timezone
+
+            self.used_at = timezone.now()
+            self.save(update_fields=["used_at"])

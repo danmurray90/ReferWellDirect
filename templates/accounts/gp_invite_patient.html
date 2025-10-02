@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Invite Patient - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+}
+
+.form-section h2 {
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-group .help-text {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.25rem;
+}
+
+.required {
+    color: var(--color-danger);
+}
+
+.submit-button {
+    background: var(--color-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.submit-button:hover {
+    background: var(--color-primary-dark);
+}
+
+.back-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.patient-info {
+    background: var(--color-background-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--color-primary);
+}
+
+.patient-info h3 {
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.patient-info p {
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.info-box {
+    background: var(--color-background-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--color-accent);
+}
+
+.info-box h3 {
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.info-box p {
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.info-box ul {
+    color: var(--color-text-secondary);
+    margin-left: 1.5rem;
+}
+
+.info-box li {
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="{% url 'referrals:dashboard' %}" class="back-link">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        Back to Dashboard
+    </a>
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="color: var(--color-text-primary); margin-bottom: 1rem;">Invite Patient</h1>
+        <p style="color: var(--color-text-secondary);">Send an invite link to allow the patient to claim their profile</p>
+    </div>
+
+    <div class="patient-info">
+        <h3>Patient Information</h3>
+        <p><strong>Name:</strong> {{ patient_profile.get_full_name }}</p>
+        {% if patient_profile.email %}
+        <p><strong>Email:</strong> {{ patient_profile.email }}</p>
+        {% endif %}
+        {% if patient_profile.phone %}
+        <p><strong>Phone:</strong> {{ patient_profile.phone }}</p>
+        {% endif %}
+        {% if patient_profile.nhs_number %}
+        <p><strong>NHS Number:</strong> {{ patient_profile.nhs_number }}</p>
+        {% endif %}
+    </div>
+
+    <div class="info-box">
+        <h3>How Patient Invites Work</h3>
+        <ul>
+            <li>Generate a secure, time-limited invite link</li>
+            <li>Share the link with the patient via email or secure message</li>
+            <li>The patient can create an account and link it to their profile</li>
+            <li>Once linked, the patient can view their referrals and appointments</li>
+            <li>Invite links expire after 7 days for security</li>
+        </ul>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="form-section">
+            <h2>Send Invite</h2>
+
+            <div class="form-group">
+                <label for="email">Patient Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required
+                       value="{{ patient_profile.email|default:'' }}"
+                       placeholder="patient@example.com">
+                <div class="help-text">The invite link will be sent to this email address</div>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-button">
+            Generate Invite Link
+        </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 2rem; color: var(--color-text-secondary);">
+        <p><strong>Note:</strong> The invite link will be displayed on the next page. You can copy and share it securely with the patient.</p>
+    </div>
+</div>
+{% endblock %}

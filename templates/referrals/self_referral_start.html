@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Self-Referral - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+}
+
+.form-section h2 {
+    color: var(--color-text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-group .help-text {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.25rem;
+}
+
+.required {
+    color: var(--color-danger);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.checkbox-group input {
+    width: auto;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.submit-button {
+    background: var(--color-primary);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.submit-button:hover {
+    background: var(--color-primary-dark);
+}
+
+.back-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.info-box {
+    background: var(--color-background-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--color-accent);
+}
+
+.info-box h3 {
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.info-box p {
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.info-box ul {
+    color: var(--color-text-secondary);
+    margin-left: 1.5rem;
+}
+
+.info-box li {
+    margin-bottom: 0.5rem;
+}
+
+.account-section {
+    background: var(--color-background-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    border: 1px solid var(--color-border);
+}
+
+.account-section h4 {
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.account-section p {
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="{% url 'public:for_patients' %}" class="back-link">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        Back to Patient Information
+    </a>
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="color: var(--color-text-primary); margin-bottom: 1rem;">Self-Referral</h1>
+        <p style="color: var(--color-text-secondary);">Submit a referral for mental health support</p>
+    </div>
+
+    <div class="info-box">
+        <h3>About Self-Referral</h3>
+        <ul>
+            <li>You can refer yourself for mental health support</li>
+            <li>We'll match you with appropriate psychologists</li>
+            <li>You can create an account now or later</li>
+            <li>All information is kept confidential and secure</li>
+            <li>You'll be contacted about next steps</li>
+        </ul>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Personal Information -->
+        <div class="form-section">
+            <h2>Personal Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">First Name <span class="required">*</span></label>
+                    <input type="text" id="first_name" name="first_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">Last Name <span class="required">*</span></label>
+                    <input type="text" id="last_name" name="last_name" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email">
+                <div class="help-text">Optional - for updates about your referral</div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+        </div>
+
+        <!-- Referral Information -->
+        <div class="form-section">
+            <h2>Referral Information</h2>
+
+            <div class="form-group">
+                <label for="presenting_problem">What would you like help with? <span class="required">*</span></label>
+                <textarea id="presenting_problem" name="presenting_problem" rows="4" required
+                          placeholder="Please describe what you're experiencing and what kind of support you're looking for..."></textarea>
+                <div class="help-text">Be as detailed as you feel comfortable - this helps us match you with the right support</div>
+            </div>
+
+            <div class="form-group">
+                <label for="service_type">Service Type</label>
+                <select id="service_type" name="service_type">
+                    <option value="nhs">NHS Service</option>
+                    <option value="private">Private Service</option>
+                    <option value="mixed">Either NHS or Private</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="modality">Preferred Modality</label>
+                <select id="modality" name="modality">
+                    <option value="mixed">No preference</option>
+                    <option value="in_person">In-person sessions</option>
+                    <option value="remote">Remote sessions (video/phone)</option>
+                    <option value="mixed">Mix of in-person and remote</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Account Creation -->
+        <div class="form-section">
+            <h2>Account Creation</h2>
+
+            <div class="account-section">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="create_account" name="create_account">
+                    <label for="create_account">Create an account to track your referral</label>
+                </div>
+                <p>Creating an account allows you to:</p>
+                <ul style="margin-left: 1.5rem;">
+                    <li>Track your referral status</li>
+                    <li>View matched psychologists</li>
+                    <li>Manage appointments</li>
+                    <li>Communicate with your care team</li>
+                </ul>
+            </div>
+
+            <div id="account-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="password">Password <span class="required">*</span></label>
+                    <input type="password" id="password" name="password">
+                    <div class="help-text">Minimum 8 characters with letters and numbers</div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-button">
+            Submit Self-Referral
+        </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 2rem; color: var(--color-text-secondary);">
+        <p>Already have an account? <a href="{% url 'accounts:signin' %}">Sign in here</a></p>
+    </div>
+</div>
+
+<script>
+document.getElementById('create_account').addEventListener('change', function() {
+    const accountFields = document.getElementById('account-fields');
+    const passwordField = document.getElementById('password');
+
+    if (this.checked) {
+        accountFields.style.display = 'block';
+        passwordField.required = true;
+    } else {
+        accountFields.style.display = 'none';
+        passwordField.required = false;
+    }
+});
+</script>
+{% endblock %}

@@ -1038,3 +1038,103 @@ def bulk_assign_task_user(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Self-referral view
+
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_http_methods
+
+
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def self_referral_start(request):
+    """
+    Patient self-referral start view.
+    """
+    if request.method == "POST":
+        # Handle self-referral form
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        date_of_birth = request.POST.get("date_of_birth")
+
+        # Referral details
+        presenting_problem = request.POST.get("presenting_problem")
+        service_type = request.POST.get("service_type")
+        modality = request.POST.get("modality")
+        preferred_language = request.POST.get("preferred_language")
+
+        # Optional account creation
+        create_account = request.POST.get("create_account") == "on"
+        password = request.POST.get("password")
+
+        if first_name and last_name and presenting_problem:
+            try:
+                from accounts.models import User
+
+                from .models import PatientProfile
+
+                # Create patient profile
+                patient_profile = PatientProfile.objects.create(
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                    phone=phone,
+                    date_of_birth=date_of_birth if date_of_birth else None,
+                )
+
+                # Create user account if requested
+                user = None
+                if create_account and email and password:
+                    user = User.objects.create_user(
+                        email=email,
+                        password=password,
+                        first_name=first_name,
+                        last_name=last_name,
+                        phone=phone,
+                        user_type=User.UserType.PATIENT,
+                        is_verified=True,
+                    )
+                    patient_profile.link_to_user(user)
+
+                # Create referral (will need a system referrer or handle differently)
+                # For now, we will create a placeholder referral
+                referral = Referral.objects.create(
+                    referral_id=f"SRF{timezone.now().strftime('%Y%m%d%H%M%S')}",
+                    referrer=user if user else None,  # Self-referred
+                    patient=user if user else None,
+                    patient_profile=patient_profile if not user else None,
+                    presenting_problem=presenting_problem,
+                    service_type=service_type or Referral.ServiceType.NHS,
+                    modality=modality or Referral.Modality.MIXED,
+                    preferred_language=preferred_language or "en",
+                    status=Referral.Status.SUBMITTED,
+                )
+
+                if user:
+                    # Authenticate and login user
+                    user = authenticate(request, username=email, password=password)
+                    if user:
+                        login(request, user)
+                        messages.success(
+                            request, "Self-referral submitted successfully!"
+                        )
+                        return redirect("referrals:dashboard")
+                else:
+                    messages.success(
+                        request,
+                        "Self-referral submitted successfully! You can create an account later to track your referral.",
+                    )
+                    return redirect("public:landing")
+
+            except Exception as e:
+                messages.error(request, f"Error submitting referral: {str(e)}")
+        else:
+            messages.error(request, "Please fill in all required fields.")
+
+    return render(request, "referrals/self_referral_start.html")

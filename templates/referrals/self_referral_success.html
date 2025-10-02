@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Referral Submitted - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+.success-card {
+    background: white;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+    text-align: center;
+}
+
+.success-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--color-success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    color: white;
+}
+
+.success-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+}
+
+.success-description {
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.referral-details {
+    background: var(--color-background-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.referral-details h3 {
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.referral-details p {
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.referral-details strong {
+    color: var(--color-text-primary);
+}
+
+.next-steps {
+    background: var(--color-background-light);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.next-steps h3 {
+    color: var(--color-text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.next-steps p {
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.next-steps ul {
+    color: var(--color-text-secondary);
+    margin-left: 1.5rem;
+}
+
+.next-steps li {
+    margin-bottom: 0.5rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn--primary {
+    background: var(--color-primary);
+    color: white;
+}
+
+.btn--primary:hover {
+    background: var(--color-primary-dark);
+    color: white;
+    text-decoration: none;
+}
+
+.btn--secondary {
+    background: var(--color-background-light);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+.btn--secondary:hover {
+    background: var(--color-border);
+    color: var(--color-text-primary);
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="success-card">
+        <div class="success-icon">
+            <i class="fas fa-check" aria-hidden="true"></i>
+        </div>
+
+        <h1 class="success-title">Referral Submitted Successfully!</h1>
+
+        <p class="success-description">
+            Thank you for submitting your self-referral. We've received your information and will begin the matching process.
+        </p>
+
+        <div class="referral-details">
+            <h3>Referral Details</h3>
+            <p><strong>Referral ID:</strong> {{ referral.referral_id }}</p>
+            <p><strong>Status:</strong> {{ referral.get_status_display }}</p>
+            <p><strong>Service Type:</strong> {{ referral.get_service_type_display }}</p>
+            <p><strong>Modality:</strong> {{ referral.get_modality_display }}</p>
+            <p><strong>Submitted:</strong> {{ referral.created_at|date:"F j, Y g:i A" }}</p>
+        </div>
+
+        <div class="next-steps">
+            <h3>What happens next?</h3>
+            <ul>
+                <li>Our system will review your referral and requirements</li>
+                <li>We'll search for psychologists who match your needs</li>
+                <li>You'll be contacted within 2-3 business days</li>
+                <li>We'll provide you with matched psychologist options</li>
+                <li>You can choose your preferred psychologist and book appointments</li>
+            </ul>
+        </div>
+
+        <div class="action-buttons">
+            {% if user.is_authenticated %}
+            <a href="{% url 'referrals:referral_detail' pk=referral.id %}" class="btn btn--primary">
+                View Referral Details
+            </a>
+            {% else %}
+            <a href="{% url 'accounts:signin' %}" class="btn btn--primary">
+                Sign In to Track Referral
+            </a>
+            {% endif %}
+            <a href="{% url 'public:landing' %}" class="btn btn--secondary">
+                Return to Home
+            </a>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem; color: var(--color-text-secondary);">
+        <p>Need help? <a href="mailto:support@referwelldirect.com">Contact Support</a></p>
+    </div>
+</div>
+{% endblock %}
