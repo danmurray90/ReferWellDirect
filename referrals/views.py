@@ -1083,9 +1083,15 @@ def self_referral_start(request):
                 patient_profile = PatientProfile.objects.create(
                     first_name=first_name,
                     last_name=last_name,
-                    email=email,
-                    phone=phone,
+                    email=email or "",
+                    phone=phone or "",
                     date_of_birth=date_of_birth if date_of_birth else None,
+                    address_line_1="",
+                    address_line_2="",
+                    city="",
+                    postcode="",
+                    country="United Kingdom",
+                    nhs_number="",
                 )
 
                 # Create user account if requested
@@ -1104,9 +1110,23 @@ def self_referral_start(request):
 
                 # Create referral (will need a system referrer or handle differently)
                 # For now, we will create a placeholder referral
+                # For self-referrals, we'll use the user as both referrer and patient
+                referrer_user = user if user else None
+                if not referrer_user:
+                    # Create a system user for self-referrals without account
+                    referrer_user = User.objects.create_user(
+                        email=f"self-referral-{timezone.now().strftime('%Y%m%d%H%M%S')}@system.local",
+                        password="system-generated",
+                        first_name="Self",
+                        last_name="Referral",
+                        phone="",
+                        user_type=User.UserType.PATIENT,
+                        is_verified=True,
+                    )
+
                 referral = Referral.objects.create(
                     referral_id=f"SRF{timezone.now().strftime('%Y%m%d%H%M%S')}",
-                    referrer=user if user else None,  # Self-referred
+                    referrer=referrer_user,
                     patient=user if user else None,
                     patient_profile=patient_profile if not user else None,
                     presenting_problem=presenting_problem,

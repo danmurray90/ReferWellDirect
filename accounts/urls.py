@@ -55,6 +55,10 @@ urlpatterns = [
         views.gp_invite_patient,
         name="gp_invite_patient",
     ),
+    # Verification views
+    path(
+        "verification/pending/", views.verification_pending, name="verification_pending"
+    ),
     # Patient claim views
     path("claim/<str:token>/", views.patient_claim, name="patient_claim"),
     # API views
