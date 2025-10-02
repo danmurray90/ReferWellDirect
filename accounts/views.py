@@ -21,6 +21,7 @@ from .models import (
     User,
     UserOnboardingProgress,
     UserOrganisation,
+    VerificationStatus,
 )
 from .serializers import (
     OnboardingProgressUpdateSerializer,
@@ -822,8 +823,6 @@ def gp_onboarding_start(request):
                     )
 
                 # Create verification status
-                from .models import VerificationStatus
-
                 VerificationStatus.objects.create(
                     user=user,
                     status=VerificationStatus.Status.PENDING,
@@ -895,8 +894,6 @@ def psych_onboarding_start(request):
                 )
 
                 # Create verification status
-                from .models import VerificationStatus
-
                 VerificationStatus.objects.create(
                     user=user,
                     status=VerificationStatus.Status.PENDING,
