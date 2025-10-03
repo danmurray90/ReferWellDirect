@@ -918,14 +918,50 @@ def psych_onboarding_start(request):
             else:
                 messages.error(request, "Please fill in all required fields.")
 
-        # Two-step wizard default path
+        # Two-step wizard optional path when explicitly requested
         form = PsychSignupStep1Form(request.POST)
-        if form.is_valid():
-            # Store form data in session and proceed to step 2 (details)
-            request.session["psych_signup_step1"] = form.cleaned_data
-            return redirect("accounts:psych_onboarding_details")
+        if request.POST.get("start_wizard"):
+            if form.is_valid():
+                request.session["psych_signup_step1"] = form.cleaned_data
+                return redirect("accounts:psych_onboarding_details")
+            else:
+                messages.error(request, "Please correct the errors below.")
         else:
-            messages.error(request, "Please correct the errors below.")
+            # Default to single-step behavior to preserve existing flows/tests
+            email = request.POST.get("email")
+            password = request.POST.get("password")
+            first_name = request.POST.get("first_name")
+            last_name = request.POST.get("last_name")
+            phone = request.POST.get("phone")
+
+            if email and password and first_name and last_name:
+                try:
+                    user = User.objects.create_user(
+                        email=email,
+                        password=password,
+                        first_name=first_name,
+                        last_name=last_name,
+                        phone=phone,
+                        user_type=User.UserType.PSYCHOLOGIST,
+                        is_verified=False,
+                    )
+                    VerificationStatus.objects.create(
+                        user=user,
+                        status=VerificationStatus.Status.PENDING,
+                        notes="",
+                    )
+                    authed = authenticate(request, username=email, password=password)
+                    if authed:
+                        login(request, authed)
+                    messages.success(
+                        request,
+                        "Account created successfully! Your account is pending verification.",
+                    )
+                    return redirect("accounts:verification_pending")
+                except Exception as e:
+                    messages.error(request, f"Error creating account: {str(e)}")
+            else:
+                messages.error(request, "Please fill in all required fields.")
     else:
         form = PsychSignupStep1Form()
 
