@@ -142,6 +142,18 @@
 
     <form method="post" novalidate>
         {% csrf_token %}
+        {% if form and form.errors %}
+        <div class="nhsuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1">
+            <h2 class="nhsuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+            <div class="nhsuk-error-summary__body">
+                <ul class="nhsuk-list nhsuk-error-summary__list">
+                    {% for field, errors in form.errors.items %}
+                        <li><a href="#id_{{ field }}">{{ errors|join:", " }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Personal Information -->
         <div class="form-section">
@@ -149,186 +161,43 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="first_name">First Name <span class="required">*</span></label>
-                    <input type="text" id="first_name" name="first_name" required>
+                    <label for="id_first_name">First Name <span class="required">*</span></label>
+                    <input type="text" id="id_first_name" name="first_name" value="{{ form.first_name.value|default_if_none:'' }}" required autocomplete="given-name">
                 </div>
 
                 <div class="form-group">
-                    <label for="last_name">Last Name <span class="required">*</span></label>
-                    <input type="text" id="last_name" name="last_name" required>
+                    <label for="id_last_name">Last Name <span class="required">*</span></label>
+                    <input type="text" id="id_last_name" name="last_name" value="{{ form.last_name.value|default_if_none:'' }}" required autocomplete="family-name">
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="email">Email Address <span class="required">*</span></label>
-                <input type="email" id="email" name="email" required>
-                <div class="help-text">This will be your login username</div>
+                <label for="id_email">Email Address <span class="required">*</span></label>
+                <input type="email" id="id_email" name="email" value="{{ form.email.value|default_if_none:'' }}" required autocomplete="email" aria-describedby="email-help">
+                <div id="email-help" class="help-text">This will be your login username</div>
             </div>
 
             <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone">
+                <label for="id_phone">Phone Number</label>
+                <input type="tel" id="id_phone" name="phone" value="{{ form.phone.value|default_if_none:'' }}" autocomplete="tel">
             </div>
         </div>
 
-        <!-- Professional Information -->
-        <div class="form-section">
-            <h2>Professional Information</h2>
-
-            <div class="form-group">
-                <label for="bio">Professional Bio</label>
-                <textarea id="bio" name="bio" rows="4" placeholder="Tell us about your professional background, qualifications, and approach to therapy..."></textarea>
-                <div class="help-text">This will help patients understand your expertise and approach</div>
-            </div>
-
-            <div class="form-group">
-                <label>Specialisms</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="specialism_anxiety" name="specialisms" value="anxiety">
-                        <label for="specialism_anxiety">Anxiety Disorders</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="specialism_depression" name="specialisms" value="depression">
-                        <label for="specialism_depression">Depression</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="specialism_trauma" name="specialisms" value="trauma">
-                        <label for="specialism_trauma">Trauma & PTSD</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="specialism_ocd" name="specialisms" value="ocd">
-                        <label for="specialism_ocd">OCD</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="specialism_eating" name="specialisms" value="eating">
-                        <label for="specialism_eating">Eating Disorders</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="specialism_bipolar" name="specialisms" value="bipolar">
-                        <label for="specialism_bipolar">Bipolar Disorder</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="specialism_addiction" name="specialisms" value="addiction">
-                        <label for="specialism_addiction">Addiction</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="specialism_relationships" name="specialisms" value="relationships">
-                        <label for="specialism_relationships">Relationship Issues</label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Therapeutic Modalities</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="modality_cbt" name="modalities" value="cbt">
-                        <label for="modality_cbt">Cognitive Behavioural Therapy (CBT)</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="modality_dbt" name="modalities" value="dbt">
-                        <label for="modality_dbt">Dialectical Behaviour Therapy (DBT)</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="modality_psychodynamic" name="modalities" value="psychodynamic">
-                        <label for="modality_psychodynamic">Psychodynamic Therapy</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="modality_humanistic" name="modalities" value="humanistic">
-                        <label for="modality_humanistic">Humanistic Therapy</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="modality_emdr" name="modalities" value="emdr">
-                        <label for="modality_emdr">EMDR</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="modality_mindfulness" name="modalities" value="mindfulness">
-                        <label for="modality_mindfulness">Mindfulness-Based Therapy</label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Languages Spoken</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="lang_english" name="languages" value="en" checked>
-                        <label for="lang_english">English</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="lang_spanish" name="languages" value="es">
-                        <label for="lang_spanish">Spanish</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="lang_french" name="languages" value="fr">
-                        <label for="lang_french">French</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="lang_german" name="languages" value="de">
-                        <label for="lang_german">German</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="lang_italian" name="languages" value="it">
-                        <label for="lang_italian">Italian</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="lang_portuguese" name="languages" value="pt">
-                        <label for="lang_portuguese">Portuguese</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Service Preferences -->
-        <div class="form-section">
-            <h2>Service Preferences</h2>
-
-            <div class="form-group">
-                <label>Service Types</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="nhs_provider" name="nhs_provider">
-                        <label for="nhs_provider">NHS Provider</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="private_provider" name="private_provider">
-                        <label for="private_provider">Private Provider</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Location Information -->
-        <div class="form-section">
-            <h2>Location Information</h2>
-
-            <div class="form-group">
-                <label for="address_line_1">Address Line 1</label>
-                <input type="text" id="address_line_1" name="address_line_1">
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="city">City</label>
-                    <input type="text" id="city" name="city">
-                </div>
-
-                <div class="form-group">
-                    <label for="postcode">Postcode</label>
-                    <input type="text" id="postcode" name="postcode">
-                </div>
-            </div>
-        </div>
+        <!-- Step 2 covers professional, service, and location -->
 
         <!-- Account Security -->
         <div class="form-section">
             <h2>Account Security</h2>
 
             <div class="form-group">
-                <label for="password">Password <span class="required">*</span></label>
-                <input type="password" id="password" name="password" required>
-                <div class="help-text">Minimum 8 characters with letters and numbers</div>
+                <label for="id_password">Password <span class="required">*</span></label>
+                <input type="password" id="id_password" name="password" required aria-describedby="password-help">
+                <div id="password-help" class="help-text">Minimum 8 characters per password policy</div>
+                <div style="margin-top: 0.5rem;">
+                    <label style="display:inline-flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                        <input type="checkbox" id="toggle-password" style="width:auto;"> Show password
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -342,8 +211,8 @@
             </div>
         </div>
 
-        <button type="submit" class="submit-button">
-            Join Our Network
+        <button type="submit" class="submit-button" name="start_wizard" value="1">
+            Continue
         </button>
     </form>
 
@@ -351,4 +220,15 @@
         <p>Already have an account? <a href="{% url 'accounts:signin' %}">Sign in here</a></p>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const toggle = document.getElementById('toggle-password');
+  const pwd = document.getElementById('id_password');
+  if (toggle && pwd) {
+    toggle.addEventListener('change', function() {
+      pwd.type = this.checked ? 'text' : 'password';
+    });
+  }
+});
+</script>
 {% endblock %}

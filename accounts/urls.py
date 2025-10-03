@@ -35,6 +35,11 @@ urlpatterns = [
         name="psych_onboarding_start",
     ),
     path(
+        "onboarding/psych/details/",
+        views.psych_onboarding_details,
+        name="psych_onboarding_details",
+    ),
+    path(
         "onboarding/step/<uuid:step_id>/", views.onboarding_step, name="onboarding_step"
     ),
     path(

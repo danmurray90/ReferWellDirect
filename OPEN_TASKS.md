@@ -97,7 +97,7 @@
 
 - [ ] Enhanced dashboard with real-time updates
 - [ ] Advanced user preferences management
-- [ ] Improved mobile experience
+- [x] Improved mobile experience (onboarding wizard responsive two-step flow)
 - [ ] Accessibility improvements and testing
 
 ### Testing
@@ -239,6 +239,7 @@
 - [x] **OnboardingSession Model**: Manage overall onboarding sessions with progress tracking
 - [x] **Onboarding Serializers**: Comprehensive serializers for API endpoints
 - [x] **Onboarding Views**: Web and API views for step management and progress tracking
+- [x] **Psychologist Wizard**: Two-step psychologist signup (account → details) with accessibility
 - [x] **NHS.UK Templates**: Accessible, mobile-responsive templates for all step types
 - [x] **Management Command**: Automated setup of default onboarding steps
 - [x] **Dashboard Integration**: Seamless integration with user dashboard

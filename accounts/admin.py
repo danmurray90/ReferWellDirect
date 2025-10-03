@@ -30,6 +30,9 @@ class UserAdmin(BaseUserAdmin):
         "created_at",
     )
     list_filter = ("user_type", "is_active", "is_verified", "created_at")
+    actions = [
+        "mark_users_verified",
+    ]
     search_fields = ("email", "first_name", "last_name")
     ordering = ("-created_at",)
 
@@ -81,6 +84,11 @@ class UserAdmin(BaseUserAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("created_by")
+
+    @admin.action(description="Mark selected users as verified")
+    def mark_users_verified(self, request, queryset):
+        updated = queryset.update(is_verified=True)
+        self.message_user(request, f"{updated} users marked as verified.")
 
 
 @admin.register(Organisation)
