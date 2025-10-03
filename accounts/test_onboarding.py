@@ -205,6 +205,64 @@ class PsychologistOnboardingTestCase(TestCase):
         user = User.objects.get(email="psych@example.com")
         self.assertEqual(user.user_type, User.UserType.PSYCHOLOGIST)
 
+    def test_psych_wizard_two_step_redirects_to_details(self):
+        """Starting wizard with flag should redirect to details step."""
+        data = {
+            "first_name": "Jane",
+            "last_name": "Smith",
+            "email": "wizard@example.com",
+            "password": "testpass123",
+            "start_wizard": "1",
+        }
+        response = self.client.post(self.psych_signup_url, data)
+        self.assertRedirects(response, reverse("accounts:psych_onboarding_details"))
+
+    def test_psych_details_requires_session(self):
+        """Accessing details without step1 session should redirect to start."""
+        response = self.client.get(reverse("accounts:psych_onboarding_details"))
+        self.assertRedirects(response, self.psych_signup_url)
+
+    def test_psych_details_completes_signup_and_creates_profile(self):
+        """Posting details completes signup, creates user + psychologist profile."""
+        # Seed session with step1 data
+        session = self.client.session
+        session["psych_signup_step1"] = {
+            "first_name": "Wiz",
+            "last_name": "Ard",
+            "email": "wiz@example.com",
+            "password": "testpass123",
+            "phone": "+44123456789",
+        }
+        session.save()
+
+        details = {
+            "registration_body": "HCPC",
+            "registration_number": "ABC123",
+            "years_experience": 5,
+            "bio": "Experienced clinician",
+            "specialisms": "anxiety, depression",
+            "languages": "en, es",
+            "service_nhs": "on",
+            "modality": "mixed",
+            "address_line_1": "1 High St",
+            "city": "London",
+            "postcode": "SW1A 1AA",
+            "max_patients": 80,
+        }
+
+        response = self.client.post(reverse("accounts:psych_onboarding_details"), details)
+        # Should redirect to verification pending page
+        self.assertRedirects(response, reverse("accounts:verification_pending"))
+
+        # Verify user and profile creation
+        user = User.objects.get(email="wiz@example.com")
+        self.assertEqual(user.user_type, User.UserType.PSYCHOLOGIST)
+        from catalogue.models import Psychologist
+
+        profile = Psychologist.objects.get(user=user)
+        self.assertEqual(profile.registration_body, "HCPC")
+        self.assertEqual(profile.registration_number, "ABC123")
+
 
 class VerificationSystemTestCase(TestCase):
     """Test cases for verification system."""
