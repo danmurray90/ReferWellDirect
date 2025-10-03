@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Psychologist Details - ReferWell Direct{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-section { background: white; border-radius: 12px; padding: 2rem; margin: 2rem 0; box-shadow: 0 4px 6px rgba(0,0,0,.1); border:1px solid var(--color-border); }
+.form-group { margin-bottom: 1.5rem; }
+.form-group label { display:block; margin-bottom:.5rem; font-weight:500; color: var(--color-text-primary); }
+.form-group input, .form-group select, .form-group textarea { width:100%; padding:.75rem; border:1px solid var(--color-border); border-radius:6px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+@media (max-width: 768px) { .form-row { grid-template-columns:1fr; } }
+.submit-button { background: var(--color-primary); color:white; padding:1rem 2rem; border:none; border-radius:8px; font-weight:600; width:100%; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <a href="{% url 'accounts:psych_onboarding_start' %}" class="back-link">&larr; Back</a>
+
+  <div style="text-align:center; margin-bottom:2rem;">
+    <h1 style="color: var(--color-text-primary);">Professional & Practice Details</h1>
+    <p style="color: var(--color-text-secondary);">Step 2 of 2</p>
+  </div>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {% if form and form.errors %}
+    <div class="nhsuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1">
+      <h2 class="nhsuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+      <div class="nhsuk-error-summary__body">
+        <ul class="nhsuk-list nhsuk-error-summary__list">
+          {% for field, errors in form.errors.items %}
+            <li><a href="#id_{{ field }}">{{ errors|join:", " }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="form-section">
+      <h2>Professional Registration</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_registration_body">Registration Body</label>
+          <input type="text" id="id_registration_body" name="registration_body" value="{{ form.registration_body.value|default_if_none:'' }}" placeholder="HCPC, BPS, etc.">
+        </div>
+        <div class="form-group">
+          <label for="id_registration_number">Registration Number</label>
+          <input type="text" id="id_registration_number" name="registration_number" value="{{ form.registration_number.value|default_if_none:'' }}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="id_years_experience">Years of Experience</label>
+        <input type="number" id="id_years_experience" name="years_experience" value="{{ form.years_experience.value|default_if_none:'' }}" min="0">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Profile</h2>
+      <div class="form-group">
+        <label for="id_bio">Professional Bio</label>
+        <textarea id="id_bio" name="bio" rows="4">{{ form.bio.value|default_if_none:'' }}</textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_specialisms">Specialisms (comma-separated)</label>
+          <input type="text" id="id_specialisms" name="specialisms" value="{{ form.specialisms.value|default_if_none:'' }}" placeholder="anxiety, depression, trauma">
+        </div>
+        <div class="form-group">
+          <label for="id_languages">Languages (comma-separated)</label>
+          <input type="text" id="id_languages" name="languages" value="{{ form.languages.value|default_if_none:'' }}" placeholder="en, es, fr">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Service & Modality</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_modality">Modality</label>
+          <select id="id_modality" name="modality">
+            <option value="in_person" {% if form.modality.value == 'in_person' %}selected{% endif %}>In-Person</option>
+            <option value="remote" {% if form.modality.value == 'remote' %}selected{% endif %}>Remote</option>
+            <option value="mixed" {% if form.modality.value == 'mixed' or not form.modality.value %}selected{% endif %}>Mixed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Service Types</label>
+          <div style="display:flex; gap:1rem; align-items:center;">
+            <label><input type="checkbox" name="service_nhs" {% if form.service_nhs.value %}checked{% endif %}> NHS</label>
+            <label><input type="checkbox" name="service_private" {% if form.service_private.value %}checked{% endif %}> Private</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Location</h2>
+      <div class="form-group">
+        <label for="id_address_line_1">Address Line 1</label>
+        <input type="text" id="id_address_line_1" name="address_line_1" value="{{ form.address_line_1.value|default_if_none:'' }}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_city">City</label>
+          <input type="text" id="id_city" name="city" value="{{ form.city.value|default_if_none:'' }}">
+        </div>
+        <div class="form-group">
+          <label for="id_postcode">Postcode</label>
+          <input type="text" id="id_postcode" name="postcode" value="{{ form.postcode.value|default_if_none:'' }}">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Capacity</h2>
+      <div class="form-group">
+        <label for="id_max_patients">Max Concurrent Patients</label>
+        <input type="number" id="id_max_patients" name="max_patients" value="{{ form.max_patients.value|default_if_none:'' }}" min="1">
+      </div>
+    </div>
+
+    <button type="submit" class="submit-button">Create Account</button>
+  </form>
+</div>
+{% endblock %}

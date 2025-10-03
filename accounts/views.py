@@ -23,6 +23,7 @@ from .models import (
     UserOrganisation,
     VerificationStatus,
 )
+from .forms import PsychSignupStep1Form, PsychSignupStep2Form
 from .serializers import (
     OnboardingProgressUpdateSerializer,
     OnboardingSessionSerializer,
@@ -852,71 +853,182 @@ def gp_onboarding_start(request):
 @require_http_methods(["GET", "POST"])
 def psych_onboarding_start(request):
     """
-    Psychologist onboarding start view with verification status.
+    Psychologist onboarding start view (Step 1) with verification status.
     """
     if request.user.is_authenticated:
         return redirect("accounts:dashboard")
 
     if request.method == "POST":
-        # Handle Psychologist signup form
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        phone = request.POST.get("phone")
+        # Backward-compatible single-step handling: if detailed fields are posted,
+        # create the account immediately as before.
+        detailed_fields = [
+            "bio",
+            "specialisms",
+            "modalities",
+            "languages",
+            "nhs_provider",
+            "private_provider",
+            "address_line_1",
+            "city",
+            "postcode",
+        ]
+        if any(field in request.POST for field in detailed_fields):
+            email = request.POST.get("email")
+            password = request.POST.get("password")
+            first_name = request.POST.get("first_name")
+            last_name = request.POST.get("last_name")
+            phone = request.POST.get("phone")
 
-        # Professional details
-        bio = request.POST.get("bio")
-        specialisms = request.POST.getlist("specialisms")
-        modalities = request.POST.getlist("modalities")
-        languages = request.POST.getlist("languages")
+            bio = request.POST.get("bio")
+            specialisms = request.POST.getlist("specialisms")
+            modalities = request.POST.getlist("modalities")
 
-        # Service preferences
-        nhs_provider = request.POST.get("nhs_provider") == "on"
-        private_provider = request.POST.get("private_provider") == "on"
+            if email and password and first_name and last_name:
+                try:
+                    user = User.objects.create_user(
+                        email=email,
+                        password=password,
+                        first_name=first_name,
+                        last_name=last_name,
+                        phone=phone,
+                        user_type=User.UserType.PSYCHOLOGIST,
+                        is_verified=False,
+                    )
+                    VerificationStatus.objects.create(
+                        user=user,
+                        status=VerificationStatus.Status.PENDING,
+                        notes=(
+                            (f"Bio: {bio}\n" if bio else "")
+                            + (f"Specialisms: {', '.join(specialisms)}\n" if specialisms else "")
+                            + (f"Modalities: {', '.join(modalities)}" if modalities else "")
+                        ),
+                    )
 
-        # Location
-        address_line_1 = request.POST.get("address_line_1")
-        city = request.POST.get("city")
-        postcode = request.POST.get("postcode")
+                    authed = authenticate(request, username=email, password=password)
+                    if authed:
+                        login(request, authed)
+                        messages.success(
+                            request,
+                            "Account created successfully! Your account is pending verification. "
+                            "You'll be notified once verified.",
+                        )
+                        return redirect("accounts:verification_pending")
+                except Exception as e:
+                    messages.error(request, f"Error creating account: {str(e)}")
+            else:
+                messages.error(request, "Please fill in all required fields.")
 
-        if email and password and first_name and last_name:
+        # Two-step wizard default path
+        form = PsychSignupStep1Form(request.POST)
+        if form.is_valid():
+            # Store form data in session and proceed to step 2 (details)
+            request.session["psych_signup_step1"] = form.cleaned_data
+            return redirect("accounts:psych_onboarding_details")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = PsychSignupStep1Form()
+
+    return render(request, "accounts/onboarding/psych_signup.html", {"form": form})
+
+
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def psych_onboarding_details(request):
+    """
+    Psychologist onboarding details view (Step 2): professional and practice details.
+    Creates the user, profile, and verification record on successful submission.
+    """
+    if request.user.is_authenticated:
+        return redirect("accounts:dashboard")
+
+    # Require step 1 data in session
+    step1 = request.session.get("psych_signup_step1")
+    if not step1:
+        messages.info(request, "Please start your registration.")
+        return redirect("accounts:psych_onboarding_start")
+
+    if request.method == "POST":
+        form = PsychSignupStep2Form(request.POST)
+        if form.is_valid():
             try:
-                # Create user
+                # Create user from step 1
                 user = User.objects.create_user(
-                    email=email,
-                    password=password,
-                    first_name=first_name,
-                    last_name=last_name,
-                    phone=phone,
+                    email=step1["email"],
+                    password=step1["password"],
+                    first_name=step1["first_name"],
+                    last_name=step1["last_name"],
+                    phone=step1.get("phone", ""),
                     user_type=User.UserType.PSYCHOLOGIST,
-                    is_verified=False,  # Will be verified by admin
+                    is_verified=False,
                 )
 
-                # Create verification status
+                # Create catalogue profile with minimal fields; avoid heavy logic here
+                from catalogue.models import Psychologist
+
+                service_type = (
+                    Psychologist.ServiceType.MIXED
+                )
+                if form.cleaned_data.get("service_nhs") and form.cleaned_data.get("service_private"):
+                    service_type = Psychologist.ServiceType.MIXED
+                elif form.cleaned_data.get("service_nhs"):
+                    service_type = Psychologist.ServiceType.NHS
+                elif form.cleaned_data.get("service_private"):
+                    service_type = Psychologist.ServiceType.PRIVATE
+
+                profile = Psychologist.objects.create(
+                    user=user,
+                    registration_number=form.cleaned_data.get("registration_number", ""),
+                    registration_body=form.cleaned_data.get("registration_body", ""),
+                    years_experience=form.cleaned_data.get("years_experience"),
+                    specialisms=form.get_specialisms_list(),
+                    languages=form.get_languages_list(),
+                    service_type=service_type,
+                    modality=form.cleaned_data.get("modality"),
+                    address_line_1=form.cleaned_data.get("address_line_1", ""),
+                    city=form.cleaned_data.get("city", ""),
+                    postcode=form.cleaned_data.get("postcode", ""),
+                    country=form.cleaned_data.get("country") or "United Kingdom",
+                    max_patients=form.cleaned_data.get("max_patients") or 50,
+                    created_by=user,
+                )
+
+                # Create verification status with summary notes
                 VerificationStatus.objects.create(
                     user=user,
                     status=VerificationStatus.Status.PENDING,
-                    notes=f"Bio: {bio}\nSpecialisms: {', '.join(specialisms)}\nModalities: {', '.join(modalities)}",
+                    notes=(
+                        f"Reg: {profile.registration_body} {profile.registration_number}\n"
+                        f"Specialisms: {', '.join(profile.specialisms)}\n"
+                        f"Languages: {', '.join(profile.languages)}"
+                    ),
                 )
 
-                # Authenticate and login user
-                user = authenticate(request, username=email, password=password)
-                if user:
-                    login(request, user)
-                    messages.success(
-                        request,
-                        "Account created successfully! Your account is pending verification. "
-                        "You'll be notified once verified.",
-                    )
-                    return redirect("accounts:verification_pending")
+                # Clear session and sign in
+                if "psych_signup_step1" in request.session:
+                    del request.session["psych_signup_step1"]
+
+                authed = authenticate(request, username=user.email, password=step1["password"])
+                if authed:
+                    login(request, authed)
+                messages.success(
+                    request,
+                    "Account created successfully! Your account is pending verification.",
+                )
+                return redirect("accounts:verification_pending")
 
             except Exception as e:
                 messages.error(request, f"Error creating account: {str(e)}")
         else:
-            messages.error(request, "Please fill in all required fields.")
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = PsychSignupStep2Form()
 
-    return render(request, "accounts/onboarding/psych_signup.html")
+    return render(
+        request,
+        "accounts/onboarding/psych_details.html",
+        {"form": form, "step1": step1},
+    )
 
 
 @login_required
